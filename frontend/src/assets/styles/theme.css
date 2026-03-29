@@ -1,0 +1,48 @@
+:root {
+  /* ප්‍රධාන වර්ණ (Brand Colors) */
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+  --secondary-color: #6c757d;
+  --accent-color: #17a2b8;
+  
+  /* ප්‍රතිඵල වර්ණ (Status Colors) */
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  
+  /* පසුබිම් වර්ණ (Backgrounds) */
+  --bg-light: #f8f9fa;
+  --bg-white: #ffffff;
+  --bg-dark: #343a40;
+  
+  /* අකුරු (Fonts) */
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --text-dark: #333333;
+  --text-light: #666666;
+  --text-white: #ffffff;
+
+  /* අනෙකුත් (Misc) */
+  --border-radius: 8px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* මේවා Global Styles විදිහට පාවිච්චි කරන්න */
+body {
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  font-family: var(--font-main);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}

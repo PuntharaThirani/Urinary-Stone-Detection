@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="45" stroke="#007bff" stroke-width="5" fill="#eef"/>
+  <path d="M30 50 L45 65 L70 35" stroke="#28a745" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="50" y="90" font-family="Arial" font-size="12" text-anchor="middle" fill="#007bff">StoneDetect</text>
+</svg>
