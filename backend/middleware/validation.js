@@ -1,23 +1,33 @@
 const { check, validationResult } = require('express-validator');
 
-// 1. Validation Rules හදනවා
+// Register validation
 exports.registerValidation = [
-    check('name', 'Name is required').not().isEmpty(),
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Password must be 6 or more characters').isLength({ min: 6 })
+  check('name', 'Name is required').not().isEmpty().trim(),
+  check('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+  check('role')
+    .optional()
+    .isIn(['doctor', 'patient', 'staff'])
+    .withMessage('Invalid role selected'),
 ];
 
+// Login validation
 exports.loginValidation = [
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Password is required').exists()
+  check('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  check('password', 'Password is required').not().isEmpty(),
 ];
 
-// 2. Validation Check කරන Function එක
+// Common validation result handler
 exports.validate = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        // වැරදි තියෙනවා නම් කෙලින්ම Error එක යවනවා
-        return res.status(400).json({ errors: errors.array() });
-    }
-    next(); // වැරදි නැත්නම් ඉස්සරහට යවනවා
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array(),
+    });
+  }
+
+  next();
 };

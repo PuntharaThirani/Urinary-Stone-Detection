@@ -1,20 +1,24 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
-    // 1. Header එකෙන් Token එක ගන්නවා
-    const token = req.header('x-auth-token');
+  try {
+    // 1. Authorization header එකෙන් token එක ගන්නවා
+    const authHeader = req.header('Authorization');
 
-    // 2. Token එකක් නැත්නම් එලවනවා
-    if (!token) {
-        return res.status(401).json({ msg: 'No token, authorization denied' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ msg: 'No token, authorization denied' });
     }
 
-    // 3. Token එක හරිද කියලා බලනවා
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // User විස්තර Request එකට අමුණනවා
-        next(); // ඊළඟ පියවරට යන්න දෙනවා
-    } catch (err) {
-        res.status(401).json({ msg: 'Token is not valid' });
-    }
+    const token = authHeader.split(' ')[1];
+
+    // 2. Token verify කරනවා
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 3. req.user attach කරනවා
+    req.user = decoded;
+
+    next();
+  } catch (err) {
+    return res.status(401).json({ msg: 'Token is not valid' });
+  }
 };

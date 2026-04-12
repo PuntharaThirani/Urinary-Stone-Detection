@@ -1,23 +1,55 @@
 const express = require('express');
 const router = express.Router();
+
 const reportController = require('../controllers/reportController');
-const auth = require('../middleware/auth'); // Login වෙලා ඉන්න ඕන
+const auth = require('../middleware/auth');
+const allowRoles = require('../middleware/role');
 
-// @route   POST api/reports
-// @desc    Save a new AI draft report
-// 🚀 මෙන්න මෙතන තමයි saveReport වෙනුවට createDraftReport කියලා වෙනස් වුණේ
-router.post('/', auth, reportController.createDraftReport);
+// Create AI draft
+router.post(
+  '/draft',
+  auth,
+  allowRoles('doctor'),
+  reportController.createDraftReport
+);
 
-// @route   GET api/reports
-// @desc    Get all reports (Doctor Only)
-router.get('/', auth, reportController.getAllReports);
+// Confirm report
+router.put(
+  '/:id/confirm',
+  auth,
+  allowRoles('doctor'),
+  reportController.confirmReport
+);
 
-// @route   GET api/reports/patient/:name
-// @desc    Get reports by patient name
-router.get('/patient/:name', auth, reportController.getPatientReports);
+// Patient finalized reports
+router.get(
+  '/my/final',
+  auth,
+  allowRoles('patient'),
+  reportController.getMyFinalReports
+);
 
-// රිපෝට් එකක් Confirm කරන Route එක (PUT Request)
-// 🚀 මේකටත් auth එක දාන එක ආරක්ෂිතයි (Doctor කෙනෙක්මයි Confirm කරන්නේ කියලා තහවුරු කරන්න)
-router.put('/confirm/:id', auth, reportController.confirmReport);
+// Reports by patient ID
+router.get(
+  '/patient/:patientId',
+  auth,
+  allowRoles('doctor', 'staff'),
+  reportController.getReportsByPatientId
+);
+
+// All reports
+router.get(
+  '/',
+  auth,
+  allowRoles('doctor', 'staff'),
+  reportController.getAllReports
+);
+
+// Single report by ID
+router.get(
+  '/:id',
+  auth,
+  reportController.getReportById
+);
 
 module.exports = router;

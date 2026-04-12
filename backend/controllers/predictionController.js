@@ -3,47 +3,96 @@ const fs = require('fs');
 const path = require('path');
 
 exports.predictImage = (req, res) => {
-    const { imagePath, fileName } = req.body;
+  try {
+    const { imagePath } = req.body;
 
     if (!imagePath) {
-        return res.status(400).json({ error: "Image path is missing! Please upload first." });
+      return res.status(400).json({
+        success: false,
+        message: 'Image path is missing. Please upload an image first.',
+      });
     }
 
     const pythonScriptPath = path.join(__dirname, '..', 'detect.py');
-    const absoluteImagePath = path.join(__dirname, '..', imagePath);
+
+    const absoluteImagePath = path.isAbsolute(imagePath)
+      ? imagePath
+      : path.join(__dirname, '..', imagePath);
+
+    if (!fs.existsSync(pythonScriptPath)) {
+      return res.status(500).json({
+        success: false,
+        message: 'Python detection script not found.',
+      });
+    }
+
+    if (!fs.existsSync(absoluteImagePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Uploaded image file not found.',
+      });
+    }
 
     const pythonProcess = spawn('python', [pythonScriptPath, absoluteImagePath]);
 
     let dataString = '';
     let errorString = '';
 
-    pythonProcess.stdout.on('data', (data) => { dataString += data.toString(); });
-    pythonProcess.stderr.on('data', (data) => { errorString += data.toString(); });
+    pythonProcess.stdout.on('data', (data) => {
+      dataString += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      errorString += data.toString();
+    });
 
     pythonProcess.on('close', (code) => {
-        if (errorString) {
-            console.error("🐍 Python Errors:", errorString);
+      if (errorString) {
+        console.error('🐍 Python stderr:', errorString);
+      }
+
+      if (code !== 0) {
+        return res.status(500).json({
+          success: false,
+          message: 'Python process exited with an error.',
+          details: errorString || `Exit code: ${code}`,
+        });
+      }
+
+      try {
+        const results = JSON.parse(dataString);
+
+        if (results.status === 'error') {
+          return res.status(500).json({
+            success: false,
+            message: results.message || 'Model processing failed.',
+          });
         }
 
-        try {
-           
-            const results = JSON.parse(dataString);
-            
-            if (results.error) {
-                return res.status(500).json({ message: "Model Error", error: results.error });
-            }
-
-         
-            res.json({ 
-                message: "✅ Analysis Successful", 
-                stoneCount: results.stoneCount,       // කලින් තිබ්බ length කෑල්ල අයින් කළා
-                details: results.details,
-                annotatedImage: results.annotatedImage // කොටු ඇඳපු පින්තූරය
-            });
-
-        } catch (e) {
-            console.error("JSON Parsing Error:", e);
-            res.status(500).json({ error: "Processing failed", details: errorString });
-        }
+        return res.status(200).json({
+          success: true,
+          message: 'Analysis completed successfully.',
+          stoneCount: results.stoneCount || 0,
+          hasStones: results.hasStones || false,
+          details: results.details || [],
+          annotatedImage: results.annotatedImage || null,
+        });
+      } catch (parseError) {
+        console.error('JSON Parsing Error:', parseError);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to parse AI model output.',
+          rawOutput: dataString,
+          details: errorString,
+        });
+      }
     });
+  } catch (error) {
+    console.error('Prediction Controller Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Unexpected server error during prediction.',
+      error: error.message,
+    });
+  }
 };
