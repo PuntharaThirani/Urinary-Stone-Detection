@@ -8,6 +8,14 @@ const ReportCard = ({ report, onClick }) => {
   const patientName = report.patientName || 'Unknown Patient';
   const reportId = report._id ? `${report._id.substring(0, 8)}...` : 'N/A';
   const createdDate = report.createdAt ? formatDate(report.createdAt) : 'Not available';
+  const status = report.status || 'pending';
+
+  const statusClasses =
+    status === 'confirmed'
+      ? 'bg-blue-100 text-blue-700'
+      : status === 'rejected'
+      ? 'bg-slate-200 text-slate-700'
+      : 'bg-amber-100 text-amber-700';
 
   return (
     <button
@@ -41,6 +49,12 @@ const ReportCard = ({ report, onClick }) => {
               }`}
             >
               {hasStones ? 'Stone Indicated' : 'No Stone Indicated'}
+            </span>
+
+            <span
+              className={`inline-flex rounded-full px-4 py-2 text-xs font-bold capitalize ${statusClasses}`}
+            >
+              {status}
             </span>
 
             <span className="text-sm font-semibold text-blue-600 transition group-hover:translate-x-1">

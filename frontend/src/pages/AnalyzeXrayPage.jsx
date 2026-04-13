@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -13,6 +13,14 @@ const AnalyzeXrayPage = () => {
   const [loadingText, setLoadingText] = useState('');
   const [error, setError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -56,20 +64,29 @@ const AnalyzeXrayPage = () => {
 
     setIsAnalyzing(true);
     setError('');
-    setLoadingText('Uploading image...');
 
     try {
-      setLoadingText('Running YOLOv8 inference...');
+      setLoadingText('Uploading image...');
+      const response = await api.uploadAndPredict(selectedImage);
 
-      const result = await api.predictStone(selectedImage);
+      const uploadData = response?.upload;
+      const predictionData = response?.prediction;
+
+      if (!uploadData || !predictionData) {
+        throw new Error('Invalid analysis response received from the server.');
+      }
+
+      setLoadingText('Opening analysis results...');
 
       navigate('/results', {
         state: {
-          result,
+          result: predictionData,
           image: previewUrl,
+          uploadedImage: uploadData?.image || null,
         },
       });
     } catch (err) {
+      console.error('Analysis error:', err);
       setError(
         err?.response?.data?.message ||
           err?.message ||
@@ -110,7 +127,8 @@ const AnalyzeXrayPage = () => {
             AI Scan Analysis
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-500 md:text-base">
-            Upload an X-ray or CT scan image to preview the scan and run AI-assisted detection.
+            Upload an X-ray image to preview the scan and run AI-assisted urinary
+            stone detection.
           </p>
         </section>
 
@@ -121,7 +139,6 @@ const AnalyzeXrayPage = () => {
         )}
 
         <section className="grid gap-6 xl:grid-cols-2">
-          {/* Left Card */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5 border-b border-slate-100 pb-3">
               <h2 className="text-xl font-bold text-slate-900">Scan Preview</h2>
@@ -139,9 +156,11 @@ const AnalyzeXrayPage = () => {
                 }`}
               >
                 <div className="mb-3 text-5xl">{isDragging ? '📂' : '📤'}</div>
+
                 <p className="text-lg font-bold text-slate-700">
-                  {isDragging ? 'Drop image here' : 'Drag & Drop Scan Image'}
+                  {isDragging ? 'Drop image here' : 'Drag & Drop X-ray Image'}
                 </p>
+
                 <p className="mt-2 text-sm text-slate-500">
                   Supported formats: JPG, JPEG, PNG
                 </p>
@@ -196,7 +215,6 @@ const AnalyzeXrayPage = () => {
             )}
           </div>
 
-          {/* Right Card */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5 border-b border-slate-100 pb-3">
               <h2 className="text-xl font-bold text-slate-900">Analysis Status</h2>
@@ -205,7 +223,7 @@ const AnalyzeXrayPage = () => {
             {!previewUrl ? (
               <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 text-center text-slate-500">
                 <p className="text-4xl">📄</p>
-                <p className="mt-3 text-sm font-medium">Upload a scan image to begin.</p>
+                <p className="mt-3 text-sm font-medium">Upload an X-ray image to begin.</p>
               </div>
             ) : isAnalyzing ? (
               <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 text-center">
@@ -218,11 +236,9 @@ const AnalyzeXrayPage = () => {
             ) : (
               <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 text-center text-slate-500">
                 <p className="text-4xl text-emerald-500">✅</p>
-                <p className="mt-3 text-sm font-medium">
-                  Scan ready for analysis.
-                </p>
+                <p className="mt-3 text-sm font-medium">Scan ready for analysis.</p>
                 <p className="mt-2 max-w-sm text-xs leading-6 text-slate-500">
-                  Once analysis is complete, the result summary will be opened on the results page.
+                  Once analysis is complete, the result summary will open on the results page.
                 </p>
               </div>
             )}
