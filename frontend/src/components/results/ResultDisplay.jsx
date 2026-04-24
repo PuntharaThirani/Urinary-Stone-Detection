@@ -4,6 +4,8 @@ const ResultDisplay = ({ result }) => {
   if (!result) return null;
 
   const isDanger = Boolean(result.hasStones);
+  const stoneCount = result?.stoneCount ?? 0;
+
   const confidence =
     result?.details && result.details.length > 0 && result.details[0]?.confidence != null
       ? `${(result.details[0].confidence * 100).toFixed(2)}%`
@@ -44,13 +46,15 @@ const ResultDisplay = ({ result }) => {
         </span>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-white/60 bg-white/70 p-4">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
             Detection Status
           </p>
           <p className="mt-2 text-lg font-bold text-slate-900">
-            {result.diagnosis || (isDanger ? 'Positive Indication' : 'Negative Indication')}
+            {result.finalDiagnosis ||
+              result.diagnosis ||
+              (isDanger ? 'Positive Indication' : 'Negative Indication')}
           </p>
         </div>
 
@@ -59,6 +63,13 @@ const ResultDisplay = ({ result }) => {
             Confidence Score
           </p>
           <p className="mt-2 text-lg font-bold text-blue-600">{confidence}</p>
+        </div>
+
+        <div className="rounded-2xl border border-white/60 bg-white/70 p-4">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+            Stone Count
+          </p>
+          <p className="mt-2 text-lg font-bold text-slate-900">{stoneCount}</p>
         </div>
 
         <div className="rounded-2xl border border-white/60 bg-white/70 p-4">

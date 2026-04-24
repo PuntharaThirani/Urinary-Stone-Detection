@@ -128,8 +128,8 @@ Create `.env` file:
 
 ```
 PORT=5000
-MONGO_URI=your_mongodb_connection
-JWT_SECRET=your_secret_key
+MONGO_URI=mongodb+srv://xray-admin:password456@cluster0.lc5jt.mongodb.net/?appName=Cluster0
+JWT_SECRET=kidney_stone_project_secret_key_2026
 ```
 
 Run backend:
