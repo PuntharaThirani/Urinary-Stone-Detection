@@ -1,11 +1,12 @@
 const User = require('../models/User');
 
-// ==========================================
-// Get logged-in user profile
-// ==========================================
+// ===============================
+// GET LOGGED-IN USER PROFILE
+// ===============================
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id)
+      .select('-password');
 
     if (!user) {
       return res.status(404).json({
@@ -22,17 +23,19 @@ exports.getMe = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch current user',
-      error: error.message,
+      error:   error.message,
     });
   }
 };
 
-// ==========================================
-// Get all users
-// ==========================================
+// ===============================
+// GET ALL USERS (Admin Only)
+// ===============================
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    const users = await User.find()
+      .select('-password')
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -43,14 +46,14 @@ exports.getAllUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch users',
-      error: error.message,
+      error:   error.message,
     });
   }
 };
 
-// ==========================================
-// Get all doctors
-// ==========================================
+// ===============================
+// GET ALL DOCTORS
+// ===============================
 exports.getDoctors = async (req, res) => {
   try {
     const doctors = await User.find({ role: 'doctor' })
@@ -59,21 +62,21 @@ exports.getDoctors = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      count: doctors.length,
+      count:   doctors.length,
       doctors,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch doctors',
-      error: error.message,
+      error:   error.message,
     });
   }
 };
 
-// ==========================================
-// Get all patients
-// ==========================================
+// ===============================
+// GET ALL PATIENTS
+// ===============================
 exports.getPatients = async (req, res) => {
   try {
     const patients = await User.find({ role: 'patient' })
@@ -82,14 +85,50 @@ exports.getPatients = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      count: patients.length,
+      count:    patients.length,
       patients,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: 'Failed to fetch patients',
-      error: error.message,
+      error:   error.message,
+    });
+  }
+};
+
+// ===============================
+// UPDATE USER PROFILE
+// ===============================
+exports.updateProfile = async (req, res) => {
+  try {
+    // Prevent role change through this endpoint
+    delete req.body.role;
+    delete req.body.password;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update profile',
+      error:   error.message,
     });
   }
 };

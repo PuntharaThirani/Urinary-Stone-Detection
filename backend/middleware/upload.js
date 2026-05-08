@@ -1,9 +1,9 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const path   = require('path');
+const fs     = require('fs');
 
 // ===============================
-// CREATE FOLDERS
+// CREATE UPLOAD FOLDERS
 // ===============================
 const uploadDirs = ['uploads/xrays', 'uploads/processed'];
 
@@ -14,38 +14,56 @@ uploadDirs.forEach((dir) => {
 });
 
 // ===============================
-// STORAGE CONFIG
+// STORAGE CONFIGURATION
 // ===============================
 const storage = multer.diskStorage({
+  // Save to uploads/xrays folder
   destination: (req, file, cb) => {
-    cb(null, 'uploads/xrays'); // 🔥 correct folder
+    cb(null, 'uploads/xrays');
   },
 
+  // Generate safe unique filename
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
 
-    // 🔥 safe filename
-    const safeName = file.originalname
-      .replace(/\s+/g, '-')
-      .replace(/[^a-zA-Z0-9.-]/g, '');
+    // Remove extension from original name first
+    const nameWithoutExt = path.basename(
+      file.originalname, 
+      ext
+    );
 
+    // Create safe filename — remove special characters
+    const safeName = nameWithoutExt
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '');
+
+    // Final: timestamp-safename.ext ✅
     cb(null, `${Date.now()}-${safeName}${ext}`);
   },
 });
 
 // ===============================
-// FILE FILTER (STRICT)
+// FILE TYPE FILTER
 // ===============================
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  const allowedMimeTypes = [
+    'image/jpeg', 
+    'image/png', 
+    'image/jpg',
+  ];
+  const allowedExtensions = ['.jpg', '.jpeg', '.png'];
   const ext = path.extname(file.originalname).toLowerCase();
 
-  const allowedExt = ['.jpg', '.jpeg', '.png'];
-
-  if (allowedTypes.includes(file.mimetype) && allowedExt.includes(ext)) {
+  if (
+    allowedMimeTypes.includes(file.mimetype) && 
+    allowedExtensions.includes(ext)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Only JPG, JPEG, PNG images are allowed'), false);
+    cb(
+      new Error('Only JPG, JPEG, PNG images are allowed'), 
+      false
+    );
   }
 };
 
@@ -56,7 +74,8 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: 5 * 1024 * 1024, // 5MB max
+    files:    1,                // Only 1 file at a time
   },
 });
 

@@ -2,107 +2,210 @@ const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema(
   {
-    // Linked doctor
+    // ─────────────────────────────────────
+    // Doctor Reference
+    // ─────────────────────────────────────
     doctor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type:     mongoose.Schema.Types.ObjectId,
+      ref:      'User',
       required: true,
     },
 
-    // Linked patient (better than relying only on patientName)
+    // ─────────────────────────────────────
+    // Patient Reference
+    // ─────────────────────────────────────
     patient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Patient',
+      type:    mongoose.Schema.Types.ObjectId,
+      ref:     'Patient',
       default: null,
     },
 
-    // Snapshot patient details at report creation time
+    // Patient snapshot data
     patientName: {
-      type: String,
-      required: true,
-      trim: true,
+      type:    String,
+      default: '',
+      trim:    true,
     },
+
     patientAge: {
       type: Number,
-      min: 0,
+      min:  0,
     },
+
     patientGender: {
       type: String,
-      enum: ['Male', 'Female', 'Other'],
+      enum: ['male', 'female', 'other', 'Male', 'Female', 'Other', ''],
     },
 
-    // X-ray image reference
+    // ─────────────────────────────────────
+    // X-ray Image
+    // ─────────────────────────────────────
     imageId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'XrayImage',
+      type:    mongoose.Schema.Types.ObjectId,
+      ref:     'XrayImage',
       default: null,
     },
+
     imagePath: {
-      type: String,
-      required: true,
-      trim: true,
+      type:    String,
+      default: '',
+      trim:    true,
     },
 
-    // AI prediction output
+    // Annotated image with bounding boxes ✅ NEW
+    annotatedImageUrl: {
+      type:    String,
+      default: null,
+      trim:    true,
+    },
+
+    // ─────────────────────────────────────
+    // Phase 1 — Classification Result ✅ NEW
+    // ─────────────────────────────────────
+    phase1: {
+      result: {
+        type:    String,
+        enum:    ['stone', 'normal', null],
+        default: null,
+      },
+      confidence: {
+        type:    Number,
+        default: 0,
+      },
+    },
+
+    // ─────────────────────────────────────
+    // Raw AI Result
+    // ─────────────────────────────────────
     aiResult: {
-      type: Object,
-      default: {},
+      detectedObjects: {
+        type:    Array,
+        default: [],
+      },
+      rawOutput: {
+        type:    Object,
+        default: {},
+      },
     },
+
+    // ─────────────────────────────────────
+    // Detection Summary
+    // ─────────────────────────────────────
     hasStones: {
-      type: Boolean,
+      type:    Boolean,
       default: false,
     },
+
     stoneCount: {
-      type: Number,
+      type:    Number,
       default: 0,
-      min: 0,
+      min:     0,
     },
 
-    // AI-generated draft
+    // Individual stone details ✅ NEW
+    details: [
+      {
+        location:   { type: String, default: 'Unknown' },
+        size:       { type: Number, default: 0 },
+        confidence: { type: Number, default: 0 },
+      },
+    ],
+
+    // ─────────────────────────────────────
+    // AI Diagnosis Support
+    // ─────────────────────────────────────
+    diagnosisData: {
+      estimatedSize:  { type: Number, default: 0 },
+      riskLevel: {
+        type:    String,
+        enum:    ['No Risk', 'Low', 'Medium', 'High'],
+        default: 'No Risk',
+      },
+      confidence:     { type: Number, default: 0 },
+      recommendation: { type: String, default: '', trim: true },
+    },
+
+    // ─────────────────────────────────────
+    // AI Draft Report
+    // ─────────────────────────────────────
     aiDraft: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
+      trim:    true,
     },
 
-    // Doctor review section
+    // ─────────────────────────────────────
+    // Doctor Review
+    // ─────────────────────────────────────
     doctorNotes: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
-    },
-    doctorAdvice: {
-      type: String,
-      default: '',
-      trim: true,
-    },
-    finalDiagnosis: {
-      type: String,
-      default: '',
-      trim: true,
-    },
-    followUp: {
-      type: String,
-      default: '',
-      trim: true,
+      trim:    true,
     },
 
-    // Confirmation flags
+    doctorAdvice: {
+      type:    String,
+      default: '',
+      trim:    true,
+    },
+
+    finalDiagnosis: {
+      type:    String,
+      default: '',
+      trim:    true,
+    },
+
+    followUp: {
+      type:    String,
+      default: '',
+      trim:    true,
+    },
+
+    // ─────────────────────────────────────
+    // Doctor Validation Controls
+    // ─────────────────────────────────────
     doctorConfirmed: {
-      type: Boolean,
+      type:    Boolean,
       default: false,
     },
 
-    // Report workflow status
+    doctorEdited: {
+      type:    Boolean,
+      default: false,
+    },
+
+    reviewedAt: {
+      type:    Date,
+      default: null,
+    },
+
+    confirmedAt: {           // ✅ NEW
+      type:    Date,
+      default: null,
+    },
+
+    rejectedAt: {            // ✅ NEW
+      type:    Date,
+      default: null,
+    },
+
+    // ─────────────────────────────────────
+    // Workflow Status
+    // ─────────────────────────────────────
     status: {
-      type: String,
-      enum: ['pending', 'confirmed', 'rejected'],
+      type:    String,
+      enum:    ['pending', 'under_review', 'confirmed', 'rejected'],
       default: 'pending',
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
+
+// Indexes for performance
+reportSchema.index({ doctor:          1 });
+reportSchema.index({ patient:         1 });
+reportSchema.index({ status:          1 });
+reportSchema.index({ createdAt:      -1 });
+reportSchema.index({ doctorConfirmed: 1 });
 
 module.exports = mongoose.model('Report', reportSchema);

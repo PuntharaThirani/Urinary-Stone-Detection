@@ -1,43 +1,45 @@
 const express = require('express');
-const router = express.Router();
-
+const router  = express.Router();
+const auth    = require('../middleware/auth');
 const authController = require('../controllers/authController');
-const auth = require('../middleware/auth');
 const {
   registerValidation,
   loginValidation,
   validate,
 } = require('../middleware/validation');
 
-// ===============================
-// AUTH ROUTES
-// ===============================
-
-// Register
-router.post(
-  '/register',
+// Register new user
+router.post('/register',
   registerValidation,
   validate,
   authController.register
 );
 
 // Login
-router.post(
-  '/login',
+router.post('/login',
   loginValidation,
   validate,
   authController.login
 );
 
-// Get logged-in user profile
-router.get('/profile', auth, authController.getProfile);
+// Logout ✅ NEW
+router.post('/logout',
+  auth,
+  authController.logout
+);
 
-// Verify token
+// Get logged-in user profile
+router.get('/profile',
+  auth,
+  authController.getProfile
+);
+
+// Verify token validity
 router.get('/verify', auth, (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Token is valid',
-    user: req.user,
+    user:    req.user,
   });
 });
 

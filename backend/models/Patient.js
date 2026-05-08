@@ -2,60 +2,85 @@ const mongoose = require('mongoose');
 
 const patientSchema = new mongoose.Schema(
   {
+    // Linked user account
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type:     mongoose.Schema.Types.ObjectId,
+      ref:      'User',
       required: true,
-      unique: true,
+      unique:   true,
     },
+
+    // Hospital patient ID
     patientId: {
-      type: String,
+      type:     String,
       required: true,
-      unique: true,
-      trim: true,
+      unique:   true,
+      trim:     true,
+      uppercase: true,
     },
+
+    // Full name
     fullName: {
-      type: String,
+      type:     String,
       required: true,
-      trim: true,
+      trim:     true,
     },
+
+    // Age
     age: {
       type: Number,
-      required: true,
-      min: 0,
+      min:  0,
+      max:  150,
     },
+
+    // Gender — lowercase to match validation
     gender: {
       type: String,
-      enum: ['Male', 'Female', 'Other'],
-      required: true,
+      enum: ['male', 'female', 'other'], // ✅ Fixed lowercase
     },
+
+    // Blood group
     bloodGroup: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
+      trim:    true,
+      enum:    ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', ''],
     },
+
+    // Contact number
     contactNumber: {
-      type: String,
+      type:     String,
       required: true,
-      trim: true,
+      trim:     true,
     },
+
+    // Address
     address: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
+      trim:    true,
     },
+
+    // Emergency contact
     emergencyContact: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
+      trim:    true,
     },
+
+    // Medical notes
     medicalNotes: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
+      trim:    true,
     },
   },
   { timestamps: true }
 );
+
+// Indexes
+patientSchema.index({ userId:    1 });
+patientSchema.index({ patientId: 1 });
+patientSchema.index({ fullName:  1 });
 
 module.exports = mongoose.model('Patient', patientSchema);

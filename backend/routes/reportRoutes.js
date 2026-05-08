@@ -2,10 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const reportController = require('../controllers/reportController');
+
 const auth = require('../middleware/auth');
 const allowRoles = require('../middleware/role');
 
-// Create AI draft
+console.log("CONTROLLER LOADED:", reportController);
+
+
+// =====================================================
+// Create AI Preliminary Draft Report
+// =====================================================
 router.post(
   '/draft',
   auth,
@@ -13,7 +19,10 @@ router.post(
   reportController.createDraftReport
 );
 
-// Confirm report
+
+// =====================================================
+// Doctor Confirm Final Report
+// =====================================================
 router.put(
   '/:id/confirm',
   auth,
@@ -21,7 +30,32 @@ router.put(
   reportController.confirmReport
 );
 
-// Patient finalized reports
+
+// =====================================================
+// Doctor Edit Draft Report
+// =====================================================
+router.put(
+  '/:id/edit',
+  auth,
+  allowRoles('doctor'),
+  reportController.editDraftReport
+);
+
+
+// =====================================================
+// Reject Report
+// =====================================================
+router.put(
+  '/:id/reject',
+  auth,
+  allowRoles('doctor'),
+  reportController.rejectReport
+);
+
+
+// =====================================================
+// Get Logged-in Patient Finalized Reports
+// =====================================================
 router.get(
   '/my/final',
   auth,
@@ -29,7 +63,10 @@ router.get(
   reportController.getMyFinalReports
 );
 
-// Reports by patient ID
+
+// =====================================================
+// Get Reports by Patient ID
+// =====================================================
 router.get(
   '/patient/:patientId',
   auth,
@@ -37,7 +74,10 @@ router.get(
   reportController.getReportsByPatientId
 );
 
-// All reports
+
+// =====================================================
+// Get All Reports
+// =====================================================
 router.get(
   '/',
   auth,
@@ -45,11 +85,15 @@ router.get(
   reportController.getAllReports
 );
 
-// Single report by ID
+
+// =====================================================
+// Get Single Report
+// =====================================================
 router.get(
   '/:id',
   auth,
   reportController.getReportById
 );
+
 
 module.exports = router;

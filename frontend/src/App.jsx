@@ -1,30 +1,35 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Public Pages
-import Home from './pages/Home';
-import Features from './pages/Features';
-import HowItWorks from './pages/HowItWorks';
-import About from './pages/About';
+import Home          from './pages/Home';
+import Features      from './pages/Features';
+import HowItWorks    from './pages/HowItWorks';
+import About         from './pages/About';
 
 // Auth
-import LoginForm from './components/auth/LoginForm';
+import LoginForm      from './components/auth/LoginForm';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Dashboard Pages
-import DoctorDashboard from './pages/DoctorDashboard';
+// Dashboards
+import DoctorDashboard  from './pages/DoctorDashboard';
 import PatientDashboard from './pages/PatientDashboard';
-import StaffDashboard from './pages/StaffDashboard';
+import StaffDashboard   from './pages/StaffDashboard';
+import AdminDashboard   from './pages/AdminDashboard';
 
-// Feature Pages
-import AnalyzeXrayPage from './pages/AnalyzeXrayPage';
-import ResultsPage from './pages/ResultsPage';
-import ReportsPage from './pages/ReportsPage';
-import PatientsPage from './pages/PatientsPage';
+// Doctor Pages
+import AnalyzeXrayPage    from './pages/AnalyzeXrayPage';
+import ResultsPage        from './pages/ResultsPage';
+import ReportsPage        from './pages/ReportsPage';
+import PatientsPage       from './pages/PatientsPage';
 import PatientProfilePage from './pages/PatientProfilePage';
-import MyReportsPage from './pages/MyReportsPage';
+
+// Patient Pages
+import MyReportsPage     from './pages/MyReportsPage';
 import ReportDetailsPage from './pages/ReportDetailsPage';
+
+// Staff Pages
 import StaffPatientsPage from './pages/StaffPatientsPage';
-import AppointmentsPage from './pages/AppointmentsPage';
+import AppointmentsPage  from './pages/AppointmentsPage';
 
 import './App.css';
 
@@ -32,14 +37,15 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={<LoginForm />} />
 
-        {/* Doctor Routes */}
+        {/* ================= PUBLIC ================= */}
+        <Route path="/"             element={<Home />} />
+        <Route path="/features"     element={<Features />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/about"        element={<About />} />
+        <Route path="/login"        element={<LoginForm />} />
+
+        {/* ================= DOCTOR ================= */}
         <Route
           path="/doctor-dashboard"
           element={
@@ -48,6 +54,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/analyze"
           element={
@@ -56,6 +63,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/reports"
           element={
@@ -64,6 +72,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/patients"
           element={
@@ -72,6 +81,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/patients/:id"
           element={
@@ -81,7 +91,16 @@ function App() {
           }
         />
 
-        {/* Patient Routes */}
+        <Route
+          path="/report-details/:id"
+          element={
+            <ProtectedRoute role="doctor">
+              <ReportDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= PATIENT ================= */}
         <Route
           path="/patient-dashboard"
           element={
@@ -90,6 +109,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/my-reports"
           element={
@@ -98,43 +118,55 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
-  path="/report/:id"
-  element={
-    <ProtectedRoute role="patient">
-      <ReportDetailsPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/report/:id"
+          element={
+            <ProtectedRoute role="patient">
+              <ReportDetailsPage />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/staff-dashboard"
-  element={
-    <ProtectedRoute role="staff">
-      <StaffDashboard />
-    </ProtectedRoute>
-  }
-/>
+        {/* ================= STAFF ================= */}
+        <Route
+          path="/staff-dashboard"
+          element={
+            <ProtectedRoute role="staff">
+              <StaffDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/staff-patients"
-  element={
-    <ProtectedRoute role="staff">
-      <StaffPatientsPage />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/staff-patients"
+          element={
+            <ProtectedRoute role="staff">
+              <StaffPatientsPage />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/appointments"
-  element={
-    <ProtectedRoute role="staff">
-      <AppointmentsPage />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/appointments"
+          element={
+            <ProtectedRoute role="staff">
+              <AppointmentsPage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Shared */}
+        {/* ================= ADMIN ================= */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= SHARED ================= */}
         <Route
           path="/results"
           element={
@@ -143,6 +175,25 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* ================= 404 ================= */}
+        <Route
+          path="*"
+          element={
+            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+              <h1 className="text-6xl font-black text-slate-800">404</h1>
+              <p className="text-slate-500 mt-2 mb-6">Page not found</p>
+
+              <a
+                href="/"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700"
+              >
+                Go Home
+              </a>
+            </div>
+          }
+        />
+
       </Routes>
     </Router>
   );

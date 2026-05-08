@@ -4,7 +4,8 @@ module.exports = {
         ADMIN: 'admin',
         DOCTOR: 'doctor',
         PATIENT: 'patient',
-        STAFF: 'staff'
+        STAFF: 'staff',
+        ADMIN:   'admin'
     },
 
     // Report එකේ තත්ත්වය (Status)

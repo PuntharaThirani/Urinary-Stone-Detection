@@ -2,37 +2,74 @@ const mongoose = require('mongoose');
 
 const xrayImageSchema = new mongoose.Schema(
   {
+    // Original file name from upload
     originalName: {
-      type: String,
+      type:     String,
       required: true,
-      trim: true,
+      trim:     true,
     },
+
+    // Saved file name on server
     fileName: {
-      type: String,
+      type:     String,
       required: true,
-      trim: true,
+      trim:     true,
     },
+
+    // File path on server
     filePath: {
-      type: String,
+      type:     String,
       required: true,
-      trim: true,
+      trim:     true,
     },
+
+    // Processed/annotated image path ✅ NEW
+    processedImagePath: {
+      type:    String,
+      default: null,
+      trim:    true,
+    },
+
+    // MIME type
     mimeType: {
-      type: String,
+      type:    String,
       default: '',
-      trim: true,
+      trim:    true,
     },
+
+    // File size in bytes
     size: {
-      type: Number,
+      type:    Number,
       default: 0,
     },
+
+    // Who uploaded this image
     uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type:    mongoose.Schema.Types.ObjectId,
+      ref:     'User',
       default: null,
+    },
+
+    // Whether AI has processed this image ✅ NEW
+    aiProcessed: {
+      type:    Boolean,
+      default: false,
+    },
+
+    // Image quality check status ✅ NEW
+    qualityStatus: {
+      type:    String,
+      enum:    ['valid', 'invalid', 'pending'],
+      default: 'pending',
     },
   },
   { timestamps: true }
 );
+
+// Indexes for performance
+xrayImageSchema.index({ uploadedBy:    1 });
+xrayImageSchema.index({ aiProcessed:   1 });
+xrayImageSchema.index({ qualityStatus: 1 });
+xrayImageSchema.index({ createdAt:    -1 });
 
 module.exports = mongoose.model('XrayImage', xrayImageSchema);

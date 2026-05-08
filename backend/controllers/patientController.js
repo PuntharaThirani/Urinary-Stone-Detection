@@ -1,6 +1,9 @@
 const Patient = require('../models/Patient');
-const User = require('../models/User');
+const User    = require('../models/User');
 
+// ===============================
+// CREATE PATIENT
+// ===============================
 const createPatient = async (req, res) => {
   try {
     const {
@@ -16,19 +19,36 @@ const createPatient = async (req, res) => {
       medicalNotes,
     } = req.body;
 
+    // Validate required fields
+    if (!userId || !patientId || !fullName) {
+      return res.status(400).json({
+        success: false,
+        message: 'userId, patientId and fullName are required',
+      });
+    }
+
+    // Check if patient already exists
     const existingPatient = await Patient.findOne({
       $or: [{ userId }, { patientId }],
     });
 
     if (existingPatient) {
-      return res.status(400).json({ message: 'Patient already exists.' });
+      return res.status(400).json({ 
+        success: false,
+        message: 'Patient already exists' 
+      });
     }
 
+    // Check if linked user exists
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'Linked user not found.' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Linked user account not found' 
+      });
     }
 
+    // Create patient record
     const patient = await Patient.create({
       userId,
       patientId,
@@ -42,63 +62,128 @@ const createPatient = async (req, res) => {
       medicalNotes,
     });
 
-    res.status(201).json(patient);
+    res.status(201).json({
+      success: true,
+      message: 'Patient created successfully',
+      data: patient,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to create patient.', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to create patient', 
+      error: error.message 
+    });
   }
 };
 
+// ===============================
+// GET ALL PATIENTS
+// ===============================
 const getAllPatients = async (req, res) => {
   try {
-    const patients = await Patient.find().populate('userId', 'email role');
-    res.status(200).json(patients);
+    const patients = await Patient.find()
+      .populate('userId', 'email role name')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: patients.length,
+      data: patients,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch patients.', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch patients', 
+      error: error.message 
+    });
   }
 };
 
+// ===============================
+// GET PATIENT BY ID
+// ===============================
 const getPatientById = async (req, res) => {
   try {
-    const patient = await Patient.findById(req.params.id).populate('userId', 'email role');
+    const patient = await Patient.findById(req.params.id)
+      .populate('userId', 'email role name');
 
     if (!patient) {
-      return res.status(404).json({ message: 'Patient not found.' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Patient not found' 
+      });
     }
 
-    res.status(200).json(patient);
+    res.status(200).json({
+      success: true,
+      data: patient,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch patient.', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch patient', 
+      error: error.message 
+    });
   }
 };
 
+// ===============================
+// UPDATE PATIENT
+// ===============================
 const updatePatient = async (req, res) => {
   try {
-    const updatedPatient = await Patient.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedPatient = await Patient.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true, runValidators: true }
+    ).populate('userId', 'email role name');
 
     if (!updatedPatient) {
-      return res.status(404).json({ message: 'Patient not found.' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Patient not found' 
+      });
     }
 
-    res.status(200).json(updatedPatient);
+    res.status(200).json({
+      success: true,
+      message: 'Patient updated successfully',
+      data: updatedPatient,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update patient.', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to update patient', 
+      error: error.message 
+    });
   }
 };
 
+// ===============================
+// DELETE PATIENT
+// ===============================
 const deletePatient = async (req, res) => {
   try {
-    const deletedPatient = await Patient.findByIdAndDelete(req.params.id);
+    const deletedPatient = await Patient
+      .findByIdAndDelete(req.params.id);
 
     if (!deletedPatient) {
-      return res.status(404).json({ message: 'Patient not found.' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Patient not found' 
+      });
     }
 
-    res.status(200).json({ message: 'Patient deleted successfully.' });
+    res.status(200).json({ 
+      success: true,
+      message: 'Patient deleted successfully' 
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete patient.', error: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to delete patient', 
+      error: error.message 
+    });
   }
 };
 

@@ -3,38 +3,50 @@ const mongoose = require('mongoose');
 const auditLogSchema = new mongoose.Schema(
   {
     // User who performed the action
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+    user_id: {                              // ✅ Fixed — user → user_id
+      type:    mongoose.Schema.Types.ObjectId,
+      ref:     'User',
       default: null,
     },
 
     // Action performed
     action: {
-      type: String,
-      required: true,
+      type:      String,
+      required:  true,
       uppercase: true,
       enum: [
         'USER_LOGIN',
         'USER_REGISTER',
+        'USER_LOGOUT',
         'UPLOAD_XRAY',
         'PREDICT_XRAY',
         'CREATE_REPORT',
         'CONFIRM_REPORT',
+        'REJECT_REPORT',        // ✅ Added
+        'EDIT_REPORT',          // ✅ Added
         'VIEW_REPORT',
         'DELETE_REPORT',
+        'CREATE_PATIENT',       // ✅ Added
+        'UPDATE_PATIENT',       // ✅ Added
+        'DELETE_PATIENT',       // ✅ Added
+        'CREATE_APPOINTMENT',   // ✅ Added
+        'UPDATE_APPOINTMENT',   // ✅ Added
+        'DELETE_APPOINTMENT',   // ✅ Added
+        'ROLE_UPDATED',         // ✅ Added
+        'USER_DELETED',         // ✅ Added
       ],
     },
 
-    // Target resource
+    // Target resource type
     resourceType: {
-      type: String,
-      enum: ['USER', 'XRAY', 'REPORT'],
+      type:    String,
+      enum:    ['USER', 'XRAY', 'REPORT', 'PATIENT', 'APPOINTMENT'],
       default: null,
     },
 
+    // Target resource ID
     resourceId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type:    mongoose.Schema.Types.ObjectId,
       default: null,
     },
 
@@ -44,35 +56,37 @@ const auditLogSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Request metadata
+    // HTTP method
     method: {
-      type: String,
+      type:    String,
       default: '',
     },
 
+    // API route
     route: {
-      type: String,
+      type:    String,
       default: '',
     },
 
+    // Client IP address
     ipAddress: {
-      type: String,
+      type:    String,
       default: '',
     },
 
-    // Success / failure
+    // Success or failure
     status: {
-      type: String,
-      enum: ['SUCCESS', 'FAILED'],
+      type:    String,
+      enum:    ['SUCCESS', 'FAILED'],
       default: 'SUCCESS',
     },
   },
   { timestamps: true }
 );
 
-// 🔥 Indexes for performance
-auditLogSchema.index({ user: 1 });
-auditLogSchema.index({ action: 1 });
+// Indexes for query performance
+auditLogSchema.index({ user_id:   1 });
+auditLogSchema.index({ action:    1 });
 auditLogSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('AuditLog', auditLogSchema);

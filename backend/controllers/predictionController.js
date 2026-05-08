@@ -13,7 +13,8 @@ exports.predictImage = (req, res) => {
       });
     }
 
-    const pythonScriptPath = path.join(__dirname, '..', 'detect.py');
+    // ✅ AI/detect.py ekata update una
+    const pythonScriptPath = path.join(__dirname, '..', 'AI', 'detect.py');
 
     const absoluteImagePath = path.isAbsolute(imagePath)
       ? imagePath
@@ -72,11 +73,14 @@ exports.predictImage = (req, res) => {
         return res.status(200).json({
           success: true,
           message: 'Analysis completed successfully.',
+          // ✅ Phase 1 result ekath include una
+          phase1: results.phase1 || null,
           stoneCount: results.stoneCount || 0,
           hasStones: results.hasStones || false,
           details: results.details || [],
-          annotatedImage: results.annotatedImage || null,
+          annotatedImageUrl: results.annotatedImage || null, 
         });
+
       } catch (parseError) {
         console.error('JSON Parsing Error:', parseError);
         return res.status(500).json({
@@ -87,6 +91,7 @@ exports.predictImage = (req, res) => {
         });
       }
     });
+
   } catch (error) {
     console.error('Prediction Controller Error:', error);
     return res.status(500).json({
