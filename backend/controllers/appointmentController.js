@@ -1,8 +1,8 @@
 const Appointment = require('../models/Appointment');
 
-// ===============================
+
 // CREATE APPOINTMENT
-// ===============================
+
 const createAppointment = async (req, res) => {
   try {
     const { 
@@ -47,9 +47,9 @@ const createAppointment = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET ALL APPOINTMENTS
-// ===============================
+
 const getAllAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find()
@@ -71,9 +71,9 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET APPOINTMENT BY ID
-// ===============================
+
 const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
@@ -100,9 +100,9 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
-// ===============================
+
 // UPDATE APPOINTMENT
-// ===============================
+
 const updateAppointment = async (req, res) => {
   try {
     const updatedAppointment = await Appointment.findByIdAndUpdate(
@@ -134,9 +134,9 @@ const updateAppointment = async (req, res) => {
   }
 };
 
-// ===============================
+
 // DELETE APPOINTMENT
-// ===============================
+
 const deleteAppointment = async (req, res) => {
   try {
     const deletedAppointment = await Appointment

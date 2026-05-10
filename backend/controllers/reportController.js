@@ -1,8 +1,8 @@
 const Report  = require('../models/Report');
 
-// =====================================================
+
 // CREATE AI DRAFT REPORT
-// =====================================================
+
 exports.createDraftReport = async (req, res) => {
   try {
     const {
@@ -28,7 +28,7 @@ exports.createDraftReport = async (req, res) => {
     const date = new Date().toLocaleDateString('en-GB');
     const aiDraft = yoloResults?.aiDraft || `
 AI-ASSISTED PRELIMINARY REPORT
-================================================== 
+
 Date           : ${date}
 System         : UroScan AI — Diagnosis Support System
 
@@ -44,7 +44,7 @@ Stone Count    : ${stoneCount}
 IMPORTANT:
 This is an AI-generated preliminary interpretation.
 Final diagnosis must be confirmed by a qualified doctor.
-==================================================
+
     `.trim();
 
     // Save report to database
@@ -85,9 +85,9 @@ Final diagnosis must be confirmed by a qualified doctor.
   }
 };
 
-// =====================================================
+
 // CONFIRM FINAL REPORT (Doctor Only)
-// =====================================================
+
 exports.confirmReport = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
@@ -146,9 +146,9 @@ exports.confirmReport = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // EDIT DRAFT REPORT
-// =====================================================
+
 exports.editDraftReport = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
@@ -186,9 +186,9 @@ exports.editDraftReport = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // REJECT REPORT
-// =====================================================
+
 exports.rejectReport = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id);
@@ -229,9 +229,9 @@ exports.rejectReport = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // GET ALL REPORTS (Doctor / Admin)
-// =====================================================
+
 exports.getAllReports = async (req, res) => {
   try {
     const reports = await Report.find()
@@ -254,9 +254,9 @@ exports.getAllReports = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // GET SINGLE REPORT BY ID
-// =====================================================
+
 exports.getReportById = async (req, res) => {
   try {
     const report = await Report.findById(req.params.id)
@@ -284,9 +284,9 @@ exports.getReportById = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // GET REPORTS BY PATIENT ID
-// =====================================================
+
 exports.getReportsByPatientId = async (req, res) => {
   try {
     const reports = await Report.find({
@@ -310,9 +310,9 @@ exports.getReportsByPatientId = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // GET MY FINAL REPORTS (Logged-in Patient)
-// =====================================================
+
 exports.getMyFinalReports = async (req, res) => {
   try {
     // Find reports where patient matches logged-in user
@@ -342,9 +342,9 @@ exports.getMyFinalReports = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // GET DOCTOR'S OWN REPORTS
-// =====================================================
+
 exports.getMyReports = async (req, res) => {
   try {
     const reports = await Report.find({
@@ -368,9 +368,9 @@ exports.getMyReports = async (req, res) => {
   }
 };
 
-// =====================================================
+
 // DELETE REPORT (Admin Only)
-// =====================================================
+
 exports.deleteReport = async (req, res) => {
   try {
     const report = await Report.findByIdAndDelete(req.params.id);

@@ -1,24 +1,63 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock heavy components
+vi.mock('./pages/Home',    () => ({ default: () => <div>Home Page</div>  }));
+vi.mock('./pages/Features', () => ({ default: () => <div>Features</div> }));
+
+// Mock API calls
+vi.mock('./services/api', () => ({
+  default: {
+    get:  vi.fn(),
+    post: vi.fn(),
+  },
+  loginUser:    vi.fn(),
+  registerUser: vi.fn(),
+}));
+
 import App from './App';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider   } from './context/AuthContext';
 import { UploadProvider } from './context/UploadContext';
-import { describe, it, expect } from 'vitest';
 
-describe('App Component', () => {
-  it('renders login page text', () => {
-    // App එක Providers ඇතුලේ ඔතලා (Wrap කරලා) Render කරනවා
-    render(
-      <AuthProvider>
-        <UploadProvider>
+// Helper — render with providers
+const renderApp = (initialPath = '/') => {
+  return render(
+    <AuthProvider>
+      <UploadProvider>
+        <MemoryRouter initialEntries={[initialPath]}>
           <App />
-        </UploadProvider>
-      </AuthProvider>
-    );
+        </MemoryRouter>
+      </UploadProvider>
+    </AuthProvider>
+  );
+};
 
-    // Login Page එකේ "Login" හෝ "Join Us" වගේ වචනයක් තියෙනවද බලනවා
-    // (Regular Expression /Login/i මගින් simple/capital භේදයකින් තොරව සොයයි)
-    const loginText = screen.getAllByText(/Login/i)[0]; 
-    expect(loginText).toBeInTheDocument();
+describe('🚀 App Component Tests', () => {
+
+  it('renders home page at root path', () => {
+    renderApp('/');
+    expect(screen.getByText('Home Page')).toBeInTheDocument();
   });
+
+  it('renders login page at /login', () => {
+    renderApp('/login');
+    // Login page has "Sign In" text
+    expect(screen.getByText(/sign in/i)).toBeInTheDocument();
+  });
+
+  it('renders 404 page for unknown route', () => {
+    renderApp('/unknown-page-xyz');
+    expect(screen.getByText('404')).toBeInTheDocument();
+  });
+
+  it('redirects to login when accessing protected route without token', () => {
+    // No token in localStorage
+    localStorage.clear();
+    renderApp('/doctor-dashboard');
+    // Should redirect to login
+    expect(screen.queryByText(/doctor dashboard/i)).not.toBeInTheDocument();
+  });
+
 });

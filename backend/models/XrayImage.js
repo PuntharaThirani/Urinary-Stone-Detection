@@ -23,7 +23,7 @@ const xrayImageSchema = new mongoose.Schema(
       trim:     true,
     },
 
-    // Processed/annotated image path ✅ NEW
+    // Processed/annotated image path 
     processedImagePath: {
       type:    String,
       default: null,
@@ -50,13 +50,13 @@ const xrayImageSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Whether AI has processed this image ✅ NEW
+    // Whether AI has processed this image
     aiProcessed: {
       type:    Boolean,
       default: false,
     },
 
-    // Image quality check status ✅ NEW
+    // Image quality check status 
     qualityStatus: {
       type:    String,
       enum:    ['valid', 'invalid', 'pending'],

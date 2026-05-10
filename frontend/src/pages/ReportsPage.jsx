@@ -25,63 +25,35 @@ const ReportsPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
 
 
-  // =====================================================
+ 
   // FETCH REPORTS
-  // =====================================================
+  
   const fetchAllReports = async () => {
+  try {
+    setLoading(true);
+    setError('');
 
-    try {
+    //  Direct api.get
+    const response = await api.get('/reports');
+    const reportData = response.data?.reports ||
+                       response.data?.data    ||
+                       [];
+    setReports(reportData);
 
-      setLoading(true);
-
-      setError('');
-
-      const response = await api.getAllReports();
-
-      let reportData = [];
-
-
-      if (Array.isArray(response)) {
-
-        reportData = response;
-
-      } else if (Array.isArray(response?.reports)) {
-
-        reportData = response.reports;
-
-      } else if (Array.isArray(response?.data?.reports)) {
-
-        reportData = response.data.reports;
-
-      } else if (Array.isArray(response?.data)) {
-
-        reportData = response.data;
-
-      }
-
-      setReports(reportData);
-
-    } catch (err) {
-
-      console.error('Failed to load reports', err);
-
-      setError(
-        err?.response?.data?.message ||
-        'Failed to load patient reports. Please try again.'
-      );
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
+  } catch (err) {
+    setError(
+      err?.response?.data?.message ||
+      'Failed to load patient reports. Please try again.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
 
-  // =====================================================
+  
   // LOAD REPORTS
-  // =====================================================
+  
   useEffect(() => {
 
     fetchAllReports();
@@ -89,9 +61,9 @@ const ReportsPage = () => {
   }, []);
 
 
-  // =====================================================
+  
   // UPDATE VERIFIED REPORT
-  // =====================================================
+  
   const handleVerifiedSuccess = (updatedReport) => {
 
     setSelectedReport(updatedReport);
@@ -111,9 +83,9 @@ const ReportsPage = () => {
   };
 
 
-  // =====================================================
+ 
   // FILTERED REPORTS
-  // =====================================================
+
   const filteredReports = useMemo(() => {
 
     return reports.filter((report) => {
@@ -143,9 +115,9 @@ const ReportsPage = () => {
   }, [reports, searchTerm, statusFilter]);
 
 
-  // =====================================================
+  
   // STATS
-  // =====================================================
+
   const totalReports = reports.length;
 
   const pendingReports = reports.filter(
@@ -174,9 +146,9 @@ const ReportsPage = () => {
 
           <>
 
-            {/* ================================================= */}
+            
             {/* PAGE HEADER */}
-            {/* ================================================= */}
+            
             <section className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
               <div>
@@ -214,9 +186,9 @@ const ReportsPage = () => {
             </section>
 
 
-            {/* ================================================= */}
+           
             {/* REPORT STATISTICS */}
-            {/* ================================================= */}
+            
             <section className="mb-8 grid gap-4 md:grid-cols-4">
 
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -281,9 +253,9 @@ const ReportsPage = () => {
             </section>
 
 
-            {/* ================================================= */}
+            
             {/* FILTERS */}
-            {/* ================================================= */}
+          
             <section className="mb-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -348,9 +320,9 @@ const ReportsPage = () => {
             </section>
 
 
-            {/* ================================================= */}
+           
             {/* ERROR */}
-            {/* ================================================= */}
+            
             {error && (
 
               <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -362,9 +334,9 @@ const ReportsPage = () => {
             )}
 
 
-            {/* ================================================= */}
+            
             {/* LOADING */}
-            {/* ================================================= */}
+            
             {loading ? (
 
               <div className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
@@ -385,9 +357,9 @@ const ReportsPage = () => {
 
             ) : filteredReports.length > 0 ? (
 
-              /* ============================================= */
+              
               /* REPORT LIST */
-              /* ============================================= */
+              
               <div className="grid gap-6">
 
                 {filteredReports.map((report) => (
@@ -404,9 +376,9 @@ const ReportsPage = () => {
 
             ) : (
 
-              /* ============================================= */
+              
               /* EMPTY STATE */
-              /* ============================================= */
+              
               <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
 
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-3xl">
@@ -439,9 +411,9 @@ const ReportsPage = () => {
 
           <>
 
-            {/* ================================================= */}
+            
             {/* BACK BUTTON */}
-            {/* ================================================= */}
+            
             <div className="mb-6">
 
               <button
@@ -456,9 +428,9 @@ const ReportsPage = () => {
             </div>
 
 
-            {/* ================================================= */}
+           
             {/* DOCTOR REVIEW PANEL */}
-            {/* ================================================= */}
+            
             <DoctorReportReview
               report={selectedReport}
               onVerifiedSuccess={handleVerifiedSuccess}

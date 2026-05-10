@@ -1,48 +1,127 @@
+/* 
+   UroScan AI — Theme Variables
+   Diagnosis Support System
+  */
+
 :root {
-  /* ප්‍රධාන වර්ණ (Brand Colors) */
-  --primary-color: #007bff;
-  --primary-hover: #0056b3;
-  --secondary-color: #6c757d;
-  --accent-color: #17a2b8;
-  
-  /* ප්‍රතිඵල වර්ණ (Status Colors) */
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  
-  /* පසුබිම් වර්ණ (Backgrounds) */
-  --bg-light: #f8f9fa;
-  --bg-white: #ffffff;
-  --bg-dark: #343a40;
-  
-  /* අකුරු (Fonts) */
-  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --text-dark: #333333;
-  --text-light: #666666;
-  --text-white: #ffffff;
+  /* ─── Brand Colors ─── */
+  --color-primary:       #2563eb;  /* Blue 600 */
+  --color-primary-hover: #1d4ed8;  /* Blue 700 */
+  --color-secondary:     #64748b;  /* Slate 500 */
+  --color-accent:        #06b6d4;  /* Cyan 500 */
 
-  /* අනෙකුත් (Misc) */
-  --border-radius: 8px;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* ─── Status Colors ─── */
+  --color-success: #22c55e;  /* Green 500 */
+  --color-danger:  #ef4444;  /* Red 500 */
+  --color-warning: #f59e0b;  /* Amber 500 */
+  --color-info:    #3b82f6;  /* Blue 500 */
+
+  /* ─── Background Colors ─── */
+  --color-bg-light: #f8fafc;  /* Slate 50 */
+  --color-bg-white: #ffffff;
+  --color-bg-dark:  #0f172a;  /* Slate 900 */
+  --color-bg-card:  #ffffff;
+
+  /* ─── Text Colors ─── */
+  --color-text-dark:  #0f172a;  /* Slate 900 */
+  --color-text-light: #64748b;  /* Slate 500 */
+  --color-text-white: #ffffff;
+  --color-text-muted: #94a3b8;  /* Slate 400 */
+
+  /* ─── Border ─── */
+  --color-border:    #e2e8f0;  /* Slate 200 */
+  --border-radius:   0.75rem;  /* 12px */
+  --border-radius-lg: 1.5rem;  /* 24px */
+
+  /* ─── Shadows ─── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* ─── Typography ─── */
+  --font-main: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'Courier New', monospace;
 }
 
-/* මේවා Global Styles විදිහට පාවිච්චි කරන්න */
-body {
-  background-color: var(--bg-light);
-  color: var(--text-dark);
-  font-family: var(--font-main);
+/* 
+   Global Base Styles
+   Note: Tailwind handles most styling
+   Only add non-Tailwind global styles here
+    */
+
+* {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
 }
 
-.btn-primary {
-  background-color: var(--primary-color);
-  color: var(--text-white);
-  border: none;
-  padding: 10px 20px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: background 0.3s;
+html {
+  scroll-behavior: smooth;
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-hover);
+/* ─── Medical Image Display ─── */
+.xray-image {
+  filter:          brightness(1.1) contrast(1.2);
+  border-radius:   var(--border-radius);
+  object-fit:      contain;
+  background:      #000;
+}
+
+/* ─── Bounding Box Overlay ─── */
+.bounding-box {
+  position:      absolute;
+  border:        2px solid var(--color-danger);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ─── AI Result Badge ─── */
+.badge-stone {
+  background: #fef2f2;
+  color:      #dc2626;
+  border:     1px solid #fecaca;
+  padding:    0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size:  0.75rem;
+  font-weight: 700;
+}
+
+.badge-normal {
+  background: #f0fdf4;
+  color:      #16a34a;
+  border:     1px solid #bbf7d0;
+  padding:    0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size:  0.75rem;
+  font-weight: 700;
+}
+
+/* ─── Loading Spinner ─── */
+.spinner {
+  width:  2rem;
+  height: 2rem;
+  border: 3px solid #e2e8f0;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Print Styles for Reports ─── */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white;
+    color:      black;
+  }
 }

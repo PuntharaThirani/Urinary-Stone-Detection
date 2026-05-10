@@ -12,19 +12,19 @@ const cloudIcon = 'https://cdn-icons-png.flaticon.com/512/414/414927.png';
 
 const coreFeatures = [
   {
-    title: 'YOLOv8 AI Detection',
-    icon: aiIcon,
-    desc: 'The system uses a YOLOv8-based detection model to analyze uploaded medical scan images and highlight suspected urinary stone locations.',
+    title: 'EfficientNet-B0 Classification',
+    icon:  aiIcon,
+    desc:  'Phase 1 uses EfficientNet-B0 with transfer learning to classify X-rays as normal or stone-positive, achieving 94.74% test accuracy and F1-score of 0.95.',
   },
   {
-    title: 'Draft Report Generation',
-    icon: reportIcon,
-    desc: 'Doctors can review scan findings and generate draft reports that can be edited, finalized, and exported for documentation.',
+    title: 'YOLOv8 Stone Detection',
+    icon:  reportIcon,
+    desc:  'Phase 2 uses YOLOv8l trained on 1698 images with 4367 annotated stones. Achieves mAP@50 of 0.927 and precision of 0.944 for precise stone localization.',
   },
   {
     title: 'Secure Record Handling',
-    icon: securityIcon,
-    desc: 'Patient information, scan records, and generated reports are managed through a structured backend and database workflow.',
+    icon:  securityIcon,
+    desc:  'Patient information, scan records, and reports are managed through JWT authentication, role-based access control, and MongoDB with audit logging.',
   },
 ];
 
@@ -62,18 +62,9 @@ const detailedFeatures = [
 ];
 
 const systemHighlights = [
-  {
-    value: 'AI-Based',
-    label: 'Detection support powered by YOLOv8',
-  },
-  {
-    value: 'Structured',
-    label: 'Workflow for upload, review, and reporting',
-  },
-  {
-    value: 'Responsive',
-    label: 'Designed for modern web access',
-  },
+  { value: '94.74%', label: 'Phase 1 Classification Accuracy'  },
+  { value: '0.927',  label: 'Phase 2 YOLOv8 mAP@50'           },
+  { value: '4',      label: 'User Roles Supported'             },
 ];
 
 const Features = () => {

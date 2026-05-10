@@ -1,19 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-
-const appointments = [
-  { id: 'A-001', patient: 'Nimal Perera', doctor: 'Dr. Silva', date: 'Mar 28, 2026', time: '09:30 AM', status: 'Scheduled', statusClass: 'bg-blue-100 text-blue-700' },
-  { id: 'A-002', patient: 'Kavindi Silva', doctor: 'Dr. Fernando', date: 'Mar 28, 2026', time: '11:00 AM', status: 'Completed', statusClass: 'bg-emerald-100 text-emerald-700' },
-  { id: 'A-003', patient: 'Amal Fernando', doctor: 'Dr. Silva', date: 'Mar 29, 2026', time: '02:00 PM', status: 'Pending', statusClass: 'bg-amber-100 text-amber-700' },
-];
+import api    from '../services/api';
 
 const AppointmentsPage = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [showForm,     setShowForm]     = useState(false);
+  const [formData,     setFormData]     = useState({
+    patientId:       '',
+    doctorId:        '',
+    appointmentDate: '',
+    timeSlot:        '',
+    reason:          '',
+    status:          'scheduled',
+  });
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      const res = await api.get('/appointments');
+      setAppointments(res.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch appointments:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/appointments', formData);
+      setShowForm(false);
+      setFormData({
+        patientId: '', doctorId: '', appointmentDate: '',
+        timeSlot: '', reason: '', status: 'scheduled',
+      });
+      fetchAppointments();
+    } catch (err) {
+      console.error('Failed to create appointment:', err);
+    }
+  };
+
+  const getStatusClass = (status) => {
+    const styles = {
+      scheduled: 'bg-blue-100 text-blue-700',
+      completed: 'bg-emerald-100 text-emerald-700',
+      pending:   'bg-amber-100 text-amber-700',
+      cancelled: 'bg-red-100 text-red-700',
+    };
+    return styles[status] || 'bg-slate-100 text-slate-700';
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-800">
       <Header />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8 lg:px-10">
+
+        {/*  Header  */}
         <section className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-600">
@@ -26,43 +75,121 @@ const AppointmentsPage = () => {
               Manage patient appointments and administrative scheduling tasks.
             </p>
           </div>
-
-          <button className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700">
-            + New Appointment
+          <button
+            onClick={() => setShowForm((prev) => !prev)}
+            className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+          >
+            {showForm ? '✕ Cancel' : '+ New Appointment'}
           </button>
         </section>
 
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Appointment ID</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Patient</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Doctor</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Date</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Time</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((item) => (
-                  <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-6 py-4 font-semibold text-slate-900">{item.id}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{item.patient}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{item.doctor}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{item.date}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{item.time}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-block rounded-full px-4 py-2 text-xs font-bold ${item.statusClass}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/*  New Appointment Form  */}
+        {showForm && (
+          <div className="mb-6 rounded-3xl border border-blue-200 bg-blue-50 p-6">
+            <h2 className="mb-4 text-lg font-bold text-slate-800">
+              Create New Appointment
+            </h2>
+            <form onSubmit={handleCreate} className="grid gap-4 md:grid-cols-2">
+              <input
+                type="text"
+                placeholder="Patient ID"
+                value={formData.patientId}
+                onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
+                required
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+              />
+              <input
+                type="text"
+                placeholder="Doctor ID"
+                value={formData.doctorId}
+                onChange={(e) => setFormData({ ...formData, doctorId: e.target.value })}
+                required
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+              />
+              <input
+                type="date"
+                value={formData.appointmentDate}
+                onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
+                required
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+              />
+              <input
+                type="text"
+                placeholder="Time Slot (e.g. 09:30 AM)"
+                value={formData.timeSlot}
+                onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
+                required
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+              />
+              <input
+                type="text"
+                placeholder="Reason (optional)"
+                value={formData.reason}
+                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 md:col-span-2"
+              />
+              <button
+                type="submit"
+                className="rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700 md:col-span-2"
+              >
+                Create Appointment
+              </button>
+            </form>
           </div>
+        )}
+
+        {/*  Table  */}
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+            </div>
+          ) : appointments.length === 0 ? (
+            <div className="py-16 text-center text-slate-400">
+              <p className="text-4xl">📅</p>
+              <p className="mt-3 text-sm">No appointments found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    {['Patient', 'Doctor', 'Date', 'Time', 'Reason', 'Status'].map((h) => (
+                      <th key={h} className="px-6 py-4 text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((item) => (
+                    <tr key={item._id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="px-6 py-4 font-semibold text-slate-900">
+                        {item.patientId?.fullName || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {item.doctorId?.name || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {new Date(item.appointmentDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {item.timeSlot}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-500">
+                        {item.reason || '—'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-block rounded-full px-4 py-2 text-xs font-bold ${getStatusClass(item.status)}`}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       </main>
 

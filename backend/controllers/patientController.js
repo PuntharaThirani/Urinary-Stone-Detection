@@ -1,10 +1,7 @@
 const Patient = require('../models/Patient');
-const User    = require('../models/User');
 
-// ===============================
-// CREATE PATIENT
-// ===============================
-const createPatient = async (req, res) => {
+// ---------------- CREATE PATIENT ----------------
+exports.createPatient = async (req, res) => {
   try {
     const {
       userId,
@@ -16,40 +13,19 @@ const createPatient = async (req, res) => {
       contactNumber,
       address,
       emergencyContact,
-      medicalNotes,
+      medicalNotes
     } = req.body;
 
-    // Validate required fields
-    if (!userId || !patientId || !fullName) {
+    // 🔴 HARD VALIDATION (prevents vague Mongoose errors)
+    if (!userId || !patientId || !fullName || !contactNumber) {
       return res.status(400).json({
         success: false,
-        message: 'userId, patientId and fullName are required',
+        message: 'Missing required fields',
+        required: ['userId', 'patientId', 'fullName', 'contactNumber']
       });
     }
 
-    // Check if patient already exists
-    const existingPatient = await Patient.findOne({
-      $or: [{ userId }, { patientId }],
-    });
-
-    if (existingPatient) {
-      return res.status(400).json({ 
-        success: false,
-        message: 'Patient already exists' 
-      });
-    }
-
-    // Check if linked user exists
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ 
-        success: false,
-        message: 'Linked user account not found' 
-      });
-    }
-
-    // Create patient record
-    const patient = await Patient.create({
+    const patient = new Patient({
       userId,
       patientId,
       fullName,
@@ -59,138 +35,130 @@ const createPatient = async (req, res) => {
       contactNumber,
       address,
       emergencyContact,
-      medicalNotes,
+      medicalNotes
     });
 
-    res.status(201).json({
+    const saved = await patient.save();
+
+    return res.status(201).json({
       success: true,
       message: 'Patient created successfully',
-      data: patient,
+      data: saved
     });
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error('CREATE PATIENT ERROR:', error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Failed to create patient', 
-      error: error.message 
+      message: error.message,
+      type: error.name
     });
   }
 };
 
-// ===============================
-// GET ALL PATIENTS
-// ===============================
-const getAllPatients = async (req, res) => {
+// ---------------- GET ALL PATIENTS ----------------
+exports.getAllPatients = async (req, res) => {
   try {
-    const patients = await Patient.find()
-      .populate('userId', 'email role name')
-      .sort({ createdAt: -1 });
+    const patients = await Patient.find();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      count: patients.length,
-      data: patients,
+      data: patients
     });
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Failed to fetch patients', 
-      error: error.message 
+      message: error.message
     });
   }
 };
 
-// ===============================
-// GET PATIENT BY ID
-// ===============================
-const getPatientById = async (req, res) => {
+// ---------------- GET PATIENT BY ID ----------------
+exports.getPatientById = async (req, res) => {
   try {
-    const patient = await Patient.findById(req.params.id)
-      .populate('userId', 'email role name');
+    const patient = await Patient.findById(req.params.id);
 
     if (!patient) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Patient not found' 
+        message: 'Patient not found'
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: patient,
+      data: patient
     });
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Failed to fetch patient', 
-      error: error.message 
+      message: error.message
     });
   }
 };
 
-// ===============================
-// UPDATE PATIENT
-// ===============================
-const updatePatient = async (req, res) => {
+// ---------------- UPDATE PATIENT ----------------
+exports.updatePatient = async (req, res) => {
   try {
-    const updatedPatient = await Patient.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
+    const updated = await Patient.findByIdAndUpdate(
+      req.params.id,
+      req.body,
       { new: true, runValidators: true }
-    ).populate('userId', 'email role name');
+    );
 
-    if (!updatedPatient) {
-      return res.status(404).json({ 
+    if (!updated) {
+      return res.status(404).json({
         success: false,
-        message: 'Patient not found' 
+        message: 'Patient not found'
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Patient updated successfully',
-      data: updatedPatient,
+      data: updated
     });
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Failed to update patient', 
-      error: error.message 
+      message: error.message
     });
   }
 };
 
-// ===============================
-// DELETE PATIENT
-// ===============================
-const deletePatient = async (req, res) => {
+// ---------------- DELETE PATIENT ----------------
+exports.deletePatient = async (req, res) => {
   try {
-    const deletedPatient = await Patient
-      .findByIdAndDelete(req.params.id);
+    const deleted = await Patient.findByIdAndDelete(req.params.id);
 
-    if (!deletedPatient) {
-      return res.status(404).json({ 
+    if (!deleted) {
+      return res.status(404).json({
         success: false,
-        message: 'Patient not found' 
+        message: 'Patient not found'
       });
     }
 
-    res.status(200).json({ 
+    return res.status(200).json({
       success: true,
-      message: 'Patient deleted successfully' 
+      message: 'Patient deleted successfully'
     });
+
   } catch (error) {
-    res.status(500).json({ 
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Failed to delete patient', 
-      error: error.message 
+      message: error.message
     });
   }
-};
-
-module.exports = {
-  createPatient,
-  getAllPatients,
-  getPatientById,
-  updatePatient,
-  deletePatient,
 };

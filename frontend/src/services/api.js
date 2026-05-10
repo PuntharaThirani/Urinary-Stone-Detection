@@ -1,299 +1,230 @@
 import axios from 'axios';
 
 // Backend base URL
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Axios instance
+
+// Axios Instance
+
 const axiosInstance = axios.create({
   baseURL: API_URL,
 });
 
-// Attach token automatically
+
+// Request Interceptor — Attach Token
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ======================================
-// AUTH
-// ======================================
 
-// Register User
+// Response Interceptor — Handle 401
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+
+// AUTH
+
+
 export const registerUser = async (userData) => {
   const response = await axiosInstance.post('/auth/register', userData);
   return response.data;
 };
 
-// Login User
 export const loginUser = async (userData) => {
   const response = await axiosInstance.post('/auth/login', userData);
 
   if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-
-    const role = response.data.role || response.data.user?.role || '';
-    if (role) {
-      localStorage.setItem('userRole', role);
-    }
+    const { token, role, user } = response.data;
+    localStorage.setItem('token',    token);
+    localStorage.setItem('userRole', role || user?.role || '');
+    localStorage.setItem('userName', user?.name  || '');
+    localStorage.setItem('userId',   user?.id    || user?._id || '');
   }
 
   return response.data;
 };
 
-// Get Logged-in User Profile
-export const getProfile = async () => {
-  const response = await axiosInstance.get('/auth/profile');
+// ✅ adminLogin — same as loginUser ඒත් admin role validate කරනවා
+export const adminLogin = async (userData) => {
+  const response = await axiosInstance.post('/auth/login', userData);
+
+  if (response.data.token) {
+    const { token, role, user } = response.data;
+
+    // ✅ Admin role check
+    if (role !== 'admin' && user?.role !== 'admin') {
+      throw { response: { data: { message: 'Unauthorized. Admin access only.' } } };
+    }
+
+    localStorage.setItem('token',    token);
+    localStorage.setItem('userRole', role || user?.role || '');
+    localStorage.setItem('userName', user?.name  || '');
+    localStorage.setItem('userId',   user?.id    || user?._id || '');
+  }
+
   return response.data;
 };
 
-// Verify Token
-export const verifyToken = async () => {
-  const response = await axiosInstance.get('/auth/verify');
-  return response.data;
-};
+export const getProfile  = async () => (await axiosInstance.get('/auth/profile')).data;
+export const verifyToken = async () => (await axiosInstance.get('/auth/verify')).data;
 
-// Logout
 export const logoutUser = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('userRole');
+  localStorage.clear();
 };
 
-// ======================================
-// UPLOAD + PREDICTION
-// ======================================
 
-// Step 1: Upload X-ray Image
+// UPLOAD + PREDICTION
+
+
 export const uploadXray = async (file) => {
   const formData = new FormData();
   formData.append('image', file);
-
   const response = await axiosInstance.post('/upload', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
-
   return response.data;
 };
 
-// Step 2: Predict using uploaded file path
 export const predictStone = async (imagePath) => {
-  const response = await axiosInstance.post('/predict', {
-    imagePath,
-  });
-
+  const response = await axiosInstance.post('/predict', { imagePath });
   return response.data;
 };
 
-// Combined helper: Upload + Predict
 export const uploadAndPredict = async (file) => {
   const uploadResponse = await uploadXray(file);
-
   const uploadedPath =
     uploadResponse?.image?.filePath ||
-    uploadResponse?.filePath ||
-    '';
+    uploadResponse?.filePath || '';
 
-  if (!uploadedPath) {
-    throw new Error('Uploaded image path not found.');
-  }
+  if (!uploadedPath) throw new Error('Uploaded image path not found.');
 
   const predictionResponse = await predictStone(uploadedPath);
-
-  return {
-    upload: uploadResponse,
-    prediction: predictionResponse,
-  };
+  return { upload: uploadResponse, prediction: predictionResponse };
 };
 
-// ======================================
+
 // REPORTS
-// ======================================
 
-// Create draft report
-export const createDraftReport = async (reportData) => {
-  const response = await axiosInstance.post('/reports/draft', reportData);
-  return response.data;
-};
 
-// Confirm report by doctor
-export const confirmReport = async (reportId, reportData) => {
-  const response = await axiosInstance.put(
-    `/reports/${reportId}/confirm`,
-    reportData
-  );
-  return response.data;
-};
+export const createDraftReport      = async (data)        => (await axiosInstance.post('/reports/draft',              data)).data;
+export const confirmReport          = async (id, data)    => (await axiosInstance.put(`/reports/${id}/confirm`,       data)).data;
+export const rejectReport           = async (id)          => (await axiosInstance.put(`/reports/${id}/reject`)).data;
+export const editDraftReport        = async (id, data)    => (await axiosInstance.put(`/reports/${id}/edit`,          data)).data;
+export const getAllReports          = async ()             => (await axiosInstance.get('/reports')).data;
+export const getMyReports           = async ()             => (await axiosInstance.get('/reports/my')).data;
+export const getMyFinalReports      = async ()             => (await axiosInstance.get('/reports/my/final')).data;
+export const getReportById          = async (id)          => (await axiosInstance.get(`/reports/${id}`)).data;
+export const getReportsByPatientId  = async (patientId)   => (await axiosInstance.get(`/reports/patient/${patientId}`)).data;
+export const deleteReport           = async (id)          => (await axiosInstance.delete(`/reports/${id}`)).data;
 
-// Get all reports
-export const getAllReports = async () => {
-  const response = await axiosInstance.get('/reports');
-  return response.data;
-};
 
-// Get report by ID
-export const getReportById = async (reportId) => {
-  const response = await axiosInstance.get(`/reports/${reportId}`);
-  return response.data;
-};
-
-// Get reports by patient ID
-export const getReportsByPatientId = async (patientId) => {
-  const response = await axiosInstance.get(`/reports/patient/${patientId}`);
-  return response.data;
-};
-
-// Get my finalized reports (patient)
-export const getMyFinalReports = async () => {
-  const response = await axiosInstance.get('/reports/my/final');
-  return response.data;
-};
-
-// ======================================
 // USERS
-// ======================================
 
-// Get all users
-export const getAllUsers = async () => {
-  const response = await axiosInstance.get('/users');
-  return response.data;
-};
 
-// Get current logged-in user
-export const getMe = async () => {
-  const response = await axiosInstance.get('/users/me');
-  return response.data;
-};
+export const getAllUsers    = async ()       => (await axiosInstance.get('/users')).data;
+export const getMe         = async ()       => (await axiosInstance.get('/users/me')).data;
+export const getDoctors    = async ()       => (await axiosInstance.get('/users/doctors')).data;
+export const getPatients   = async ()       => (await axiosInstance.get('/users/patients')).data;
+export const updateProfile = async (data)  => (await axiosInstance.put('/users/me', data)).data;
 
-// Get doctors
-export const getDoctors = async () => {
-  const response = await axiosInstance.get('/users/doctors');
-  return response.data;
-};
 
-// Get patients
-export const getPatients = async () => {
-  const response = await axiosInstance.get('/users/patients');
-  return response.data;
-};
-
-// ======================================
 // PATIENTS
-// ======================================
 
-// Create patient
-export const createPatient = async (patientData) => {
-  const response = await axiosInstance.post('/patients', patientData);
-  return response.data;
-};
 
-// Get all patients
-export const getAllPatients = async () => {
-  const response = await axiosInstance.get('/patients');
-  return response.data;
-};
+export const createPatient  = async (data)     => (await axiosInstance.post('/patients',       data)).data;
+export const getAllPatients  = async ()         => (await axiosInstance.get('/patients')).data;
+export const getPatientById = async (id)       => (await axiosInstance.get(`/patients/${id}`)).data;
+export const updatePatient  = async (id, data) => (await axiosInstance.put(`/patients/${id}`,  data)).data;
+export const deletePatient  = async (id)       => (await axiosInstance.delete(`/patients/${id}`)).data;
 
-// Get patient by ID
-export const getPatientById = async (patientId) => {
-  const response = await axiosInstance.get(`/patients/${patientId}`);
-  return response.data;
-};
 
-// Update patient
-export const updatePatient = async (patientId, patientData) => {
-  const response = await axiosInstance.put(`/patients/${patientId}`, patientData);
-  return response.data;
-};
-
-// Delete patient
-export const deletePatient = async (patientId) => {
-  const response = await axiosInstance.delete(`/patients/${patientId}`);
-  return response.data;
-};
-
-// ======================================
 // APPOINTMENTS
-// ======================================
 
-// Create appointment
-export const createAppointment = async (appointmentData) => {
-  const response = await axiosInstance.post('/appointments', appointmentData);
-  return response.data;
-};
 
-// Get all appointments
-export const getAllAppointments = async () => {
-  const response = await axiosInstance.get('/appointments');
-  return response.data;
-};
+export const createAppointment  = async (data)     => (await axiosInstance.post('/appointments',       data)).data;
+export const getAllAppointments  = async ()         => (await axiosInstance.get('/appointments')).data;
+export const getAppointmentById = async (id)       => (await axiosInstance.get(`/appointments/${id}`)).data;
+export const updateAppointment  = async (id, data) => (await axiosInstance.put(`/appointments/${id}`,  data)).data;
+export const deleteAppointment  = async (id)       => (await axiosInstance.delete(`/appointments/${id}`)).data;
 
-// Get appointment by ID
-export const getAppointmentById = async (appointmentId) => {
-  const response = await axiosInstance.get(`/appointments/${appointmentId}`);
-  return response.data;
-};
 
-// Update appointment
-export const updateAppointment = async (appointmentId, appointmentData) => {
-  const response = await axiosInstance.put(
-    `/appointments/${appointmentId}`,
-    appointmentData
-  );
-  return response.data;
-};
+// ADMIN
 
-// Delete appointment
-export const deleteAppointment = async (appointmentId) => {
-  const response = await axiosInstance.delete(`/appointments/${appointmentId}`);
-  return response.data;
-};
 
-// ======================================
+export const getAdminStats     = async ()         => (await axiosInstance.get('/admin/stats')).data;
+export const getAdminUsers     = async ()         => (await axiosInstance.get('/admin/users')).data;
+export const updateUserRole    = async (id, role) => (await axiosInstance.put(`/admin/users/${id}/role`, { role })).data;
+export const deleteAdminUser   = async (id)       => (await axiosInstance.delete(`/admin/users/${id}`)).data;
+export const getAuditLogs      = async ()         => (await axiosInstance.get('/admin/audit-logs')).data;
+export const getRecentActivity = async ()         => (await axiosInstance.get('/admin/recent-activity')).data;
+
+
 // DEFAULT EXPORT
-// ======================================
 
-const api = {
-  registerUser,
-  loginUser,
-  getProfile,
-  verifyToken,
-  logoutUser,
+const api = axiosInstance;
 
-  uploadXray,
-  predictStone,
-  uploadAndPredict,
+api.registerUser          = registerUser;
+api.loginUser             = loginUser;
+api.adminLogin            = adminLogin; // ✅ New
+api.getProfile            = getProfile;
+api.verifyToken           = verifyToken;
+api.logoutUser            = logoutUser;
 
-  createDraftReport,
-  confirmReport,
-  getAllReports,
-  getReportById,
-  getReportsByPatientId,
-  getMyFinalReports,
+api.uploadXray            = uploadXray;
+api.predictStone          = predictStone;
+api.uploadAndPredict      = uploadAndPredict;
 
-  getAllUsers,
-  getMe,
-  getDoctors,
-  getPatients,
+api.createDraftReport     = createDraftReport;
+api.confirmReport         = confirmReport;
+api.rejectReport          = rejectReport;
+api.editDraftReport       = editDraftReport;
+api.getAllReports          = getAllReports;
+api.getMyReports          = getMyReports;
+api.getMyFinalReports     = getMyFinalReports;
+api.getReportById         = getReportById;
+api.getReportsByPatientId = getReportsByPatientId;
+api.deleteReport          = deleteReport;
 
-  createPatient,
-  getAllPatients,
-  getPatientById,
-  updatePatient,
-  deletePatient,
+api.getAllUsers            = getAllUsers;
+api.getMe                 = getMe;
+api.getDoctors            = getDoctors;
+api.getPatients           = getPatients;
+api.updateProfile         = updateProfile;
 
-  createAppointment,
-  getAllAppointments,
-  getAppointmentById,
-  updateAppointment,
-  deleteAppointment,
-};
+api.createPatient         = createPatient;
+api.getAllPatients         = getAllPatients;
+api.getPatientById        = getPatientById;
+api.updatePatient         = updatePatient;
+api.deletePatient         = deletePatient;
+
+api.createAppointment     = createAppointment;
+api.getAllAppointments     = getAllAppointments;
+api.getAppointmentById    = getAppointmentById;
+api.updateAppointment     = updateAppointment;
+api.deleteAppointment     = deleteAppointment;
+
+api.getAdminStats         = getAdminStats;
+api.getAdminUsers         = getAdminUsers;
+api.updateUserRole        = updateUserRole;
+api.deleteAdminUser       = deleteAdminUser;
+api.getAuditLogs          = getAuditLogs;
+api.getRecentActivity     = getRecentActivity;
 
 export default api;

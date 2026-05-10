@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const auditLogSchema = new mongoose.Schema(
   {
     // User who performed the action
-    user_id: {                              // ✅ Fixed — user → user_id
+    user_id: {                              
       type:    mongoose.Schema.Types.ObjectId,
       ref:     'User',
       default: null,
@@ -22,18 +22,18 @@ const auditLogSchema = new mongoose.Schema(
         'PREDICT_XRAY',
         'CREATE_REPORT',
         'CONFIRM_REPORT',
-        'REJECT_REPORT',        // ✅ Added
-        'EDIT_REPORT',          // ✅ Added
+        'REJECT_REPORT',        
+        'EDIT_REPORT',          
         'VIEW_REPORT',
         'DELETE_REPORT',
-        'CREATE_PATIENT',       // ✅ Added
-        'UPDATE_PATIENT',       // ✅ Added
-        'DELETE_PATIENT',       // ✅ Added
-        'CREATE_APPOINTMENT',   // ✅ Added
-        'UPDATE_APPOINTMENT',   // ✅ Added
-        'DELETE_APPOINTMENT',   // ✅ Added
-        'ROLE_UPDATED',         // ✅ Added
-        'USER_DELETED',         // ✅ Added
+        'CREATE_PATIENT',       
+        'UPDATE_PATIENT',       
+        'DELETE_PATIENT',       
+        'CREATE_APPOINTMENT',   
+        'UPDATE_APPOINTMENT',   
+        'DELETE_APPOINTMENT',   
+        'ROLE_UPDATED',         
+        'USER_DELETED',         
       ],
     },
 

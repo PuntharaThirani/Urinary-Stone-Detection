@@ -1,28 +1,56 @@
-// වෙලාව ගන්න පොඩි උදව්වක්
+// backend/utils/logger.js
+
+// Get current timestamp
 const getTimestamp = () => {
-    return new Date().toISOString().replace('T', ' ').substring(0, 19);
+  return new Date()
+    .toISOString()
+    .replace('T', ' ')
+    .substring(0, 19);
 };
 
 const logger = {
-    // සාමාන්‍ය තොරතුරු
-    info: (message) => {
-        console.log(`ℹ️  [INFO] [${getTimestamp()}]: ${message}`);
-    },
+  // General information
+  info: (message) => {
+    console.log(
+      `ℹ️  [INFO]    [${getTimestamp()}]: ${message}`
+    );
+  },
 
-    // සාර්ථක වූ දේවල්
-    success: (message) => {
-        console.log(`✅ [SUCCESS] [${getTimestamp()}]: ${message}`);
-    },
+  // Success messages
+  success: (message) => {
+    console.log(
+      `✅ [SUCCESS] [${getTimestamp()}]: ${message}`
+    );
+  },
 
-    // අනතුරු ඇඟවීම්
-    warn: (message) => {
-        console.warn(`⚠️ [WARN] [${getTimestamp()}]: ${message}`);
-    },
+  // Warnings
+  warn: (message) => {
+    console.warn(
+      `⚠️  [WARN]    [${getTimestamp()}]: ${message}`
+    );
+  },
 
-    // දෝෂ (Errors)
-    error: (message, error = '') => {
-        console.error(`❌ [ERROR] [${getTimestamp()}]: ${message}`, error);
-    }
+  // Errors
+  error: (message, error = '') => {
+    console.error(
+      `❌ [ERROR]   [${getTimestamp()}]: ${message}`,
+      error instanceof Error ? error.message : error
+    );
+  },
+
+  // Database operations
+  db: (message) => {
+    console.log(
+      `🗄️  [DB]      [${getTimestamp()}]: ${message}`
+    );
+  },
+
+  // API requests
+  api: (method, route, status) => {
+    console.log(
+      `🌐 [API]     [${getTimestamp()}]: ${method} ${route} → ${status}`
+    );
+  },
 };
 
 module.exports = logger;

@@ -3,9 +3,9 @@ const AuditLog = require('../models/AuditLog');
 const XrayImage = require('../models/XrayImage');
 const Report = require('../models/Report');
 
-// ===============================
+
 // GET ALL USERS
-// ===============================
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -25,9 +25,9 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET USER BY ID
-// ===============================
+
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
@@ -52,9 +52,9 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// ===============================
+
 // UPDATE USER ROLE
-// ===============================
+
 exports.updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
@@ -102,9 +102,9 @@ exports.updateUserRole = async (req, res) => {
   }
 };
 
-// ===============================
+
 // DELETE USER
-// ===============================
+
 exports.deleteUser = async (req, res) => {
   try {
     // Prevent admin from deleting own account
@@ -136,9 +136,9 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET SYSTEM STATS
-// ===============================
+
 exports.getSystemStats = async (req, res) => {
   try {
     // User counts by role
@@ -205,9 +205,9 @@ exports.getSystemStats = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET AUDIT LOGS
-// ===============================
+
 exports.getAuditLogs = async (req, res) => {
   try {
     const page  = parseInt(req.query.page)  || 1;
@@ -239,9 +239,9 @@ exports.getAuditLogs = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET RECENT ACTIVITY
-// ===============================
+
 exports.getRecentActivity = async (req, res) => {
   try {
     const recentLogs = await AuditLog.find()

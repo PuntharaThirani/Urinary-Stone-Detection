@@ -2,18 +2,18 @@ const mongoose = require('mongoose');
 
 const reportSchema = new mongoose.Schema(
   {
-    // ─────────────────────────────────────
+    
     // Doctor Reference
-    // ─────────────────────────────────────
+    
     doctor: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'User',
       required: true,
     },
 
-    // ─────────────────────────────────────
+   
     // Patient Reference
-    // ─────────────────────────────────────
+    
     patient: {
       type:    mongoose.Schema.Types.ObjectId,
       ref:     'Patient',
@@ -37,9 +37,9 @@ const reportSchema = new mongoose.Schema(
       enum: ['male', 'female', 'other', 'Male', 'Female', 'Other', ''],
     },
 
-    // ─────────────────────────────────────
+   
     // X-ray Image
-    // ─────────────────────────────────────
+    
     imageId: {
       type:    mongoose.Schema.Types.ObjectId,
       ref:     'XrayImage',
@@ -52,16 +52,16 @@ const reportSchema = new mongoose.Schema(
       trim:    true,
     },
 
-    // Annotated image with bounding boxes ✅ NEW
+    // Annotated image with bounding boxes 
     annotatedImageUrl: {
       type:    String,
       default: null,
       trim:    true,
     },
 
-    // ─────────────────────────────────────
-    // Phase 1 — Classification Result ✅ NEW
-    // ─────────────────────────────────────
+    
+    // Phase 1 — Classification Result 
+    
     phase1: {
       result: {
         type:    String,
@@ -74,9 +74,9 @@ const reportSchema = new mongoose.Schema(
       },
     },
 
-    // ─────────────────────────────────────
+
     // Raw AI Result
-    // ─────────────────────────────────────
+   
     aiResult: {
       detectedObjects: {
         type:    Array,
@@ -88,9 +88,9 @@ const reportSchema = new mongoose.Schema(
       },
     },
 
-    // ─────────────────────────────────────
+    
     // Detection Summary
-    // ─────────────────────────────────────
+    
     hasStones: {
       type:    Boolean,
       default: false,
@@ -102,7 +102,7 @@ const reportSchema = new mongoose.Schema(
       min:     0,
     },
 
-    // Individual stone details ✅ NEW
+    // Individual stone details 
     details: [
       {
         location:   { type: String, default: 'Unknown' },
@@ -111,9 +111,9 @@ const reportSchema = new mongoose.Schema(
       },
     ],
 
-    // ─────────────────────────────────────
+   
     // AI Diagnosis Support
-    // ─────────────────────────────────────
+  
     diagnosisData: {
       estimatedSize:  { type: Number, default: 0 },
       riskLevel: {
@@ -125,18 +125,18 @@ const reportSchema = new mongoose.Schema(
       recommendation: { type: String, default: '', trim: true },
     },
 
-    // ─────────────────────────────────────
+    
     // AI Draft Report
-    // ─────────────────────────────────────
+  
     aiDraft: {
       type:    String,
       default: '',
       trim:    true,
     },
 
-    // ─────────────────────────────────────
+    
     // Doctor Review
-    // ─────────────────────────────────────
+   
     doctorNotes: {
       type:    String,
       default: '',
@@ -161,9 +161,9 @@ const reportSchema = new mongoose.Schema(
       trim:    true,
     },
 
-    // ─────────────────────────────────────
+    
     // Doctor Validation Controls
-    // ─────────────────────────────────────
+   
     doctorConfirmed: {
       type:    Boolean,
       default: false,
@@ -179,19 +179,19 @@ const reportSchema = new mongoose.Schema(
       default: null,
     },
 
-    confirmedAt: {           // ✅ NEW
+    confirmedAt: {           
       type:    Date,
       default: null,
     },
 
-    rejectedAt: {            // ✅ NEW
+    rejectedAt: {            
       type:    Date,
       default: null,
     },
 
-    // ─────────────────────────────────────
+    
     // Workflow Status
-    // ─────────────────────────────────────
+    
     status: {
       type:    String,
       enum:    ['pending', 'under_review', 'confirmed', 'rejected'],

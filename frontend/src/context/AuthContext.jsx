@@ -1,48 +1,92 @@
-import React, { createContext, useState, useEffect } from 'react';
-import authService from '../services/authService';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 
-// Context එක නිර්මාණය කිරීම
 export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // User Object (name, role, etc.)
-  const [loading, setLoading] = useState(true); // App එක load වෙනකම්
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+};
 
-  // 1. App එක පටන් ගන්නකොට කලින් Login වෙලාද බලනවා
+export const AuthProvider = ({ children }) => {
+  const [user,    setUser]    = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check existing login on app start
   useEffect(() => {
     const checkLogin = () => {
-      const token = localStorage.getItem('token');
-      const role = localStorage.getItem('userRole');
-      
+      const token  = localStorage.getItem('token');
+      const role   = localStorage.getItem('userRole');
+      const name   = localStorage.getItem('userName');
+      const userId = localStorage.getItem('userId');
+
       if (token && role) {
-        // සරලව user state එක update කරනවා
-        setUser({ role: role, token: token });
+        // ✅ Token expiry check
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.exp * 1000 < Date.now()) {
+            localStorage.clear();
+            setUser(null);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          localStorage.clear();
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        setUser({ id: userId, name, role, token });
       }
       setLoading(false);
     };
     checkLogin();
   }, []);
 
-  // 2. Login Function
-  const login = async (email, password) => {
-    const data = await authService.login({ email, password });
-    setUser({ name: data.name, role: data.role, token: data.token });
-    return data; // Component එකට data යවනවා redirect කරන්න
+  // Login
+  const login = (userData) => {
+    const { token, role, user: u } = userData;
+
+    localStorage.setItem('token',    token);
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('userName', u?.name || '');
+    localStorage.setItem('userId',   u?.id || u?._id || ''); // ✅ _id fallback
+
+    setUser({
+      id:    u?.id || u?._id,
+      name:  u?.name,
+      email: u?.email,
+      role,
+      token,
+    });
   };
 
-  // 3. Register Function
-  const register = async (userData) => {
-    return await authService.register(userData);
-  };
-
-  // 4. Logout Function
+  // Logout
   const logout = () => {
-    authService.logout();
+    localStorage.clear();
     setUser(null);
   };
 
+  // ✅ Fix: /admin → /admin-dashboard consistent
+  const getDashboardPath = (role) => {
+    const paths = {
+      doctor:  '/doctor-dashboard',
+      patient: '/patient-dashboard',
+      staff:   '/staff-dashboard',
+      admin:   '/admin-dashboard',
+    };
+    return paths[role] || '/login';
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      logout,
+      getDashboardPath,
+      isAuthenticated: !!user,
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

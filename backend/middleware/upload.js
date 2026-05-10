@@ -2,9 +2,9 @@ const multer = require('multer');
 const path   = require('path');
 const fs     = require('fs');
 
-// ===============================
+
 // CREATE UPLOAD FOLDERS
-// ===============================
+
 const uploadDirs = ['uploads/xrays', 'uploads/processed'];
 
 uploadDirs.forEach((dir) => {
@@ -13,9 +13,9 @@ uploadDirs.forEach((dir) => {
   }
 });
 
-// ===============================
+
 // STORAGE CONFIGURATION
-// ===============================
+
 const storage = multer.diskStorage({
   // Save to uploads/xrays folder
   destination: (req, file, cb) => {
@@ -42,9 +42,9 @@ const storage = multer.diskStorage({
   },
 });
 
-// ===============================
+
 // FILE TYPE FILTER
-// ===============================
+
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
     'image/jpeg', 
@@ -67,9 +67,9 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// ===============================
+
 // MULTER INSTANCE
-// ===============================
+
 const upload = multer({
   storage,
   fileFilter,

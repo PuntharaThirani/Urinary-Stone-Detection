@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
+const logger   = require('../utils/logger');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      autoIndex: true,
-    });
+    const conn = await mongoose.connect(
+      process.env.MONGODB_URI, // MONGODB_URI
+      { autoIndex: true }
+    );
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    logger.success(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('❌ MongoDB Connection Failed');
-    console.error(error.message);
-
+    logger.error('MongoDB Connection Failed:', error);
     process.exit(1);
   }
 };

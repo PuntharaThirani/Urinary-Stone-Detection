@@ -3,11 +3,9 @@ import { UploadContext } from '../context/UploadContext';
 
 const useUpload = () => {
   const context = useContext(UploadContext);
-
   if (!context) {
-    throw new Error("useUpload must be used within an UploadProvider");
+    throw new Error('useUpload must be used within an UploadProvider');
   }
-
   return context;
 };
 

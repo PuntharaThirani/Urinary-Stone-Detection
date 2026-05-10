@@ -4,28 +4,32 @@ import Footer from '../components/common/Footer';
 
 const steps = [
   {
-    number: '01',
-    title: 'Upload Scan Image',
-    description:
-      'The doctor logs into the system and uploads a patient X-ray or CT scan image through the web interface. The system accepts common image formats such as JPG, JPEG, and PNG.',
-    image: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
-    alt: 'Upload scan',
+    number:      '01',
+    title:       'Upload X-Ray Image',
+    description: 'The doctor logs in and uploads a KUB X-ray image (JPG, PNG). The system validates file type and size before processing.',
+    image:       'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
+    alt:         'Upload scan',
   },
   {
-    number: '02',
-    title: 'AI Processing with YOLOv8',
-    description:
-      'The uploaded image is sent to the backend, where the Python-based YOLOv8 model performs inference to identify suspected urinary stone regions and return detection details.',
-    image: 'https://cdn-icons-png.flaticon.com/512/8654/8654261.png',
-    alt: 'AI analysis',
+    number:      '02',
+    title:       'Phase 1 — EfficientNet-B0 Classification',
+    description: 'The image is classified as Normal or Stone-Positive by EfficientNet-B0 with transfer learning. Achieves 94.74% test accuracy and F1-score of 0.95. Phase 2 only runs if Phase 1 detects a stone.',
+    image:       'https://cdn-icons-png.flaticon.com/512/8654/8654261.png',
+    alt:         'Classification',
   },
   {
-    number: '03',
-    title: 'Review Results and Generate Report',
-    description:
-      'The system displays the result visually with highlighted detection areas and relevant output details. A draft report can then be reviewed, edited, saved, or exported as a PDF.',
-    image: 'https://cdn-icons-png.flaticon.com/512/2983/2983677.png',
-    alt: 'Report generation',
+    number:      '03',
+    title:       'Phase 2 — YOLOv8 Stone Detection',
+    description: 'YOLOv8l trained on 1698 images (4367 annotated stones) locates and draws bounding boxes around detected stones. Precision: 0.944, Recall: 0.893, mAP@50: 0.927.',
+    image:       'https://cdn-icons-png.flaticon.com/512/2983/2983677.png',
+    alt:         'Detection',
+  },
+  {
+    number:      '04',
+    title:       'Doctor Review & Report Generation',
+    description: 'The system generates a preliminary AI draft report. The doctor reviews, edits, adds clinical notes, confirms, and sends the finalized report to the patient.',
+    image:       'https://cdn-icons-png.flaticon.com/512/3029/3029337.png',
+    alt:         'Report',
   },
 ];
 
@@ -48,10 +52,11 @@ const faqs = [
 ];
 
 const architecture = [
-  { title: 'Frontend', subtitle: 'React + Vite' },
-  { title: 'API Server', subtitle: 'Node.js + Express' },
-  { title: 'AI Engine', subtitle: 'Python + YOLOv8', highlight: true },
-  { title: 'Database', subtitle: 'MongoDB' },
+  { title: 'React Frontend',    subtitle: 'React + Vite + Tailwind'           },
+  { title: 'Node.js API',       subtitle: 'Express + JWT + MongoDB'           },
+  { title: 'EfficientNet-B0',   subtitle: 'Phase 1 Classification', highlight: true },
+  { title: 'YOLOv8',           subtitle: 'Phase 2 Detection',      highlight: true },
+  { title: 'MongoDB Atlas',     subtitle: 'Reports + Users + Logs'            },
 ];
 
 const HowItWorks = () => {

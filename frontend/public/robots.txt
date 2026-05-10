@@ -1,3 +1,18 @@
+# UroScan AI — Diagnosis Support System
 # https://www.robotstxt.org/robotstxt.html
+
+# Allow all crawlers
 User-agent: *
-Disallow:
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /doctor-dashboard
+Disallow: /patient-dashboard
+Disallow: /staff-dashboard
+
+# Allow public pages only
+Allow: /
+Allow: /features
+Allow: /how-it-works
+Allow: /about
+Allow: /login

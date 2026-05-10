@@ -1,8 +1,8 @@
 const User = require('../models/User');
 
-// ===============================
+
 // GET LOGGED-IN USER PROFILE
-// ===============================
+
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
@@ -28,9 +28,9 @@ exports.getMe = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET ALL USERS (Admin Only)
-// ===============================
+
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
@@ -51,9 +51,9 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET ALL DOCTORS
-// ===============================
+
 exports.getDoctors = async (req, res) => {
   try {
     const doctors = await User.find({ role: 'doctor' })
@@ -74,9 +74,9 @@ exports.getDoctors = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET ALL PATIENTS
-// ===============================
+
 exports.getPatients = async (req, res) => {
   try {
     const patients = await User.find({ role: 'patient' })
@@ -97,9 +97,9 @@ exports.getPatients = async (req, res) => {
   }
 };
 
-// ===============================
+
 // UPDATE USER PROFILE
-// ===============================
+
 exports.updateProfile = async (req, res) => {
   try {
     // Prevent role change through this endpoint

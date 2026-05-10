@@ -16,50 +16,28 @@ const PatientsPage = () => {
   const [error, setError] = useState('');
 
 
-  // =====================================================
+  
   // Fetch Patients
-  // =====================================================
-  const fetchPatients = async () => {
+ 
+const fetchPatients = async () => {
+  try {
+    setLoading(true);
+    setError('');
 
-    try {
+    //  Direct api.get use
+    const response = await api.get('/patients');
+    const patientData = response.data?.data || 
+                        response.data?.patients || 
+                        [];
+    setPatients(patientData);
 
-      setLoading(true);
-
-      setError('');
-
-      const response = await api.getAllPatients();
-
-      let patientData = [];
-
-      if (Array.isArray(response)) {
-
-        patientData = response;
-
-      } else if (Array.isArray(response?.patients)) {
-
-        patientData = response.patients;
-
-      } else if (Array.isArray(response?.data?.patients)) {
-
-        patientData = response.data.patients;
-
-      }
-
-      setPatients(patientData);
-
-    } catch (err) {
-
-      console.error('Failed to fetch patients:', err);
-
-      setError('Failed to load patients.');
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
+  } catch (err) {
+    console.error('Failed to fetch patients:', err);
+    setError('Failed to load patients. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   useEffect(() => {
@@ -77,9 +55,9 @@ const PatientsPage = () => {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8 lg:px-10">
 
-        {/* ================================================= */}
+       
         {/* Header */}
-        {/* ================================================= */}
+       
 
         <section className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
@@ -106,9 +84,9 @@ const PatientsPage = () => {
         </section>
 
 
-        {/* ================================================= */}
+        
         {/* Error */}
-        {/* ================================================= */}
+       
 
         {error && (
 
@@ -119,9 +97,9 @@ const PatientsPage = () => {
         )}
 
 
-        {/* ================================================= */}
+        
         {/* Loading */}
-        {/* ================================================= */}
+        
 
         {loading ? (
 

@@ -1,36 +1,47 @@
-import api from './api';
+import { registerUser, loginUser, logoutUser, getProfile } from './api';
 
 const authService = {
-  // 1. User Register කිරීම
+  // Register
   register: async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
-      return response.data;
+      return await registerUser(userData);
     } catch (error) {
       throw error.response ? error.response.data : error;
     }
   },
 
-  // 2. User Login වීම
+  // Login — token and role saved in api.js
   login: async (userData) => {
     try {
-      const response = await api.post('/auth/login', userData);
-      if (response.data.token) {
-        // Token එක LocalStorage එකේ Save කරගන්නවා
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userRole', response.data.role);
-      }
-      return response.data;
+      return await loginUser(userData);
     } catch (error) {
       throw error.response ? error.response.data : error;
     }
   },
 
-  // 3. Logout වීම (Local Storage සුද්ද කිරීම)
+  // Get profile
+  getProfile: async () => {
+    try {
+      return await getProfile();
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+
+  // Logout — clear localStorage
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
-  }
+    logoutUser();
+  },
+
+  // Check if logged in
+  isAuthenticated: () => {
+    return !!localStorage.getItem('token');
+  },
+
+  // Get current role
+  getRole: () => {
+    return localStorage.getItem('userRole') || null;
+  },
 };
 
 export default authService;

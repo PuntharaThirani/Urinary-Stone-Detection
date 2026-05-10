@@ -1,99 +1,78 @@
-const express = require('express');
-const router = express.Router();
+const express    = require('express');
+const router     = express.Router();
+const auth       = require('../middleware/auth');
+const allowRoles = require('../middleware/role');
 
 const reportController = require('../controllers/reportController');
 
-const auth = require('../middleware/auth');
-const allowRoles = require('../middleware/role');
-
-console.log("CONTROLLER LOADED:", reportController);
-
-
-// =====================================================
-// Create AI Preliminary Draft Report
-// =====================================================
-router.post(
-  '/draft',
+// Create AI draft report — doctor only
+router.post('/draft',
   auth,
   allowRoles('doctor'),
   reportController.createDraftReport
 );
 
-
-// =====================================================
-// Doctor Confirm Final Report
-// =====================================================
-router.put(
-  '/:id/confirm',
+// Get doctor's own reports 
+router.get('/my',
   auth,
   allowRoles('doctor'),
-  reportController.confirmReport
+  reportController.getMyReports
 );
 
-
-// =====================================================
-// Doctor Edit Draft Report
-// =====================================================
-router.put(
-  '/:id/edit',
-  auth,
-  allowRoles('doctor'),
-  reportController.editDraftReport
-);
-
-
-// =====================================================
-// Reject Report
-// =====================================================
-router.put(
-  '/:id/reject',
-  auth,
-  allowRoles('doctor'),
-  reportController.rejectReport
-);
-
-
-// =====================================================
-// Get Logged-in Patient Finalized Reports
-// =====================================================
-router.get(
-  '/my/final',
+// Get logged-in patient's confirmed reports
+router.get('/my/final',
   auth,
   allowRoles('patient'),
   reportController.getMyFinalReports
 );
 
-
-// =====================================================
-// Get Reports by Patient ID
-// =====================================================
-router.get(
-  '/patient/:patientId',
+// Get reports by patient ID — doctor, staff, admin
+router.get('/patient/:patientId',
   auth,
-  allowRoles('doctor', 'staff'),
+  allowRoles('doctor', 'staff', 'admin'),
   reportController.getReportsByPatientId
 );
 
-
-// =====================================================
-// Get All Reports
-// =====================================================
-router.get(
-  '/',
+// Get all reports — doctor, staff, admin
+router.get('/',
   auth,
-  allowRoles('doctor', 'staff'),
+  allowRoles('doctor', 'staff', 'admin'),
   reportController.getAllReports
 );
 
-
-// =====================================================
-// Get Single Report
-// =====================================================
-router.get(
-  '/:id',
+// Get single report by ID
+router.get('/:id',
   auth,
+  allowRoles('doctor', 'staff', 'patient', 'admin'),
   reportController.getReportById
 );
 
+// Confirm report — doctor only
+router.put('/:id/confirm',
+  auth,
+  allowRoles('doctor'),
+  reportController.confirmReport
+);
+
+// Edit draft report — doctor only
+router.put('/:id/edit',
+  auth,
+  allowRoles('doctor'),
+  reportController.editDraftReport
+);
+
+// Reject report — doctor only
+router.put('/:id/reject',
+  auth,
+  allowRoles('doctor'),
+  reportController.rejectReport
+);
+
+// Delete report — admin only 
+router.delete('/:id',
+  auth,
+  allowRoles('admin'),
+  reportController.deleteReport
+);
 
 module.exports = router;

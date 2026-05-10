@@ -13,7 +13,7 @@ exports.predictImage = (req, res) => {
       });
     }
 
-    // ✅ AI/detect.py ekata update una
+    //  AI/detect.py ekata update una
     const pythonScriptPath = path.join(__dirname, '..', 'AI', 'detect.py');
 
     const absoluteImagePath = path.isAbsolute(imagePath)
@@ -73,7 +73,7 @@ exports.predictImage = (req, res) => {
         return res.status(200).json({
           success: true,
           message: 'Analysis completed successfully.',
-          // ✅ Phase 1 result ekath include una
+          //  Phase 1 result ekath include una
           phase1: results.phase1 || null,
           stoneCount: results.stoneCount || 0,
           hasStones: results.hasStones || false,

@@ -5,9 +5,9 @@ const { spawn } = require('child_process');
 const XrayImage = require('../models/XrayImage');
 const Report    = require('../models/Report');
 
-// ===============================
+
 // Run Python AI Model
-// ===============================
+
 const runPythonModel = (imagePath) => {
   return new Promise((resolve, reject) => {
     // Path to detect.py
@@ -46,9 +46,9 @@ const runPythonModel = (imagePath) => {
   });
 };
 
-// ===============================
+
 // ANALYZE X-RAY — Main Controller
-// ===============================
+
 exports.analyzeXray = async (req, res) => {
   try {
     // Validate uploaded file
@@ -93,7 +93,7 @@ exports.analyzeXray = async (req, res) => {
     const date = new Date().toLocaleDateString('en-GB');
     const aiDraftText = `
 MEDICAL IMAGING REPORT (AI-ASSISTED PRELIMINARY DRAFT)
-=======================================================
+
 Date of Analysis : ${date}
 System           : UroScan AI — Diagnosis Support System
 
@@ -115,10 +115,10 @@ ${hasStones
   ? 'Findings suggest possible urinary stone disease (urolithiasis). Clinical review recommended.'
   : 'No significant radiographic evidence of urinary stones detected.'}
 
-=======================================================
+
 IMPORTANT: This is an AI-generated preliminary report.
 Final review and validation by a qualified doctor is mandatory.
-=======================================================
+
     `.trim();
 
     // Save Report to DB

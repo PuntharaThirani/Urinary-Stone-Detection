@@ -1,23 +1,32 @@
-import api from './api';
+import { uploadXray, predictStone, uploadAndPredict } from './api';
 
 const uploadService = {
-  // X-ray පින්තූරය යවා AI ප්‍රතිඵලය ලබා ගැනීම
-  predictStone: async (imageFile) => {
-    const formData = new FormData();
-    formData.append('image', imageFile); // Backend එකේ 'upload.single("image")' නිසා නම "image" විය යුතුයි
-
+  // Step 1 — Upload X-ray image
+  uploadXray: async (imageFile) => {
     try {
-      // පින්තූර යවනකොට Content-Type එක වෙනස් වෙනවා
-      const response = await api.post('/predict', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
+      return await uploadXray(imageFile);
     } catch (error) {
       throw error.response ? error.response.data : error;
     }
-  }
+  },
+
+  // Step 2 — Run AI prediction with uploaded path
+  predictStone: async (imagePath) => {
+    try {
+      return await predictStone(imagePath);
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+
+  // Combined — Upload + Predict in one call
+  uploadAndPredict: async (imageFile) => {
+    try {
+      return await uploadAndPredict(imageFile);
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
 };
 
 export default uploadService;

@@ -1,7 +1,7 @@
 import React from 'react';
 
 const ResultDisplay = ({ result }) => {
-  // ✅ Error State Handle
+  //  Error State Handle
   if (result?.error) {
     return (
       <div className="rounded-3xl border border-red-200 bg-red-50 p-6">
@@ -16,13 +16,13 @@ const ResultDisplay = ({ result }) => {
   const isDanger = Boolean(result.hasStones);
   const stoneCount = result?.stoneCount ?? 0;
 
-  // ✅ Phase 1 data
+  //  Phase 1 data
   const phase1Result = result?.phase1?.result || null;
   const phase1Confidence = result?.phase1?.confidence
     ? `${result.phase1.confidence.toFixed(2)}%`
     : null;
 
-  // ✅ Phase 2 — Average Confidence (All Stones)
+  //  Phase 2 — Average Confidence (All Stones)
   const phase2Confidence =
     result?.details?.length > 0
       ? `${(
@@ -32,7 +32,7 @@ const ResultDisplay = ({ result }) => {
         ).toFixed(2)}%`
       : 'Not available';
 
-  // ✅ Phase 1 Label
+  //  Phase 1 Label
   const phase1Label =
     {
       stone: 'Stone Detected',
@@ -47,7 +47,7 @@ const ResultDisplay = ({ result }) => {
           : 'border-emerald-200 bg-emerald-50'
       }`}
     >
-      {/* ───── Header ───── */}
+      {/*  Header  */}
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h2
@@ -74,7 +74,7 @@ const ResultDisplay = ({ result }) => {
         </span>
       </div>
 
-      {/* ───── Phase 1 Result Banner ───── */}
+      {/*  Phase 1 Result Banner  */}
       {phase1Result && (
         <div
           className={`mt-4 rounded-2xl p-3 flex items-center gap-3 ${
@@ -103,7 +103,7 @@ const ResultDisplay = ({ result }) => {
         </div>
       )}
 
-      {/* ───── Phase 2 Banner (Only if Stone) ───── */}
+      {/*  Phase 2 Banner (Only if Stone)  */}
       {isDanger && (
         <div className="mt-3 rounded-2xl p-3 flex items-center gap-3 bg-blue-50 border border-blue-200">
           <span className="text-lg">🎯</span>
@@ -119,7 +119,7 @@ const ResultDisplay = ({ result }) => {
         </div>
       )}
 
-      {/* ───── Stats Grid ───── */}
+      {/*  Stats Grid  */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Detection Status */}
         <div className="rounded-2xl border border-white/60 bg-white/70 p-4">
@@ -164,21 +164,25 @@ const ResultDisplay = ({ result }) => {
         </div>
       </div>
 
-      {/* ───── Annotated X-Ray Image ───── */}
-      {isDanger && result?.annotatedImageUrl && (
+        {/*  Annotated X-Ray Image  */}
+        {isDanger && result?.annotatedImageUrl && (
         <div className="mt-6 rounded-2xl overflow-hidden border border-slate-200 bg-white/70">
-          <p className="px-4 pt-4 text-xs font-bold uppercase tracking-widest text-slate-500">
-            🖼️ AI Annotated X-Ray
-          </p>
-          <img
-            src={result.annotatedImageUrl}
-            alt="AI Annotated X-Ray with Bounding Boxes"
-            className="w-full object-contain mt-2 rounded-b-2xl"
-          />
-        </div>
-      )}
+         <p className="px-4 pt-4 text-xs font-bold uppercase tracking-widest text-slate-500">
+          🖼️ AI Annotated X-Ray
+        </p>
+       <img
+         src={
+          result.annotatedImageUrl.startsWith('http')
+          ? result.annotatedImageUrl
+          : `http://localhost:5000/${result.annotatedImageUrl}` // ✅ Backend URL
+          }
+             alt="AI Annotated X-Ray with Bounding Boxes"
+             className="w-full object-contain mt-2 rounded-b-2xl"
+       />
+         </div>
+        )}
 
-      {/* ───── Detected Stones Detail Table ───── */}
+      {/*  Detected Stones Detail Table  */}
       {isDanger && result?.details?.length > 0 && (
         <div className="mt-6 rounded-2xl bg-white/70 border border-slate-200 p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">
@@ -218,7 +222,7 @@ const ResultDisplay = ({ result }) => {
         </div>
       )}
 
-      {/* ───── Recommendation Box ───── */}
+      {/*  Recommendation Box  */}
       {isDanger && (
         <div className="mt-5 rounded-2xl border-l-4 border-orange-500 bg-orange-50 p-4">
           <p className="text-sm font-bold text-orange-800">
@@ -232,7 +236,7 @@ const ResultDisplay = ({ result }) => {
         </div>
       )}
 
-      {/* ───── Normal Result Info Box ───── */}
+      {/*  Normal Result Info Box  */}
       {!isDanger && (
         <div className="mt-5 rounded-2xl border-l-4 border-emerald-500 bg-emerald-50 p-4">
           <p className="text-sm font-bold text-emerald-800">
@@ -246,7 +250,7 @@ const ResultDisplay = ({ result }) => {
         </div>
       )}
 
-      {/* ───── Footer Disclaimer ───── */}
+      {/*  Footer Disclaimer  */}
       <div className="mt-6 rounded-2xl bg-slate-100 border border-slate-200 p-3">
         <p className="text-xs text-slate-400 text-center leading-5">
           ⚠️ This AI system is a <span className="font-bold">decision support tool only</span>.

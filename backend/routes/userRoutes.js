@@ -1,46 +1,40 @@
-const express = require('express');
-const router = express.Router();
-
-const userController = require('../controllers/userController');
-const auth = require('../middleware/auth');
+const express    = require('express');
+const router     = express.Router();
+const auth       = require('../middleware/auth');
 const allowRoles = require('../middleware/role');
 
-// ===============================
-// USER ROUTES
-// ===============================
+const userController = require('../controllers/userController');
 
-// @route   GET /api/users/me
-// @desc    Get logged-in user profile
-// @access  All authenticated users
-router.get('/me', auth, userController.getMe);
-
-// @route   GET /api/users
-// @desc    Get all users
-// @access  Staff only
-router.get(
-  '/',
+// Get logged-in user profile — all authenticated users
+router.get('/me',
   auth,
-  allowRoles('staff'),
+  userController.getMe
+);
+
+// Update own profile — all authenticated users 
+router.put('/me',
+  auth,
+  userController.updateProfile
+);
+
+// Get all users — staff, admin
+router.get('/',
+  auth,
+  allowRoles('staff', 'admin'), //  Admin added
   userController.getAllUsers
 );
 
-// @route   GET /api/users/doctors
-// @desc    Get all doctors
-// @access  Staff
-router.get(
-  '/doctors',
+// Get all doctors — staff, patient, admin
+router.get('/doctors',
   auth,
-  allowRoles('staff'),
+  allowRoles('staff', 'patient', 'admin'), //  Patient added
   userController.getDoctors
 );
 
-// @route   GET /api/users/patients
-// @desc    Get all patients
-// @access  Doctor / Staff
-router.get(
-  '/patients',
+// Get all patients — doctor, staff, admin
+router.get('/patients',
   auth,
-  allowRoles('doctor', 'staff'),
+  allowRoles('doctor', 'staff', 'admin'), //  Admin added
   userController.getPatients
 );
 

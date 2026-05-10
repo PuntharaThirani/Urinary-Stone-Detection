@@ -9,32 +9,32 @@ from torchvision import models, transforms
 from PIL import Image
 from ultralytics import YOLO
 
-# -------------------------------
+
 # Paths
-# -------------------------------
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DETECTION_MODEL_PATH = os.path.join(BASE_DIR, "..", "AI_Models", "Detection.pt")
 CLASSIFIER_MODEL_PATH = os.path.join(BASE_DIR, "..", "AI_Models", "efficientnet_b0_kidney_stone.pth")
 
-# -------------------------------
+
 # Config
-# -------------------------------
+
 CONF_THRESHOLD = 0.25
 IOU_THRESHOLD = 0.7
 IMG_SIZE = 1280
-MIN_BOX_AREA = 50   # 🔥 small stones detect karanna
+MIN_BOX_AREA = 50   #  small stones detect karanna
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# -------------------------------
+
 # Load YOLO Model
-# -------------------------------
+
 YOLO_MODEL = YOLO(DETECTION_MODEL_PATH) if os.path.exists(DETECTION_MODEL_PATH) else None
 
-# -------------------------------
+
 # Load Classifier (OPTIONAL)
-# -------------------------------
+
 CLASSIFIER_MODEL = None
 CLASS_NAMES = ["normal", "stone"]
 
@@ -49,9 +49,9 @@ if os.path.exists(CLASSIFIER_MODEL_PATH):
 
     CLASSIFIER_MODEL = model_tmp
 
-# -------------------------------
+
 # Transform
-# -------------------------------
+
 classifier_transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=3),
     transforms.Resize((224, 224)),
@@ -59,25 +59,25 @@ classifier_transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# -------------------------------
+
 # CLAHE
-# -------------------------------
+
 def apply_clahe(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(gray)
     return cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
 
-# -------------------------------
+
 # Base64 Encode
-# -------------------------------
+
 def image_to_base64(img):
     success, buffer = cv2.imencode(".jpg", img)
     return base64.b64encode(buffer).decode("utf-8") if success else None
 
-# -------------------------------
+
 # Classification (optional)
-# -------------------------------
+
 def classify_xray(image_path):
     if CLASSIFIER_MODEL is None:
         return None, None
@@ -93,9 +93,9 @@ def classify_xray(image_path):
 
     return CLASS_NAMES[pred], round(confidence * 100, 2)
 
-# -------------------------------
+
 # Main Function
-# -------------------------------
+
 def analyze_xray(image_path):
     try:
         if not image_path or not os.path.exists(image_path):
@@ -115,7 +115,7 @@ def analyze_xray(image_path):
         # Optional classification (INFO ONLY)
         predicted_class, class_confidence = classify_xray(image_path)
 
-        # 🔥 ALWAYS run detection
+        #  ALWAYS run detection
         enhanced_img = apply_clahe(original_img)
 
         results = YOLO_MODEL.predict(
@@ -181,9 +181,9 @@ def analyze_xray(image_path):
     except Exception as e:
         print(json.dumps({"status": "error", "message": str(e)}))
 
-# -------------------------------
+
 # Entry
-# -------------------------------
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         analyze_xray(sys.argv[1])

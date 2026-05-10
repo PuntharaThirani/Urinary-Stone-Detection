@@ -47,13 +47,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Account status — soft delete support ✅ NEW
+    // Account status — soft delete support 
     isActive: {
       type:    Boolean,
       default: true,
     },
 
-    // Last login time ✅ NEW
+    // Last login time 
     lastLogin: {
       type:    Date,
       default: null,
@@ -62,11 +62,11 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ─────────────────────────────────────
+
 // HASH PASSWORD BEFORE SAVE
 // Only runs when password is modified
 // authController must send plain text!
-// ─────────────────────────────────────
+
 userSchema.pre('save', async function (next) {
   // Skip if password not changed
   if (!this.isModified('password')) return next();
@@ -76,18 +76,18 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// ─────────────────────────────────────
+
 // COMPARE PASSWORD METHOD
 // Used in login to verify password
-// ─────────────────────────────────────
+
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// ─────────────────────────────────────
+
 // INDEXES
-// ─────────────────────────────────────
-userSchema.index({ email: 1 });
+
+
 userSchema.index({ role:  1 });
 
 module.exports = mongoose.model('User', userSchema);

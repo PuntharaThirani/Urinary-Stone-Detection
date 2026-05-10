@@ -22,7 +22,7 @@ router.post('/login',
   authController.login
 );
 
-// Logout ✅ NEW
+// Logout 
 router.post('/logout',
   auth,
   authController.logout

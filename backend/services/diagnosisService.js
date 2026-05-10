@@ -1,310 +1,220 @@
-// services/diagnosisService.js
+// backend/services/diagnosisService.js
 
-// ======================================================
+
 // AI-Assisted Urinary Stone Diagnosis Support Service
-// ======================================================
-//
+
 // PURPOSE:
-// This service converts YOLO detection results into
-// AI-assisted preliminary interpretation output.
+// Converts AI detection results into preliminary
+// clinical support output for doctor review.
 //
 // IMPORTANT:
-// - This is NOT a final medical diagnosis.
-// - Results must always be reviewed by a doctor.
-// - The system provides diagnosis SUPPORT only.
-//
-// ======================================================
+// This is NOT a final medical diagnosis.
+// Results must always be reviewed by a qualified doctor.
 
 
-// ======================================================
-// Estimate Detection Region
-// ======================================================
-const estimateDetectionRegion = (bbox) => {
 
-  /*
-    Example bbox:
+// Estimate Stone Size from Bounding Box
 
-    {
-      x: 120,
-      y: 90,
-      width: 45,
-      height: 40
-    }
-  */
-
+const estimateStoneSize = (bbox) => {
   if (!bbox) return 0;
 
-  const width = Number(bbox.width || 0);
-  const height = Number(bbox.height || 0);
+  let width  = 0;
+  let height = 0;
 
-  // Approximate detected area (NOT real medical size)
-  const estimatedRegion = width * height;
+  // YOLOv8 format — x1,y1,x2,y2
+  if (bbox.x1 !== undefined && bbox.x2 !== undefined) {
+    width  = Math.abs(bbox.x2 - bbox.x1);
+    height = Math.abs(bbox.y2 - bbox.y1);
+  }
 
-  return Number(estimatedRegion.toFixed(2));
+  // Old format — x,y,width,height
+  if (bbox.width !== undefined) {
+    width  = Number(bbox.width  || 0);
+    height = Number(bbox.height || 0);
+  }
+
+  // Approximate size in mm (pixel to mm conversion)
+  // Average KUB X-ray pixel spacing ~0.2mm per pixel
+  const avgPixels = (width + height) / 2;
+  const sizeInMm  = avgPixels * 0.2;
+
+  return Number(sizeInMm.toFixed(1));
 };
 
 
-// ======================================================
-// Generate AI Assessment Level
-// ======================================================
-const getAssessmentLevel = (regionValue) => {
+// Get Risk Level based on size and confidence
 
-  if (regionValue <= 0) {
-    return 'No Significant Detection';
+const getRiskLevel = (sizeInMm, confidence) => {
+  if (sizeInMm <= 0 || confidence <= 0) {
+    return 'No Risk';
   }
 
-  if (regionValue < 1000) {
-    return 'Low Detection Probability';
+  // Clinical stone size classification
+  if (sizeInMm < 4) {
+    return 'Low';      // Small stones — likely pass naturally
   }
 
-  if (regionValue >= 1000 && regionValue < 3000) {
-    return 'Moderate Detection Probability';
+  if (sizeInMm >= 4 && sizeInMm < 8) {
+    return 'Medium';   // May need medical intervention
   }
 
-  return 'High Detection Probability';
+  return 'High';       // Large stones — specialist needed
 };
 
 
-// ======================================================
-// Generate Recommendation
-// ======================================================
-const getRecommendation = (
-  detected,
-  assessmentLevel
-) => {
+// Generate Clinical Recommendation
 
+const getRecommendation = (detected, riskLevel, sizeInMm) => {
   if (!detected) {
-
     return (
-      'No obvious urinary stone was identified ' +
-      'by the AI detection model. ' +
+      'No obvious urinary stone was identified by the AI detection model. ' +
       'Clinical correlation and doctor review are recommended.'
     );
-
   }
 
-  switch (assessmentLevel) {
-
-    case 'Low Detection Probability':
-
+  switch (riskLevel) {
+    case 'Low':
       return (
-        'A small suspicious region was identified. ' +
-        'Clinical review and follow-up observation may be beneficial.'
+        `A small suspicious region (~${sizeInMm}mm) was identified. ` +
+        'Clinical review and follow-up observation may be beneficial. ' +
+        'Increased fluid intake is generally recommended.'
       );
 
-    case 'Moderate Detection Probability':
-
+    case 'Medium':
       return (
-        'A possible urinary stone region was identified. ' +
-        'Further medical evaluation or imaging review is recommended.'
+        `A possible urinary stone (~${sizeInMm}mm) was identified. ` +
+        'Further medical evaluation or imaging review is recommended. ' +
+        'Specialist consultation may be required.'
       );
 
-    case 'High Detection Probability':
-
+    case 'High':
       return (
-        'A highly suspicious urinary stone region was identified. ' +
-        'Specialist consultation is strongly recommended.'
+        `A large suspicious urinary stone region (~${sizeInMm}mm) was identified. ` +
+        'Specialist consultation is strongly recommended. ' +
+        'Immediate medical evaluation may be necessary.'
       );
 
     default:
-
-      return (
-        'Further clinical evaluation is recommended.'
-      );
+      return 'Further clinical evaluation is recommended.';
   }
 };
 
 
-// ======================================================
-// Generate AI Draft Text
-// ======================================================
+// Generate AI Draft Report Text
+
 const generateAIDraft = ({
   detected,
   confidence,
-  assessmentLevel,
+  riskLevel,
   recommendation,
-  stoneCount
+  stoneCount,
+  sizeInMm,
 }) => {
-
   const date = new Date().toLocaleDateString('en-GB');
 
-  return `AI-ASSISTED PRELIMINARY RADIOLOGY REPORT
+  return `
+AI-ASSISTED PRELIMINARY RADIOLOGY REPORT
 ==================================================
+Date of Analysis : ${date}
+System           : UroScan AI — Diagnosis Support System
 
-Date of Analysis: ${date}
-
-AI FINDINGS:
-- Detection Status: ${detected ? 'Suspicious Stone Detected' : 'No Obvious Stone Detected'}
+AI DETECTION FINDINGS:
+- Detection Status   : ${detected ? '⚠️ Suspicious Stone Detected' : '✅ No Obvious Stone Detected'}
 - Detection Confidence: ${confidence}%
-- Detected Object Count: ${stoneCount}
-- AI Assessment Level: ${assessmentLevel}
+- Detected Stone Count: ${stoneCount}
+- Estimated Size     : ${sizeInMm > 0 ? `~${sizeInMm} mm` : 'N/A'}
+- Risk Level         : ${riskLevel}
 
-AI RECOMMENDATION:
+AI CLINICAL RECOMMENDATION:
 ${recommendation}
 
 IMPORTANT DISCLAIMER:
-This report is automatically generated by an AI-assisted urinary stone detection system.
-It is intended only for preliminary clinical support purposes.
-Final interpretation and diagnosis must be confirmed by a qualified medical professional.
+This report is automatically generated by an AI-assisted
+urinary stone detection system. It is intended only for
+preliminary clinical support purposes.
+Final interpretation and diagnosis must be confirmed
+by a qualified medical professional.
 
-==================================================`;
+==================================================
+  `.trim();
 };
 
 
-// ======================================================
 // Main Diagnosis Generator
-// ======================================================
+
 const generateDiagnosis = (detectionResult) => {
-
-  /*
-    Expected Input Example:
-
-    {
-      detected: true,
-      confidence: 0.91,
-      stoneCount: 1,
-      bbox: {
-        x: 100,
-        y: 80,
-        width: 50,
-        height: 40
-      }
-    }
-  */
-
-  // ====================================================
-  // NO DETECTION
-  // ====================================================
-  if (
-    !detectionResult ||
-    detectionResult.detected === false
-  ) {
-
-    const assessmentLevel = 'No Significant Detection';
-
-    const recommendation =
-      getRecommendation(false, assessmentLevel);
+  // No detection case
+  if (!detectionResult || detectionResult.detected === false) {
+    const riskLevel      = 'No Risk';
+    const recommendation = getRecommendation(false, riskLevel, 0);
 
     return {
-
-      detected: false,
-
-      confidence: 0,
-
-      estimatedRegion: 0,
-
-      stoneCount: 0,
-
-      assessmentLevel,
-
+      detected:        false,
+      confidence:      0,
+      estimatedSize:   0,
+      stoneCount:      0,
+      riskLevel,
       recommendation,
-
-      status: 'no_obvious_stone',
-
-      aiDraft: generateAIDraft({
-        detected: false,
-        confidence: 0,
-        assessmentLevel,
+      status:          'no_obvious_stone',
+      aiDraft:         generateAIDraft({
+        detected:    false,
+        confidence:  0,
+        riskLevel,
         recommendation,
-        stoneCount: 0
+        stoneCount:  0,
+        sizeInMm:    0,
       }),
-
       disclaimer:
-        'This output is AI-assisted and must be reviewed by a qualified medical professional.'
+        'This output is AI-assisted and must be reviewed by a qualified medical professional.',
     };
   }
 
+  // Detection exists
+  const confidence = Number(
+    ((detectionResult.confidence || 0) * 100).toFixed(2)
+  );
 
-  // ====================================================
-  // DETECTION EXISTS
-  // ====================================================
-  const confidence =
-    Number(
-      ((detectionResult.confidence || 0) * 100).toFixed(2)
-    );
+  const bbox       = detectionResult.bbox  || null;
+  const stoneCount = detectionResult.stoneCount || 1;
 
-  const bbox =
-    detectionResult.bbox || null;
+  // Calculate estimated size
+  const sizeInMm = estimateStoneSize(bbox);
 
-  const stoneCount =
-    detectionResult.stoneCount || 1;
+  // Get risk level
+  const riskLevel = getRiskLevel(sizeInMm, confidence);
 
+  // Get recommendation
+  let recommendation = getRecommendation(true, riskLevel, sizeInMm);
 
-  // ====================================================
-  // Estimate Detection Region
-  // ====================================================
-  const estimatedRegion =
-    estimateDetectionRegion(bbox);
-
-
-  // ====================================================
-  // Assessment Level
-  // ====================================================
-  const assessmentLevel =
-    getAssessmentLevel(estimatedRegion);
-
-
-  // ====================================================
-  // Recommendation
-  // ====================================================
-  let recommendation =
-    getRecommendation(true, assessmentLevel);
-
-
-  // ====================================================
-  // Low Confidence Warning
-  // ====================================================
+  // Low confidence warning
   if (confidence < 60) {
-
     recommendation +=
-      ' Detection confidence is relatively low. ' +
-      'Additional clinical review is recommended.';
+      ' Note: Detection confidence is relatively low. ' +
+      'Additional clinical review is strongly recommended.';
   }
 
-
-  // ====================================================
-  // Final AI Draft
-  // ====================================================
-  const aiDraft =
-    generateAIDraft({
-      detected: true,
-      confidence,
-      assessmentLevel,
-      recommendation,
-      stoneCount
-    });
-
-
-  // ====================================================
-  // Final Response
-  // ====================================================
-  return {
-
+  // Generate draft text
+  const aiDraft = generateAIDraft({
     detected: true,
-
     confidence,
-
-    estimatedRegion,
-
-    stoneCount,
-
-    assessmentLevel,
-
+    riskLevel,
     recommendation,
+    stoneCount,
+    sizeInMm,
+  });
 
-    status: 'pending_doctor_review',
-
+  return {
+    detected:      true,
+    confidence,
+    estimatedSize: sizeInMm,
+    stoneCount,
+    riskLevel,
+    recommendation,
+    status:        'pending_doctor_review',
     aiDraft,
-
     disclaimer:
-      'This output is AI-assisted and must be reviewed by a qualified medical professional.'
+      'This output is AI-assisted and must be reviewed by a qualified medical professional.',
   };
 };
 
-
-// ======================================================
-// EXPORTS
-// ======================================================
-module.exports = {
-  generateDiagnosis
-};
+module.exports = { generateDiagnosis };

@@ -1,120 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
-import Header from '../components/common/Header';
-import Footer from '../components/common/Footer';
-
-import api from '../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate }   from 'react-router-dom';
+import Header                  from '../components/common/Header';
+import Footer                  from '../components/common/Footer';
+import api                     from '../services/api';
 
 const AnalyzeXrayPage = () => {
 
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewUrl,    setPreviewUrl]    = useState(null);
+  const [isAnalyzing,   setIsAnalyzing]   = useState(false);
+  const [loadingStep,   setLoadingStep]   = useState(0);
+  const [error,         setError]         = useState('');
+  const [isDragging,    setIsDragging]    = useState(false);
 
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  // Patient info for report
+  const [patientName,   setPatientName]   = useState('');
+  const [patientAge,    setPatientAge]    = useState('');
+  const [patientGender, setPatientGender] = useState('male');
 
-  const [loadingText, setLoadingText] = useState('');
+  // Loading steps
+  const loadingSteps = [
+    'Uploading X-ray image...',
+    'Running Phase 1 Classification (EfficientNet-B0)...',
+    'Running Phase 2 Detection (YOLOv8)...',
+    'Generating preliminary diagnosis report...',
+  ];
 
-  const [error, setError] = useState('');
-
-  const [isDragging, setIsDragging] = useState(false);
-
-
-  // =====================================================
-  // Cleanup Preview URL
-  // =====================================================
+  // Cleanup preview URL on unmount
   useEffect(() => {
 
     return () => {
-
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
 
   }, [previewUrl]);
 
-
-  // =====================================================
-  // Handle File Selection
-  // =====================================================
-  const handleImageChange = (e) => {
-
-    const file = e.target.files?.[0];
-
-    processFile(file);
-
-  };
-
-
-  // =====================================================
-  // Drag Events
-  // =====================================================
-  const handleDragOver = (e) => {
-
-    e.preventDefault();
-
-    setIsDragging(true);
-
-  };
-
-  const handleDragLeave = (e) => {
-
-    e.preventDefault();
-
-    setIsDragging(false);
-
-  };
-
-  const handleDrop = (e) => {
-
-    e.preventDefault();
-
-    setIsDragging(false);
-
-    const file = e.dataTransfer.files?.[0];
-
-    processFile(file);
-
-  };
-
-
-  // =====================================================
-  // Validate + Preview File
-  // =====================================================
+  // Validate and process file
   const processFile = (file) => {
+    if (!file) return;
 
-    if (file && file.type.startsWith('image/')) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const maxSize      = 5 * 1024 * 1024;
 
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      const objectUrl = URL.createObjectURL(file);
-
-      setSelectedImage(file);
-
-      setPreviewUrl(objectUrl);
-
-      setError('');
-
-    } else if (file) {
-
-      setError(
-        'Please upload a valid image file such as JPG, JPEG, or PNG.'
-      );
-
+    if (!allowedTypes.includes(file.type)) {
+      setError('Please upload a valid image file: JPG, JPEG, or PNG.');
+      return;
     }
 
+    if (file.size > maxSize) {
+      setError('File size must be less than 5MB.');
+      return;
+    }
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+
+    setSelectedImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setError('');
   };
 
+  const handleImageChange = (e) => processFile(e.target.files?.[0]);
+  const handleDragOver    = (e) => { e.preventDefault(); setIsDragging(true);  };
+  const handleDragLeave   = (e) => { e.preventDefault(); setIsDragging(false); };
+  const handleDrop        = (e) => { e.preventDefault(); setIsDragging(false); processFile(e.dataTransfer.files?.[0]); };
 
-  // =====================================================
-  // Run AI Analysis
-  // =====================================================
+  // Run AI Analysis — Upload → Predict → Navigate
   const handleRunAnalysis = async () => {
 
     if (!selectedImage) return;
@@ -124,63 +77,63 @@ const AnalyzeXrayPage = () => {
     setError('');
 
     try {
+      // Step 1 — Upload image
+      setLoadingStep(0);
+      const formData = new FormData();
+      formData.append('image', selectedImage);
 
-      // -----------------------------------------------
-      // Uploading
-      // -----------------------------------------------
-      setLoadingText('Uploading X-ray image...');
+      const uploadRes = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
-      const response =
-        await api.uploadAndPredict(selectedImage);
+      const imagePath = uploadRes.data.image?.filePath;
+      if (!imagePath) throw new Error('Image upload failed');
 
-      // -----------------------------------------------
-      // Extract Data
-      // -----------------------------------------------
-      const analysisData = response?.analysis;
+      // Step 2 & 3 — Run AI prediction
+      setLoadingStep(1);
+      await new Promise((r) => setTimeout(r, 500));
+      setLoadingStep(2);
 
-      const reportData = response?.report;
+      const predictRes = await api.post('/predict', { imagePath });
 
-      // -----------------------------------------------
-      // Validate Response
-      // -----------------------------------------------
-      if (!analysisData || !reportData) {
-
-        throw new Error(
-          'Invalid AI analysis response received from the server.'
-        );
-
+      if (!predictRes.data.success) {
+        throw new Error('AI analysis failed');
       }
 
-      // -----------------------------------------------
-      // Opening Results
-      // -----------------------------------------------
-      setLoadingText(
-        'Generating preliminary diagnosis report...'
-      );
+      // Step 4 — Create draft report
+      setLoadingStep(3);
 
-      // -----------------------------------------------
-      // Navigate to Results Page
-      // -----------------------------------------------
+      const reportRes = await api.post('/reports/draft', {
+        doctorId:      localStorage.getItem('userId') || req?.user?.id,
+        patientName:   patientName || 'Unknown Patient',
+        patientAge:    patientAge  || null,
+        patientGender: patientGender,
+        imagePath,
+        yoloResults: {
+          hasStones:  predictRes.data.hasStones,
+          stoneCount: predictRes.data.stoneCount,
+          details:    predictRes.data.details  || [],
+          phase1:     predictRes.data.phase1  || null,
+        },
+      });
+
+      // Navigate to results
       navigate('/results', {
 
         state: {
-
-          analysis: analysisData,
-
-          report: reportData,
-
-          image: previewUrl,
-
+          analysis: {
+            hasStones:         predictRes.data.hasStones,
+            stoneCount:        predictRes.data.stoneCount,
+            details:           predictRes.data.details,
+            phase1:            predictRes.data.phase1,
+            annotatedImageUrl: predictRes.data.annotatedImageUrl,
+          },
+          report: reportRes.data.report,
+          image:  previewUrl,
         },
-
       });
 
     } catch (err) {
-
-      console.error(
-        'AI Analysis Error:',
-        err
-      );
 
       setError(
 
@@ -195,33 +148,22 @@ const AnalyzeXrayPage = () => {
     } finally {
 
       setIsAnalyzing(false);
-
-      setLoadingText('');
-
+      setLoadingStep(0);
     }
 
   };
 
-
-  // =====================================================
-  // Reset Upload
-  // =====================================================
+  // Reset
   const handleReset = () => {
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setSelectedImage(null);
 
     setPreviewUrl(null);
 
     setError('');
-
-    setLoadingText('');
-
-    setIsAnalyzing(false);
-
+    setPatientName('');
+    setPatientAge('');
+    setPatientGender('male');
   };
 
 
@@ -233,9 +175,7 @@ const AnalyzeXrayPage = () => {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8 md:px-8 lg:px-10">
 
-        {/* ================================================= */}
-        {/* PAGE HEADER */}
-        {/* ================================================= */}
+        {/*  Page Header  */}
         <section className="mb-6">
 
           <Link
@@ -250,43 +190,30 @@ const AnalyzeXrayPage = () => {
           </h1>
 
           <p className="mt-2 text-sm leading-6 text-slate-500 md:text-base">
-            Upload a KUB X-ray image to perform AI-assisted urinary
-            stone detection and generate a preliminary diagnostic support report.
+            Upload a KUB X-ray image to perform AI-assisted urinary stone
+            detection and generate a preliminary diagnostic support report.
           </p>
 
         </section>
 
-
-        {/* ================================================= */}
-        {/* ERROR MESSAGE */}
-        {/* ================================================= */}
+        {/*  Error  */}
         {error && (
 
           <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 
             ⚠️ {error}
-
+          
           </div>
 
         )}
 
+        <div className="grid gap-6 xl:grid-cols-2">
 
-        {/* ================================================= */}
-        {/* MAIN GRID */}
-        {/* ================================================= */}
-        <section className="grid gap-6 xl:grid-cols-2">
-
-          {/* ============================================= */}
-          {/* IMAGE PREVIEW */}
-          {/* ============================================= */}
+          {/*  Left — Upload  */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
             <div className="mb-5 border-b border-slate-100 pb-3">
-
-              <h2 className="text-xl font-bold text-slate-900">
-                Scan Preview
-              </h2>
-
+              <h2 className="text-xl font-bold text-slate-900">Scan Preview</h2>
             </div>
 
             {!previewUrl ? (
@@ -295,10 +222,11 @@ const AnalyzeXrayPage = () => {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                className={`rounded-2xl border-2 border-dashed px-6 py-16 text-center transition ${
+                onClick={() => fileInputRef.current?.click()}
+                className={`cursor-pointer rounded-2xl border-2 border-dashed px-6 py-16 text-center transition ${
                   isDragging
                     ? 'border-blue-500 bg-blue-50'
-                    : 'border-slate-300 bg-slate-50'
+                    : 'border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50'
                 }`}
               >
 
@@ -309,41 +237,33 @@ const AnalyzeXrayPage = () => {
                 </div>
 
                 <p className="text-lg font-bold text-slate-700">
-                  {isDragging
-                    ? 'Drop image here'
-                    : 'Drag & Drop X-ray Image'}
+                  {isDragging ? 'Drop image here' : 'Drag & Drop X-ray Image'}
                 </p>
 
                 <p className="mt-2 text-sm text-slate-500">
-                  Supported formats: JPG, JPEG, PNG
+                  JPG, JPEG, PNG — Max 5MB
                 </p>
 
                 <input
+                  ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/jpg"
                   onChange={handleImageChange}
                   className="hidden"
-                  id="file-upload"
+
                 />
-
-                <label
-                  htmlFor="file-upload"
-                  className="mt-6 inline-flex cursor-pointer rounded-xl border border-blue-600 bg-white px-5 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-50"
-                >
+                <span className="mt-6 inline-flex cursor-pointer rounded-xl border border-blue-600 bg-white px-5 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-50">
                   Browse Files
-                </label>
-
+                </span>
               </div>
 
             ) : (
 
               <div className="flex flex-col items-center">
-
-                <div className="relative mb-5 flex h-[350px] w-full max-w-md items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-black">
-
+                <div className="relative mb-5 flex h-[300px] w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-black">
                   <img
                     src={previewUrl}
-                    alt="Uploaded scan preview"
+                    alt="Uploaded scan"
                     className="max-h-full max-w-full object-contain"
                   />
 
@@ -354,7 +274,7 @@ const AnalyzeXrayPage = () => {
                   <button
                     onClick={handleReset}
                     disabled={isAnalyzing}
-                    className="flex-1 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="flex-1 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-200 disabled:opacity-60"
                   >
                     Remove
                   </button>
@@ -362,14 +282,10 @@ const AnalyzeXrayPage = () => {
                   <button
                     onClick={handleRunAnalysis}
                     disabled={isAnalyzing}
-                    className={`flex-[2] rounded-xl px-4 py-3 text-sm font-bold transition ${
-                      isAnalyzing
-                        ? 'cursor-not-allowed bg-blue-200 text-blue-800'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
+                    className="flex-[2] rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isAnalyzing
-                      ? `⚙️ ${loadingText}`
+                      ? `⚙️ ${loadingSteps[loadingStep]}`
                       : '🚀 Run AI Diagnostic Analysis'}
                   </button>
 
@@ -381,77 +297,109 @@ const AnalyzeXrayPage = () => {
 
           </div>
 
+          {/*  Right — Patient Info + Status  */}
+          <div className="space-y-6">
 
-          {/* ============================================= */}
-          {/* ANALYSIS STATUS */}
-          {/* ============================================= */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            {/* Patient Info Form */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-5 border-b border-slate-100 pb-3">
+                <h2 className="text-xl font-bold text-slate-900">Patient Information</h2>
+                <p className="mt-1 text-xs text-slate-400">Optional — for report generation</p>
+              </div>
 
-            <div className="mb-5 border-b border-slate-100 pb-3">
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                    Patient Name
+                  </label>
+                  <input
+                    type="text"
+                    value={patientName}
+                    onChange={(e) => setPatientName(e.target.value)}
+                    placeholder="Enter patient name"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                  />
+                </div>
 
-              <h2 className="text-xl font-bold text-slate-900">
-                Analysis Status
-              </h2>
-
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      value={patientAge}
+                      onChange={(e) => setPatientAge(e.target.value)}
+                      placeholder="Age"
+                      min={0}
+                      max={150}
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                      Gender
+                    </label>
+                    <select
+                      value={patientGender}
+                      onChange={(e) => setPatientGender(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                    >
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {!previewUrl ? (
-
-              <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 text-center text-slate-500">
-
-                <p className="text-4xl">📄</p>
-
-                <p className="mt-3 text-sm font-medium">
-                  Upload an X-ray image to begin.
-                </p>
-
+            {/* Analysis Status */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-5 border-b border-slate-100 pb-3">
+                <h2 className="text-xl font-bold text-slate-900">Analysis Status</h2>
               </div>
 
-            ) : isAnalyzing ? (
+              {!previewUrl ? (
+                <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl bg-slate-50 text-center text-slate-500">
+                  <p className="text-4xl">📄</p>
+                  <p className="mt-3 text-sm font-medium">Upload an X-ray image to begin.</p>
+                </div>
+              ) : isAnalyzing ? (
+                <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl bg-slate-50 text-center">
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+                  <p className="mt-4 text-sm font-bold text-blue-600">
+                    {loadingSteps[loadingStep]}
+                  </p>
 
-              <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 text-center">
-
-                <span className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></span>
-
-                <p className="mt-4 text-sm font-bold text-blue-600">
-                  {loadingText}
-                </p>
-
-                <p className="mt-2 max-w-sm text-xs leading-6 text-slate-500">
-
-                  The uploaded X-ray image is being processed
-                  through the AI diagnostic pipeline.
-
-                </p>
-
-              </div>
-
-            ) : (
-
-              <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl bg-slate-50 px-6 text-center text-slate-500">
-
-                <p className="text-4xl text-emerald-500">✅</p>
-
-                <p className="mt-3 text-sm font-medium">
-                  AI diagnostic analysis is ready.
-                </p>
-
-                <p className="mt-2 max-w-sm text-xs leading-6 text-slate-500">
-
-                  The system will analyze the uploaded
-                  X-ray image and generate a preliminary
-                  diagnostic support report for doctor review.
-
-                </p>
-
-              </div>
-
-            )}
-
+                  {/* Progress steps */}
+                  <div className="mt-4 w-full max-w-xs space-y-1 px-4">
+                    {loadingSteps.map((step, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        <span className={i <= loadingStep ? 'text-blue-600' : 'text-slate-300'}>
+                          {i < loadingStep ? '✅' : i === loadingStep ? '⚙️' : '⏳'}
+                        </span>
+                        <span className={i <= loadingStep ? 'text-slate-700' : 'text-slate-400'}>
+                          {step}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl bg-emerald-50 text-center">
+                  <p className="text-4xl">✅</p>
+                  <p className="mt-3 text-sm font-bold text-emerald-700">
+                    Ready for AI Analysis
+                  </p>
+                  <p className="mt-2 max-w-xs text-xs leading-6 text-slate-500">
+                    Click "Run AI Diagnostic Analysis" to begin.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-
-        </section>
-
+        </div>
       </main>
 
       <Footer />

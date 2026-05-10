@@ -1,50 +1,71 @@
+// backend/services/aiService.js
+
 const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+const path      = require('path');
 
-/**
- * පින්තූරයක් Python AI Model එකට යවා ප්‍රතිඵලය ලබා ගැනීම
- * @param {String} imagePath - පින්තූරය තියෙන තැන
- */
+
+// Run Python AI Model
+// Sends image to detect.py and returns JSON result
+
 const analyzeImage = (imagePath) => {
-    return new Promise((resolve, reject) => {
-        
-        // Python Script එක තියෙන තැන (backend/detect.py)
-        const scriptPath = path.join(__dirname, '..', 'detect.py');
-        
-        // Python Process එක පටන් ගන්නවා
-        const pythonProcess = spawn('python', [scriptPath, imagePath]);
+  return new Promise((resolve, reject) => {
 
-        let dataString = '';
-        let errorString = '';
+    // Correct path to detect.py ✅
+    const scriptPath = path.join(
+      __dirname, '..', 'AI', 'detect.py'
+    );
 
-        // Data එනකොට එකතු කරගන්නවා
-        pythonProcess.stdout.on('data', (data) => {
-            dataString += data.toString();
-        });
+    // Spawn Python process
+    const pythonProcess = spawn('python', [
+      scriptPath,
+      imagePath,
+    ]);
 
-        // Error ආවොත් එකතු කරගන්නවා
-        pythonProcess.stderr.on('data', (data) => {
-            errorString += data.toString();
-        });
+    let dataString  = '';
+    let errorString = '';
 
-        // වැඩේ ඉවර වුනාම
-        pythonProcess.on('close', (code) => {
-            if (code !== 0) {
-                console.error(`❌ Python Error: ${errorString}`);
-                return reject(new Error('AI Model processing failed'));
-            }
-
-            try {
-                // String එක JSON බවට හරවනවා
-                const jsonResult = JSON.parse(dataString);
-                resolve(jsonResult);
-            } catch (error) {
-                console.error('❌ Parsing Error:', error.message);
-                reject(new Error('Failed to parse AI response'));
-            }
-        });
+    // Collect stdout output
+    pythonProcess.stdout.on('data', (data) => {
+      dataString += data.toString();
     });
+
+    // Collect stderr output
+    pythonProcess.stderr.on('data', (data) => {
+      errorString += data.toString();
+    });
+
+    // On process close
+    pythonProcess.on('close', (code) => {
+      // Log Python warnings/info (not always errors)
+      if (errorString) {
+        console.warn(`⚠️ Python stderr: ${errorString}`);
+      }
+
+      // Non-zero exit = error
+      if (code !== 0) {
+        console.error(`❌ Python exited with code ${code}`);
+        return reject(
+          new Error(`AI Model processing failed: ${errorString}`)
+        );
+      }
+
+      // Parse JSON output
+      try {
+        const jsonResult = JSON.parse(dataString);
+        resolve(jsonResult);
+      } catch (error) {
+        console.error('❌ JSON Parse Error:', error.message);
+        console.error('Raw output:', dataString);
+        reject(new Error('Failed to parse AI model response'));
+      }
+    });
+
+    // Handle spawn errors
+    pythonProcess.on('error', (err) => {
+      console.error('❌ Spawn Error:', err.message);
+      reject(new Error(`Failed to start Python process: ${err.message}`));
+    });
+  });
 };
 
 module.exports = { analyzeImage };

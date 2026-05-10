@@ -1,8 +1,8 @@
 const { check, validationResult } = require('express-validator');
 
-// ===============================
+
 // REGISTER VALIDATION
-// ===============================
+
 exports.registerValidation = [
   // Name — required, min 2 chars
   check('name', 'Name is required')
@@ -34,9 +34,9 @@ exports.registerValidation = [
     .withMessage('Phone number must be 10-15 digits'),
 ];
 
-// ===============================
+
 // LOGIN VALIDATION
-// ===============================
+
 exports.loginValidation = [
   // Email — valid format
   check('email', 'Please include a valid email')
@@ -49,9 +49,9 @@ exports.loginValidation = [
     .isEmpty(),
 ];
 
-// ===============================
+
 // REPORT VALIDATION
-// ===============================
+
 exports.reportValidation = [
   check('doctorId', 'Doctor ID is required')
     .not()
@@ -66,9 +66,9 @@ exports.reportValidation = [
     .isEmpty(),
 ];
 
-// ===============================
+
 // APPOINTMENT VALIDATION
-// ===============================
+
 exports.appointmentValidation = [
   check('patientId', 'Patient ID is required')
     .not()
@@ -89,9 +89,9 @@ exports.appointmentValidation = [
     .isEmpty(),
 ];
 
-// ===============================
+
 // PATIENT VALIDATION
-// ===============================
+
 exports.patientValidation = [
   check('fullName', 'Full name is required')
     .not()
@@ -118,9 +118,9 @@ exports.patientValidation = [
     .withMessage('Contact number must be 10-15 digits'),
 ];
 
-// ===============================
+
 // COMMON VALIDATION HANDLER
-// ===============================
+
 exports.validate = (req, res, next) => {
   const errors = validationResult(req);
 

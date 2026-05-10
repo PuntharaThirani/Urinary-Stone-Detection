@@ -19,8 +19,8 @@ const {
 router.post('/',
   auth,
   allowRoles('staff', 'admin'),
-  appointmentValidation,  // ✅ Added
-  validate,               // ✅ Added
+  appointmentValidation, 
+  validate,               
   createAppointment
 );
 

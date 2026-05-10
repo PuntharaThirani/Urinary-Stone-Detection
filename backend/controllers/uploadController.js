@@ -1,9 +1,9 @@
 const path     = require('path');
 const XrayImage = require('../models/XrayImage');
 
-// ===============================
+
 // UPLOAD X-RAY IMAGE
-// ===============================
+
 exports.uploadXray = async (req, res) => {
   try {
     if (!req.file) {

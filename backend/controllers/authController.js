@@ -4,9 +4,9 @@ const jwt    = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { ROLES } = require('../utils/constants');
 
-// ===============================
+
 // REGISTER
-// ===============================
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -64,9 +64,9 @@ exports.register = async (req, res) => {
   }
 };
 
-// ===============================
+
 // LOGIN
-// ===============================
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,7 +91,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if account is active ✅ NEW
+    // Check if account is active 
     if (!user.isActive) {
       return res.status(403).json({
         success: false,
@@ -109,7 +109,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Update last login time ✅ NEW
+    // Update last login time 
     user.lastLogin = new Date();
     await user.save();
 
@@ -135,7 +135,9 @@ exports.login = async (req, res) => {
         name:      user.name,
         email:     user.email,
         role:      user.role,
-        lastLogin: user.lastLogin, // ✅ NEW
+        doctorId:   user.doctorId, 
+        patientId:  user.patientId,
+        lastLogin: user.lastLogin, 
       },
     });
   } catch (error) {
@@ -148,9 +150,9 @@ exports.login = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET PROFILE
-// ===============================
+
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
@@ -177,9 +179,9 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// ===============================
+
 // LOGOUT (Clear client token)
-// ===============================
+
 exports.logout = async (req, res) => {
   try {
     // JWT stateless — client side token clear කරනවා
