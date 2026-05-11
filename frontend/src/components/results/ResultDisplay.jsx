@@ -165,22 +165,55 @@ const ResultDisplay = ({ result }) => {
       </div>
 
         {/*  Annotated X-Ray Image  */}
-        {isDanger && result?.annotatedImageUrl && (
-        <div className="mt-6 rounded-2xl overflow-hidden border border-slate-200 bg-white/70">
-         <p className="px-4 pt-4 text-xs font-bold uppercase tracking-widest text-slate-500">
-          🖼️ AI Annotated X-Ray
-        </p>
-       <img
-         src={
-          result.annotatedImageUrl.startsWith('http')
+        {/*  Annotated X-Ray Image  */}
+{isDanger && result?.annotatedImageUrl && (
+
+  <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white/70">
+
+    <p className="px-4 pt-4 text-xs font-bold uppercase tracking-widest text-slate-500">
+      🖼️ AI Annotated X-Ray
+    </p>
+
+    <img
+      src={
+
+        result.annotatedImageUrl.startsWith('blob:')
+
           ? result.annotatedImageUrl
-          : `http://localhost:5000/${result.annotatedImageUrl}` // ✅ Backend URL
-          }
-             alt="AI Annotated X-Ray with Bounding Boxes"
-             className="w-full object-contain mt-2 rounded-b-2xl"
-       />
-         </div>
-        )}
+
+          : result.annotatedImageUrl.startsWith('data:image')
+
+            ? result.annotatedImageUrl
+
+            : result.annotatedImageUrl.startsWith('http')
+
+              ? result.annotatedImageUrl
+
+              : `http://localhost:5000${
+                  result.annotatedImageUrl.startsWith('/')
+
+                    ? result.annotatedImageUrl
+
+                    : `/${result.annotatedImageUrl}`
+                }`
+      }
+
+      alt="AI Annotated X-Ray with Bounding Boxes"
+
+      className="mt-2 w-full rounded-b-2xl object-contain"
+
+      onError={() => {
+
+        console.error(
+          'ANNOTATED IMAGE FAILED:',
+          result.annotatedImageUrl
+        );
+      }}
+    />
+
+  </div>
+
+)}
 
       {/*  Detected Stones Detail Table  */}
       {isDanger && result?.details?.length > 0 && (

@@ -34,6 +34,15 @@ const userSchema = new mongoose.Schema(
       default: 'patient',
     },
 
+    // Doctor display code
+doctorId: {
+  type: String,
+  unique: true,
+  sparse: true,
+  default: undefined,
+},
+
+
     // Phone number — optional
     phoneNumber: {
       type:  String,

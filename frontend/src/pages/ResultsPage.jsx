@@ -46,16 +46,45 @@ const ResultsPage = () => {
   }
 
   //  Extract annotated image URL 
-  const annotatedImageUrl =
-    analysis?.annotatedImageUrl ||
-    report?.annotatedImageUrl  ||
-    null;
+ const annotatedImageUrl =
 
-  const processedImageUrl = annotatedImageUrl
-    ? (annotatedImageUrl.startsWith('http')
+  analysis?.annotatedImageUrl ||
+
+  report?.annotatedImageUrl ||
+
+  null;
+
+
+const processedImageUrl = annotatedImageUrl
+
+  ? (
+
+      // Already proper base64 image
+      annotatedImageUrl.startsWith('data:image')
+
         ? annotatedImageUrl
-        : `http://localhost:5000/${annotatedImageUrl}`)
-    : null;
+
+        // RAW base64 returned from backend
+        : annotatedImageUrl.startsWith('/9j/')
+
+          ? `data:image/jpeg;base64,${annotatedImageUrl}`
+
+          // Full URL
+          : annotatedImageUrl.startsWith('http')
+
+            ? annotatedImageUrl
+
+            // Relative backend path
+            : `http://localhost:5000${
+                annotatedImageUrl.startsWith('/')
+
+                  ? annotatedImageUrl
+
+                  : `/${annotatedImageUrl}`
+              }`
+    )
+
+  : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-800">

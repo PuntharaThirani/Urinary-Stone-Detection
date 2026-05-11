@@ -18,14 +18,61 @@ const patientRoutes     = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const adminRoutes       = require('./routes/adminRoutes');
 
+const Patient = require('./models/Patient');
+const User = require('./models/User');
+
 const errorHandler = require('./middleware/errorHandler');
 
 // Connect database
 connectDB();
 
-const app  = express();
+const Report = require('./models/Report');
+
+setTimeout(async () => {
+
+  try {
+
+    await Report.collection.dropIndex(
+      'reportNumber_1'
+    );
+
+    console.log(
+      '✅ reportNumber index removed'
+    );
+
+  } catch (err) {
+
+    console.log(
+      'ℹ️ reportNumber index already removed'
+    );
+
+  }
+
+}, 3000);
+
+const app = express();
 const port = process.env.PORT || 5000;
 
+// REMOVE OLD doctorCode INDEX
+setTimeout(async () => {
+  try {
+
+    await User.collection.dropIndex(
+      'doctorCode_1'
+    );
+
+    console.log(
+      '✅ Old doctorCode index removed'
+    );
+
+  } catch (err) {
+
+    console.log(
+      'ℹ️ doctorCode index already removed'
+    );
+
+  }
+}, 3000);
 
 // Middleware
 

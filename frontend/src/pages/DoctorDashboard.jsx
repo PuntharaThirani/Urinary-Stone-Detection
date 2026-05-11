@@ -5,11 +5,23 @@ import Footer from '../components/common/Footer';
 import api    from '../services/api';
 
 const DoctorDashboard = () => {
-  const navigate  = useNavigate();
-  const doctorName = localStorage.getItem('userName') || 'Doctor';
 
-  const [reports,  setReports]  = useState([]);
-  const [loading,  setLoading]  = useState(true);
+  const navigate = useNavigate();
+
+  const authData =
+    JSON.parse(localStorage.getItem('auth')) || {};
+
+  const doctor =
+    authData.user || {};
+
+  const doctorName =
+    doctor.name || 'Doctor';
+
+  const doctorId =
+    doctor.doctorId || 'N/A';
+
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const today = new Date().toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -68,6 +80,9 @@ const DoctorDashboard = () => {
             <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
               Welcome back, {doctorName} 👋
             </h1>
+              <div className="mt-3 inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
+    🩺 {doctorName} • {doctorId}
+  </div>
             <p className="mt-2 text-sm leading-6 text-slate-500 md:text-base">
               Review scan activity, access AI-assisted analysis tools, and monitor recent patient records.
             </p>

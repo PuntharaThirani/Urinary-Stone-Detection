@@ -1,77 +1,146 @@
-const express    = require('express');
-const router     = express.Router();
-const auth       = require('../middleware/auth');
-const allowRoles = require('../middleware/role');
+const express = require('express');
 
-const reportController = require('../controllers/reportController');
+const router = express.Router();
+
+const allowRoles =
+  require('../middleware/role');
+
+const auth =
+  require('../middleware/auth');
+
+const reportController =
+  require('../controllers/reportController');
+
 
 // Create AI draft report — doctor only
-router.post('/draft',
+router.post(
+  '/draft',
+
   auth,
+
   allowRoles('doctor'),
+
   reportController.createDraftReport
 );
 
-// Get doctor's own reports 
-router.get('/my',
+
+// Get doctor's own reports
+router.get(
+  '/my',
+
   auth,
+
   allowRoles('doctor'),
+
   reportController.getMyReports
 );
 
+
 // Get logged-in patient's confirmed reports
-router.get('/my/final',
+router.get(
+  '/my/final',
+
   auth,
+
   allowRoles('patient'),
+
   reportController.getMyFinalReports
 );
 
-// Get reports by patient ID — doctor, staff, admin
-router.get('/patient/:patientId',
+
+// Get reports by patient ID
+router.get(
+  '/patient/:patientId',
+
   auth,
-  allowRoles('doctor', 'staff', 'admin'),
+
+  allowRoles(
+    'doctor',
+    'staff',
+    'admin'
+  ),
+
   reportController.getReportsByPatientId
 );
 
-// Get all reports — doctor, staff, admin
-router.get('/',
+
+// Get all reports
+router.get(
+  '/',
+
   auth,
-  allowRoles('doctor', 'staff', 'admin'),
+
+  allowRoles(
+    'doctor',
+    'staff',
+    'admin'
+  ),
+
   reportController.getAllReports
 );
 
+
 // Get single report by ID
-router.get('/:id',
+router.get(
+  '/:id',
+
   auth,
-  allowRoles('doctor', 'staff', 'patient', 'admin'),
+
+  allowRoles(
+    'doctor',
+    'staff',
+    'patient',
+    'admin'
+  ),
+
   reportController.getReportById
 );
 
-// Confirm report — doctor only
-router.put('/:id/confirm',
+
+// Confirm report
+router.put(
+  '/:id/confirm',
+
   auth,
+
   allowRoles('doctor'),
+
   reportController.confirmReport
 );
 
-// Edit draft report — doctor only
-router.put('/:id/edit',
+
+// Edit draft report
+router.put(
+  '/:id/edit',
+
   auth,
+
   allowRoles('doctor'),
+
   reportController.editDraftReport
 );
 
-// Reject report — doctor only
-router.put('/:id/reject',
+
+// Reject report
+router.put(
+  '/:id/reject',
+
   auth,
+
   allowRoles('doctor'),
+
   reportController.rejectReport
 );
 
-// Delete report — admin only 
-router.delete('/:id',
+
+// Delete report
+router.delete(
+  '/:id',
+
   auth,
+
   allowRoles('admin'),
+
   reportController.deleteReport
 );
 

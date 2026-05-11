@@ -1,5 +1,5 @@
 const Report  = require('../models/Report');
-
+const Patient = require('../models/Patient');
 
 // CREATE AI DRAFT REPORT
 
@@ -49,24 +49,62 @@ Final diagnosis must be confirmed by a qualified doctor.
 
     // Save report to database
     const newReport = new Report({
-      doctor:          doctorId,
-      patient:         patientId || null,
-      patientName,
-      patientAge,
-      patientGender,
-      imageId,
-      imagePath,
-      aiResult:        yoloResults,
-      hasStones,
-      stoneCount,
-      aiDraft,
-      doctorNotes:     '',
-      doctorAdvice:    '',
-      finalDiagnosis:  '',
-      followUp:        '',
-      doctorConfirmed: false,
-      status:          'pending',
-    });
+
+  doctor:
+    doctorId,
+
+  patient:
+    patientId || null,
+
+  patientName,
+
+  patientAge,
+
+  patientGender,
+
+  imageId,
+
+  imagePath,
+
+  aiResult:
+    yoloResults,
+
+  hasStones,
+
+  stoneCount,
+
+  details:
+    yoloResults?.details || [],
+
+  phase1: {
+
+    result:
+
+      yoloResults?.phase1?.result ||
+
+      (hasStones
+        ? 'stone'
+        : 'normal'),
+
+    confidence:
+
+      yoloResults?.phase1?.confidence || 0,
+  },
+
+  aiDraft,
+
+  doctorNotes: '',
+
+  doctorAdvice: '',
+
+  finalDiagnosis: '',
+
+  followUp: '',
+
+  doctorConfirmed: false,
+
+  status: 'pending',
+});
 
     await newReport.save();
 
@@ -76,7 +114,12 @@ Final diagnosis must be confirmed by a qualified doctor.
       report:  newReport,
     });
   } catch (error) {
-    console.error('Create Draft Report Error:', error);
+    console.error(
+  'Create Draft Report Error:',
+  error.message
+);
+
+console.error(error);
     res.status(500).json({
       success: false,
       message: 'Failed to create draft report',
@@ -314,30 +357,75 @@ exports.getReportsByPatientId = async (req, res) => {
 // GET MY FINAL REPORTS (Logged-in Patient)
 
 exports.getMyFinalReports = async (req, res) => {
+
   try {
-    // Find reports where patient matches logged-in user
+
+    // Logged in user ID
+    const userId = req.user.id;
+
+    // Find linked patient profile
+    const patient = await Patient.findOne({
+      userId: userId,
+    });
+
+    if (!patient) {
+
+      return res.status(404).json({
+
+        success: false,
+        message: 'Patient profile not found',
+
+      });
+    }
+
+    // Get only this patient's confirmed reports
     const reports = await Report.find({
-      $or: [
-        { patient: req.user.id },
-        { patientName: req.user.name },
-      ],
+
+      patient: patient._id,
+
       doctorConfirmed: true,
-      status:          'confirmed',
+
+      status: 'confirmed',
+
     })
       .sort({ createdAt: -1 })
-      .populate('doctor', 'name email role');
 
-    res.status(200).json({
+      .populate(
+        'doctor',
+        'name email role doctorId'
+      )
+
+      .populate(
+        'patient',
+        'fullName patientId'
+      );
+
+    return res.status(200).json({
+
       success: true,
-      count:   reports.length,
+
+      count: reports.length,
+
       reports,
+
     });
+
   } catch (error) {
-    console.error('Get My Final Reports Error:', error);
-    res.status(500).json({
+
+    console.error(
+      'Get My Final Reports Error:',
+      error
+    );
+
+    return res.status(500).json({
+
       success: false,
-      message: 'Failed to fetch finalized reports',
-      error:   error.message,
+
+      message:
+        'Failed to fetch finalized reports',
+
+      error: error.message,
+
     });
   }
 };

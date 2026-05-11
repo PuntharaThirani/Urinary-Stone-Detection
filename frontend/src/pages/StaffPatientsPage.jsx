@@ -12,7 +12,7 @@ const StaffPatientsPage = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     patientId: '',
-    email: '',            // ✅ FIX: email added
+    email: '',
     age: '',
     gender: 'male',
     bloodGroup: '',
@@ -20,13 +20,13 @@ const StaffPatientsPage = () => {
     address: '',
     emergencyContact: '',
     medicalNotes: '',
-    userId: '',
   });
 
   useEffect(() => {
     fetchPatients();
   }, []);
 
+  // ---------------- FETCH PATIENTS ----------------
   const fetchPatients = async () => {
     try {
       setLoading(true);
@@ -40,6 +40,7 @@ const StaffPatientsPage = () => {
         [];
 
       setPatients(patientData);
+
     } catch (err) {
       console.error(err);
       setError('Failed to load patients.');
@@ -48,18 +49,43 @@ const StaffPatientsPage = () => {
     }
   };
 
+  // ---------------- HANDLE INPUT CHANGE ----------------
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // ---------------- CREATE PATIENT ----------------
   const handleCreate = async (e) => {
     e.preventDefault();
 
     try {
-      await api.post('/patients', formData);
+      setError('');
 
-      setShowForm(false);
+      // ✅ Get logged in user
+      const authData = JSON.parse(localStorage.getItem('auth'));
+      console.log('AUTH DATA:', authData);
 
+      // ✅ Payload with userId
+      const payload = {
+        ...formData,
+        userId:
+        authData?.user?._id ||
+        authData?._id ||
+        authData?.id
+        };
+
+      console.log('Submitting:', payload);
+
+      await api.post('/patients', payload);
+
+      // ✅ Reset form
       setFormData({
         fullName: '',
         patientId: '',
-        email: '',   // reset email
+        email: '',
         age: '',
         gender: 'male',
         bloodGroup: '',
@@ -67,12 +93,19 @@ const StaffPatientsPage = () => {
         address: '',
         emergencyContact: '',
         medicalNotes: '',
-        userId: '',
       });
 
+      setShowForm(false);
+
       fetchPatients();
+
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to create patient.');
+      console.error(err);
+
+      setError(
+        err?.response?.data?.message ||
+        'Failed to create patient.'
+      );
     }
   };
 
@@ -123,53 +156,53 @@ const StaffPatientsPage = () => {
             className="mb-6 grid gap-4 rounded-2xl border bg-white p-6 md:grid-cols-2"
           >
 
+            {/* FULL NAME */}
             <input
+              type="text"
+              name="fullName"
               placeholder="Full Name *"
               required
               value={formData.fullName}
-              onChange={(e) =>
-                setFormData({ ...formData, fullName: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
+            {/* PATIENT ID */}
             <input
+              type="text"
+              name="patientId"
               placeholder="Patient ID *"
               required
               value={formData.patientId}
-              onChange={(e) =>
-                setFormData({ ...formData, patientId: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
-            {/* ✅ EMAIL FIELD */}
+            {/* EMAIL */}
             <input
               type="email"
-              placeholder="Email Address *"
-              required
+              name="email"
+              placeholder="Email Address"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
+            {/* AGE */}
             <input
               type="number"
+              name="age"
               placeholder="Age"
               value={formData.age}
-              onChange={(e) =>
-                setFormData({ ...formData, age: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
+            {/* GENDER */}
             <select
+              name="gender"
               value={formData.gender}
-              onChange={(e) =>
-                setFormData({ ...formData, gender: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             >
               <option value="male">Male</option>
@@ -177,43 +210,56 @@ const StaffPatientsPage = () => {
               <option value="other">Other</option>
             </select>
 
+            {/* CONTACT */}
             <input
+              type="text"
+              name="contactNumber"
               placeholder="Contact Number *"
               required
               value={formData.contactNumber}
-              onChange={(e) =>
-                setFormData({ ...formData, contactNumber: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
+            {/* BLOOD GROUP */}
             <input
+              type="text"
+              name="bloodGroup"
               placeholder="Blood Group"
               value={formData.bloodGroup}
-              onChange={(e) =>
-                setFormData({ ...formData, bloodGroup: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
+            {/* EMERGENCY CONTACT */}
             <input
+              type="text"
+              name="emergencyContact"
               placeholder="Emergency Contact"
               value={formData.emergencyContact}
-              onChange={(e) =>
-                setFormData({ ...formData, emergencyContact: e.target.value })
-              }
+              onChange={handleChange}
               className="input"
             />
 
+            {/* ADDRESS */}
             <textarea
-              placeholder="Medical Notes"
-              value={formData.medicalNotes}
-              onChange={(e) =>
-                setFormData({ ...formData, medicalNotes: e.target.value })
-              }
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleChange}
               className="input md:col-span-2"
             />
 
+            {/* MEDICAL NOTES */}
+            <textarea
+              name="medicalNotes"
+              placeholder="Medical Notes"
+              value={formData.medicalNotes}
+              onChange={handleChange}
+              className="input md:col-span-2"
+            />
+
+            {/* SUBMIT BUTTON */}
             <button
               type="submit"
               className="md:col-span-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700"
@@ -228,7 +274,9 @@ const StaffPatientsPage = () => {
         <div className="overflow-hidden rounded-2xl border bg-white">
 
           {loading ? (
-            <div className="p-10 text-center">Loading...</div>
+            <div className="p-10 text-center">
+              Loading...
+            </div>
           ) : patients.length === 0 ? (
             <div className="p-10 text-center text-slate-500">
               No patients found
@@ -249,20 +297,33 @@ const StaffPatientsPage = () => {
 
               <tbody>
                 {patients.map((p) => (
-                  <tr key={p._id} className="border-t">
+                  <tr
+                    key={p._id}
+                    className="border-t"
+                  >
+                    <td className="p-4 font-semibold">
+                      {p.patientId}
+                    </td>
 
-                    <td className="p-4 font-semibold">{p.patientId}</td>
-                    <td className="p-4">{p.fullName}</td>
+                    <td className="p-4">
+                      {p.fullName}
+                    </td>
 
-                    {/* ✅ EMAIL DISPLAY */}
                     <td className="p-4 text-slate-600">
                       {p.email || 'N/A'}
                     </td>
 
-                    <td className="p-4">{p.age || '-'}</td>
-                    <td className="p-4 capitalize">{p.gender || '-'}</td>
-                    <td className="p-4">{p.contactNumber}</td>
+                    <td className="p-4">
+                      {p.age || '-'}
+                    </td>
 
+                    <td className="p-4 capitalize">
+                      {p.gender || '-'}
+                    </td>
+
+                    <td className="p-4">
+                      {p.contactNumber}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -276,7 +337,7 @@ const StaffPatientsPage = () => {
 
       <Footer />
 
-      {/* simple input style */}
+      {/* INPUT STYLE */}
       <style>{`
         .input {
           border: 1px solid #e2e8f0;
@@ -284,7 +345,9 @@ const StaffPatientsPage = () => {
           border-radius: 10px;
           font-size: 14px;
           outline: none;
+          width: 100%;
         }
+
         .input:focus {
           border-color: #2563eb;
         }

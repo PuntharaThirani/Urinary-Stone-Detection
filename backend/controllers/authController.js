@@ -1,6 +1,9 @@
-const User   = require('../models/User');
+const User = require('../models/User');
+const Patient = require('../models/Patient');
+
 const bcrypt = require('bcryptjs');
-const jwt    = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+
 const logger = require('../utils/logger');
 const { ROLES } = require('../utils/constants');
 
@@ -8,58 +11,222 @@ const { ROLES } = require('../utils/constants');
 // REGISTER
 
 exports.register = async (req, res) => {
+
   try {
-    const { name, email, password, role } = req.body;
+
+    const {
+      name,
+      email,
+      password,
+      role,
+      patientId,
+    } = req.body;
 
     // Validate required fields
     if (!name || !email || !password) {
+
       return res.status(400).json({
+
         success: false,
-        message: 'Name, email and password are required',
+
+        message:
+          'Name, email and password are required',
+
       });
     }
 
-    logger.info(`User registration attempt: ${email}`);
+    logger.info(
+      `User registration attempt: ${email}`
+    );
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    // Check existing user
+    const existingUser =
+      await User.findOne({ email });
+
     if (existingUser) {
-      logger.warn(`User already exists: ${email}`);
+
+      logger.warn(
+        `User already exists: ${email}`
+      );
+
       return res.status(400).json({
+
         success: false,
-        message: 'User already exists',
+
+        message:
+          'User already exists',
+
       });
     }
 
-    // Prevent role injection
-    // Admin role cannot be self-registered
-    const publicRoles = [ROLES.DOCTOR, ROLES.PATIENT, ROLES.STAFF];
-    const safeRole    = publicRoles.includes(role)
-      ? role
-      : ROLES.PATIENT;
+    // Safe roles only
+    const publicRoles = [
 
-    // Create new user — password hashed by pre-save hook
+      ROLES.DOCTOR,
+      ROLES.PATIENT,
+      ROLES.STAFF,
+
+    ];
+
+    const safeRole =
+      publicRoles.includes(role)
+        ? role
+        : ROLES.PATIENT;
+
+    // Generate doctor ID
+    let doctorId = undefined;
+
+    if (
+      safeRole === ROLES.DOCTOR
+    ) {
+
+      const doctorCount =
+        await User.countDocuments({
+
+          role: ROLES.DOCTOR,
+
+        });
+
+      doctorId =
+        `DOC-${String(
+          doctorCount + 1
+        ).padStart(4, '0')}`;
+    }
+
+    // VALIDATE PATIENT FIRST
+    let patient = null;
+
+    if (
+      safeRole === ROLES.PATIENT
+    ) {
+
+      // Patient ID required
+      if (!patientId) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Patient ID is required',
+
+        });
+      }
+
+      // Find patient record
+      patient =
+        await Patient.findOne({
+
+          patientId:
+            patientId.trim(),
+        });
+
+      // Invalid patient ID
+      if (!patient) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            'Invalid Patient ID',
+
+        });
+      }
+
+      // Prevent duplicate linking
+      if (patient.userId) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            'Patient account already linked',
+
+        });
+      }
+    }
+
+    // CREATE USER
     const user = new User({
+
       name,
-      email,
-      password, // plain text — model will hash it
+
+      email:
+        email.toLowerCase(),
+
+      password,
+
       role: safeRole,
+
+      doctorId,
+
     });
 
     await user.save();
 
-    logger.success(`User registered successfully: ${email}`);
+    // LINK PATIENT ACCOUNT
+    if (
+      safeRole === ROLES.PATIENT &&
+      patient
+    ) {
 
-    res.status(201).json({
+      patient.userId = user._id;
+
+      patient.email = email;
+
+      await patient.save();
+
+      logger.success(
+        `Patient linked: ${patientId}`
+      );
+    }
+
+    logger.success(
+      `User registered successfully: ${email}`
+    );
+
+    return res.status(201).json({
+
       success: true,
-      message: 'User registered successfully',
+
+      message:
+        'User registered successfully',
+
+      user: {
+
+        id: user._id,
+
+        name: user.name,
+
+        email: user.email,
+
+        role: user.role,
+
+        doctorId:
+          user.doctorId || null,
+
+      },
+
     });
+
   } catch (error) {
-    logger.error('Registration Error', error);
-    res.status(500).json({
+
+    logger.error(
+      'Registration Error',
+      error
+    );
+
+    return res.status(500).json({
+
       success: false,
-      message: 'Registration failed',
-      error:   error.message,
+
+      message:
+        'Registration failed',
+
+      error: error.message,
+
     });
   }
 };
@@ -68,84 +235,164 @@ exports.register = async (req, res) => {
 // LOGIN
 
 exports.login = async (req, res) => {
+
   try {
-    const { email, password } = req.body;
 
-    // Validate required fields
+    const {
+      email,
+      password,
+    } = req.body;
+
+    // Validation
     if (!email || !password) {
+
       return res.status(400).json({
+
         success: false,
-        message: 'Email and password are required',
+
+        message:
+          'Email and password are required',
+
       });
     }
 
-    logger.info(`Login attempt: ${email}`);
+    logger.info(
+      `Login attempt: ${email}`
+    );
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    // Find user
+    const user =
+      await User.findOne({
+
+        email:
+          email.toLowerCase(),
+      });
+
     if (!user) {
-      logger.warn(`Invalid email: ${email}`);
+
+      logger.warn(
+        `Invalid email: ${email}`
+      );
+
       return res.status(400).json({
+
         success: false,
-        message: 'Invalid credentials',
+
+        message:
+          'Invalid credentials',
+
       });
     }
 
-    // Check if account is active 
+    // Active account check
     if (!user.isActive) {
+
       return res.status(403).json({
+
         success: false,
-        message: 'Account is deactivated. Please contact admin.',
+
+        message:
+          'Account is deactivated. Please contact admin.',
+
       });
     }
 
     // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
+
     if (!isMatch) {
-      logger.warn(`Invalid password for: ${email}`);
+
+      logger.warn(
+        `Invalid password for: ${email}`
+      );
+
       return res.status(400).json({
+
         success: false,
-        message: 'Invalid credentials',
+
+        message:
+          'Invalid credentials',
+
       });
     }
 
-    // Update last login time 
-    user.lastLogin = new Date();
+    // Update last login
+    user.lastLogin =
+      new Date();
+
     await user.save();
 
-    // Generate JWT token
+    // JWT payload
     const payload = {
-      id:   user._id,
+
+      id: user._id,
+
       role: user.role,
+
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    });
+    // Generate token
+    const token = jwt.sign(
 
-    logger.success(`User logged in: ${email}`);
+      payload,
 
-    // Send response
-    res.status(200).json({
+      process.env.JWT_SECRET,
+
+      {
+        expiresIn: '1d',
+      }
+    );
+
+    logger.success(
+      `User logged in: ${email}`
+    );
+
+    return res.status(200).json({
+
       success: true,
+
       token,
+
       role: user.role,
+
       user: {
-        id:        user._id,
-        name:      user.name,
-        email:     user.email,
-        role:      user.role,
-        doctorId:   user.doctorId, 
-        patientId:  user.patientId,
-        lastLogin: user.lastLogin, 
+
+        id: user._id,
+
+        name: user.name,
+
+        email: user.email,
+
+        role: user.role,
+
+        doctorId:
+          user.doctorId || null,
+
+        lastLogin:
+          user.lastLogin,
       },
     });
+
   } catch (error) {
-    logger.error('Login Error', error);
-    res.status(500).json({
+
+    logger.error(
+      'Login Error',
+      error
+    );
+
+    return res.status(500).json({
+
       success: false,
-      message: 'Login failed',
-      error:   error.message,
+
+      message:
+        'Login failed',
+
+      error: error.message,
+
     });
   }
 };
@@ -154,50 +401,90 @@ exports.login = async (req, res) => {
 // GET PROFILE
 
 exports.getProfile = async (req, res) => {
+
   try {
-    const user = await User.findById(req.user.id)
-      .select('-password');
+
+    const user =
+      await User.findById(
+        req.user.id
+      ).select('-password');
 
     if (!user) {
+
       return res.status(404).json({
+
         success: false,
-        message: 'User not found',
+
+        message:
+          'User not found',
+
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
+
       success: true,
+
       user,
+
     });
+
   } catch (error) {
-    logger.error('Profile Error', error);
-    res.status(500).json({
+
+    logger.error(
+      'Profile Error',
+      error
+    );
+
+    return res.status(500).json({
+
       success: false,
-      message: 'Failed to fetch profile',
-      error:   error.message,
+
+      message:
+        'Failed to fetch profile',
+
+      error: error.message,
+
     });
   }
 };
 
 
-// LOGOUT (Clear client token)
+// LOGOUT
 
 exports.logout = async (req, res) => {
-  try {
-    // JWT stateless — client side token clear කරනවා
-    // Frontend localStorage clear කරනවා
-    logger.success(`User logged out: ${req.user?.id}`);
 
-    res.status(200).json({
+  try {
+
+    logger.success(
+      `User logged out: ${req.user?.id}`
+    );
+
+    return res.status(200).json({
+
       success: true,
-      message: 'Logged out successfully',
+
+      message:
+        'Logged out successfully',
+
     });
+
   } catch (error) {
-    logger.error('Logout Error', error);
-    res.status(500).json({
+
+    logger.error(
+      'Logout Error',
+      error
+    );
+
+    return res.status(500).json({
+
       success: false,
-      message: 'Logout failed',
-      error:   error.message,
+
+      message:
+        'Logout failed',
+
+      error: error.message,
+
     });
   }
 };

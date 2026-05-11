@@ -63,16 +63,26 @@ const reportSchema = new mongoose.Schema(
     // Phase 1 — Classification Result 
     
     phase1: {
-      result: {
-        type:    String,
-        enum:    ['stone', 'normal', null],
-        default: null,
-      },
-      confidence: {
-        type:    Number,
-        default: 0,
-      },
-    },
+
+  result: {
+
+    type: String,
+
+    enum: [
+      'stone',
+      'normal'
+    ],
+
+    default: 'normal',
+  },
+
+  confidence: {
+
+    type: Number,
+
+    default: 0,
+  },
+},
 
 
     // Raw AI Result

@@ -56,9 +56,11 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getDoctors = async (req, res) => {
   try {
-    const doctors = await User.find({ role: 'doctor' })
-      .select('-password')
-      .sort({ createdAt: -1 });
+    const doctors = await User.find({
+  role: 'doctor'
+})
+.select('name email doctorId specialization')
+.sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,

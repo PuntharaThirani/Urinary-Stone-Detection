@@ -20,6 +20,8 @@ const AnalyzeXrayPage = () => {
   const [patientName,   setPatientName]   = useState('');
   const [patientAge,    setPatientAge]    = useState('');
   const [patientGender, setPatientGender] = useState('male');
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState('');
 
   // Loading steps
   const loadingSteps = [
@@ -30,13 +32,9 @@ const AnalyzeXrayPage = () => {
   ];
 
   // Cleanup preview URL on unmount
-  useEffect(() => {
-
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-
-  }, [previewUrl]);
+useEffect(() => {
+  fetchPatients();
+}, []);
 
   // Validate and process file
   const processFile = (file) => {
@@ -68,90 +66,209 @@ const AnalyzeXrayPage = () => {
   const handleDrop        = (e) => { e.preventDefault(); setIsDragging(false); processFile(e.dataTransfer.files?.[0]); };
 
   // Run AI Analysis — Upload → Predict → Navigate
+  const fetchPatients = async () => {
+
+  try {
+
+    const res = await api.get('/patients');
+
+    setPatients(
+      res.data.data || []
+    );
+
+  } catch (err) {
+
+    console.error(
+      'Failed to fetch patients:',
+      err
+    );
+
+  }
+};
+
   const handleRunAnalysis = async () => {
 
-    if (!selectedImage) return;
+  if (!selectedImage) return;
 
-    setIsAnalyzing(true);
+  if (!selectedPatient) {
 
-    setError('');
+    setError('Please select a patient');
+    return;
+  }
 
-    try {
-      // Step 1 — Upload image
-      setLoadingStep(0);
-      const formData = new FormData();
-      formData.append('image', selectedImage);
+  setIsAnalyzing(true);
+  setError('');
 
-      const uploadRes = await api.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+  try {
 
-      const imagePath = uploadRes.data.image?.filePath;
-      if (!imagePath) throw new Error('Image upload failed');
+    // Step 1 — Upload image
+    setLoadingStep(0);
 
-      // Step 2 & 3 — Run AI prediction
-      setLoadingStep(1);
-      await new Promise((r) => setTimeout(r, 500));
-      setLoadingStep(2);
+    const formData = new FormData();
 
-      const predictRes = await api.post('/predict', { imagePath });
+    formData.append(
+      'image',
+      selectedImage
+    );
 
-      if (!predictRes.data.success) {
-        throw new Error('AI analysis failed');
+    const uploadRes = await api.post(
+      '/upload',
+      formData,
+      {
+        headers: {
+          'Content-Type':
+            'multipart/form-data',
+        },
       }
+    );
 
-      // Step 4 — Create draft report
-      setLoadingStep(3);
+    const imagePath =
+      uploadRes.data.image?.filePath;
 
-      const reportRes = await api.post('/reports/draft', {
-        doctorId:      localStorage.getItem('userId') || req?.user?.id,
-        patientName:   patientName || 'Unknown Patient',
-        patientAge:    patientAge  || null,
-        patientGender: patientGender,
-        imagePath,
-        yoloResults: {
-          hasStones:  predictRes.data.hasStones,
-          stoneCount: predictRes.data.stoneCount,
-          details:    predictRes.data.details  || [],
-          phase1:     predictRes.data.phase1  || null,
-        },
-      });
-
-      // Navigate to results
-      navigate('/results', {
-
-        state: {
-          analysis: {
-            hasStones:         predictRes.data.hasStones,
-            stoneCount:        predictRes.data.stoneCount,
-            details:           predictRes.data.details,
-            phase1:            predictRes.data.phase1,
-            annotatedImageUrl: predictRes.data.annotatedImageUrl,
-          },
-          report: reportRes.data.report,
-          image:  previewUrl,
-        },
-      });
-
-    } catch (err) {
-
-      setError(
-
-        err?.response?.data?.message ||
-
-        err?.message ||
-
-        'AI analysis failed. Please try again.'
-
+    if (!imagePath) {
+      throw new Error(
+        'Image upload failed'
       );
-
-    } finally {
-
-      setIsAnalyzing(false);
-      setLoadingStep(0);
     }
 
-  };
+    // Step 2 — AI Prediction
+    setLoadingStep(1);
+
+    await new Promise((r) =>
+      setTimeout(r, 500)
+    );
+
+    setLoadingStep(2);
+
+    const predictRes = await api.post(
+      '/predict',
+      { imagePath }
+    );
+
+    if (!predictRes.data.success) {
+
+      throw new Error(
+        'AI analysis failed'
+      );
+    }
+
+    // Step 3 — Create Draft Report
+    setLoadingStep(3);
+
+    const authData =
+      JSON.parse(
+        localStorage.getItem('auth')
+      ) || {};
+
+    console.log(
+      'AUTH:',
+      authData
+    );
+
+    console.log(
+      'DOCTOR ID:',
+      authData?.user?.id
+    );
+
+    console.log(
+      'PATIENT:',
+      selectedPatient
+    );
+
+    const reportRes = await api.post(
+      '/reports/draft',
+      {
+
+        doctorId:
+          authData?.user?.id,
+
+        patientId:
+          selectedPatient,
+
+        patientName:
+          patientName ||
+          'Unknown Patient',
+
+        patientAge:
+          patientAge || null,
+
+        patientGender:
+          patientGender,
+
+        imagePath,
+
+        yoloResults: {
+
+          hasStones:
+            predictRes.data.hasStones,
+
+          stoneCount:
+            predictRes.data.stoneCount,
+
+          details:
+            predictRes.data.details || [],
+
+          phase1:
+            predictRes.data.phase1 || null,
+        },
+      }
+    );
+
+    // Navigate to Results Page
+    navigate('/results', {
+
+  state: {
+
+    analysis: {
+
+      hasStones:
+        predictRes.data.hasStones,
+
+      stoneCount:
+        predictRes.data.stoneCount,
+
+      details:
+        predictRes.data.details,
+
+      phase1:
+        predictRes.data.phase1,
+
+      annotatedImageUrl:
+        predictRes.data
+          .annotatedImageUrl,
+    },
+
+    report:
+      reportRes.data.report,
+
+    image:
+      previewUrl,
+  },
+});
+
+  } catch (err) {
+
+    console.error(
+      'ANALYSIS ERROR:',
+      err
+    );
+
+    setError(
+
+      err?.response?.data?.message ||
+
+      err?.message ||
+
+      'AI analysis failed. Please try again.'
+    );
+
+  } finally {
+
+    setIsAnalyzing(false);
+    setLoadingStep(0);
+  }
+};
+
 
   // Reset
   const handleReset = () => {
@@ -301,58 +418,118 @@ const AnalyzeXrayPage = () => {
           <div className="space-y-6">
 
             {/* Patient Info Form */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-5 border-b border-slate-100 pb-3">
-                <h2 className="text-xl font-bold text-slate-900">Patient Information</h2>
-                <p className="mt-1 text-xs text-slate-400">Optional — for report generation</p>
-              </div>
+<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
-              <div className="space-y-4">
-                <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Patient Name
-                  </label>
-                  <input
-                    type="text"
-                    value={patientName}
-                    onChange={(e) => setPatientName(e.target.value)}
-                    placeholder="Enter patient name"
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-                  />
-                </div>
+  <div className="mb-5 border-b border-slate-100 pb-3">
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Age
-                    </label>
-                    <input
-                      type="number"
-                      value={patientAge}
-                      onChange={(e) => setPatientAge(e.target.value)}
-                      placeholder="Age"
-                      min={0}
-                      max={150}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-                      Gender
-                    </label>
-                    <select
-                      value={patientGender}
-                      onChange={(e) => setPatientGender(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-                    >
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <h2 className="text-xl font-bold text-slate-900">
+      Patient Information
+    </h2>
+
+    <p className="mt-1 text-xs text-slate-400">
+      Select a registered patient for report generation
+    </p>
+
+  </div>
+
+  <div className="space-y-4">
+
+    {/* Select Patient */}
+    <div>
+
+      <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+        Select Patient
+      </label>
+
+      <select
+        value={selectedPatient}
+        onChange={(e) => {
+
+          const patient =
+            patients.find(
+              (p) => p._id === e.target.value
+            );
+
+          setSelectedPatient(
+            e.target.value
+          );
+
+          if (patient) {
+
+            setPatientName(
+              patient.fullName
+            );
+
+            setPatientAge(
+              patient.age || ''
+            );
+
+            setPatientGender(
+              patient.gender || 'male'
+            );
+          }
+        }}
+        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+      >
+
+        <option value="">
+          Select Patient
+        </option>
+
+        {patients.map((patient) => (
+
+          <option
+            key={patient._id}
+            value={patient._id}
+          >
+            {patient.patientId} - {patient.fullName}
+          </option>
+
+        ))}
+
+      </select>
+
+    </div>
+
+    {/* Patient Age */}
+    <div className="grid grid-cols-2 gap-4">
+
+      <div>
+
+        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+          Age
+        </label>
+
+        <input
+          type="number"
+          value={patientAge}
+          readOnly
+          className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm"
+        />
+
+      </div>
+
+      {/* Patient Gender */}
+      <div>
+
+        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+          Gender
+        </label>
+
+        <input
+          type="text"
+          value={patientGender}
+          readOnly
+          className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm capitalize"
+        />
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
             {/* Analysis Status */}
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

@@ -63,30 +63,99 @@ FOLLOW-UP      : ${report.followUp       || 'N/A'}
   };
 
   // Calculate metrics
-  const totalReports   = reports.length;
-  const confirmedCount = reports.filter((r) => r.status === 'confirmed').length;
-  const pendingCount   = reports.filter((r) => r.status === 'pending').length;
+  // Dashboard Metrics
 
+const totalReports =
+  reports.length;
+
+const confirmedCount =
+  reports.filter(
+
+    (r) =>
+      r.status === 'confirmed'
+
+  ).length;
+
+const pendingCount =
+  reports.filter(
+
+    (r) =>
+      r.status === 'pending'
+
+  ).length;
+
+const stoneDetectedCount =
+  reports.filter(
+
+    (r) =>
+      r.hasStones === true
+
+  ).length;
+
+const clearReportsCount =
+  reports.filter(
+
+    (r) =>
+      r.hasStones === false
+
+  ).length;
+
+  
   const summaryCards = [
-    {
-      label:      'Total Reports',
-      value:      loading ? '...' : totalReports,
-      badgeText:  'All time',
-      badgeClass: 'bg-slate-100 text-slate-700',
-    },
-    {
-      label:      'Confirmed Reports',
-      value:      loading ? '...' : confirmedCount,
-      badgeText:  'Doctor reviewed',
-      badgeClass: 'bg-emerald-100 text-emerald-700',
-    },
-    {
-      label:      'Pending Review',
-      value:      loading ? '...' : pendingCount,
-      badgeText:  pendingCount > 0 ? 'Awaiting doctor' : 'All clear',
-      badgeClass: pendingCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700',
-    },
-  ];
+
+  {
+    label: 'Total Reports',
+
+    value:
+      loading ? '...' : totalReports,
+
+    badgeText: 'All records',
+
+    badgeClass:
+      'bg-slate-100 text-slate-700',
+  },
+
+  {
+    label: 'Stone Detected',
+
+    value:
+      loading ? '...' : stoneDetectedCount,
+
+    badgeText: 'Requires attention',
+
+    badgeClass:
+      'bg-red-100 text-red-700',
+  },
+
+  {
+    label: 'Clear Reports',
+
+    value:
+      loading ? '...' : clearReportsCount,
+
+    badgeText: 'No stones detected',
+
+    badgeClass:
+      'bg-emerald-100 text-emerald-700',
+  },
+
+  {
+    label: 'Pending Review',
+
+    value:
+      loading ? '...' : pendingCount,
+
+    badgeText:
+      pendingCount > 0
+        ? 'Awaiting doctor'
+        : 'All reviewed',
+
+    badgeClass:
+      pendingCount > 0
+        ? 'bg-amber-100 text-amber-700'
+        : 'bg-green-100 text-green-700',
+  },
+];
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-100 text-slate-800">

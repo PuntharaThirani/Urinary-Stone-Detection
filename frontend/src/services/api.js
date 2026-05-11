@@ -52,10 +52,27 @@ export const loginUser = async (userData) => {
 
   if (response.data.token) {
     const { token, role, user } = response.data;
-    localStorage.setItem('token',    token);
-    localStorage.setItem('userRole', role || user?.role || '');
-    localStorage.setItem('userName', user?.name  || '');
-    localStorage.setItem('userId',   user?.id    || user?._id || '');
+    localStorage.setItem('token', token);
+
+localStorage.setItem(
+  'auth',
+  JSON.stringify(response.data)
+);
+
+localStorage.setItem(
+  'userRole',
+  role || user?.role || ''
+);
+
+localStorage.setItem(
+  'userName',
+  user?.name || ''
+);
+
+localStorage.setItem(
+  'userId',
+  user?.id || user?._id || ''
+);
   }
 
   return response.data;
@@ -73,10 +90,27 @@ export const adminLogin = async (userData) => {
       throw { response: { data: { message: 'Unauthorized. Admin access only.' } } };
     }
 
-    localStorage.setItem('token',    token);
-    localStorage.setItem('userRole', role || user?.role || '');
-    localStorage.setItem('userName', user?.name  || '');
-    localStorage.setItem('userId',   user?.id    || user?._id || '');
+    localStorage.setItem('token', token);
+
+localStorage.setItem(
+  'auth',
+  JSON.stringify(response.data)
+);
+
+localStorage.setItem(
+  'userRole',
+  role || user?.role || ''
+);
+
+localStorage.setItem(
+  'userName',
+  user?.name || ''
+);
+
+localStorage.setItem(
+  'userId',
+  user?.id || user?._id || ''
+);
   }
 
   return response.data;

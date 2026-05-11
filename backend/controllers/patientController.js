@@ -3,10 +3,12 @@ const Patient = require('../models/Patient');
 // ---------------- CREATE PATIENT ----------------
 exports.createPatient = async (req, res) => {
   try {
+
     const {
       userId,
       patientId,
       fullName,
+      email,
       age,
       gender,
       bloodGroup,
@@ -16,19 +18,33 @@ exports.createPatient = async (req, res) => {
       medicalNotes
     } = req.body;
 
-    // 🔴 HARD VALIDATION (prevents vague Mongoose errors)
-    if (!userId || !patientId || !fullName || !contactNumber) {
+    // ✅ DEBUG
+    console.log('REQ BODY:', req.body);
+
+    // ✅ VALIDATION
+if (
+  !patientId ||
+  !fullName ||
+  !contactNumber
+) {
       return res.status(400).json({
         success: false,
         message: 'Missing required fields',
-        required: ['userId', 'patientId', 'fullName', 'contactNumber']
+        required: [
+        
+          'patientId',
+          'fullName',
+          'contactNumber'
+        ]
       });
     }
 
+    // ✅ CREATE PATIENT
     const patient = new Patient({
-      userId,
+      userId: userId || null,
       patientId,
       fullName,
+      email,
       age,
       gender,
       bloodGroup,
@@ -38,6 +54,7 @@ exports.createPatient = async (req, res) => {
       medicalNotes
     });
 
+    // ✅ SAVE
     const saved = await patient.save();
 
     return res.status(201).json({
@@ -47,6 +64,7 @@ exports.createPatient = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error('CREATE PATIENT ERROR:', error);
 
     return res.status(500).json({
@@ -60,6 +78,7 @@ exports.createPatient = async (req, res) => {
 // ---------------- GET ALL PATIENTS ----------------
 exports.getAllPatients = async (req, res) => {
   try {
+
     const patients = await Patient.find();
 
     return res.status(200).json({
@@ -68,6 +87,7 @@ exports.getAllPatients = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error(error);
 
     return res.status(500).json({
@@ -80,6 +100,7 @@ exports.getAllPatients = async (req, res) => {
 // ---------------- GET PATIENT BY ID ----------------
 exports.getPatientById = async (req, res) => {
   try {
+
     const patient = await Patient.findById(req.params.id);
 
     if (!patient) {
@@ -95,6 +116,7 @@ exports.getPatientById = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error(error);
 
     return res.status(500).json({
@@ -107,10 +129,14 @@ exports.getPatientById = async (req, res) => {
 // ---------------- UPDATE PATIENT ----------------
 exports.updatePatient = async (req, res) => {
   try {
+
     const updated = await Patient.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true }
+      {
+        new: true,
+        runValidators: true
+      }
     );
 
     if (!updated) {
@@ -127,6 +153,7 @@ exports.updatePatient = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error(error);
 
     return res.status(500).json({
@@ -139,6 +166,7 @@ exports.updatePatient = async (req, res) => {
 // ---------------- DELETE PATIENT ----------------
 exports.deletePatient = async (req, res) => {
   try {
+
     const deleted = await Patient.findByIdAndDelete(req.params.id);
 
     if (!deleted) {
@@ -154,6 +182,7 @@ exports.deletePatient = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error(error);
 
     return res.status(500).json({
