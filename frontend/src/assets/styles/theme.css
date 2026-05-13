@@ -4,41 +4,41 @@
   */
 
 :root {
-  /* ─── Brand Colors ─── */
+  /*  Brand Colors  */
   --color-primary:       #2563eb;  /* Blue 600 */
   --color-primary-hover: #1d4ed8;  /* Blue 700 */
   --color-secondary:     #64748b;  /* Slate 500 */
   --color-accent:        #06b6d4;  /* Cyan 500 */
 
-  /* ─── Status Colors ─── */
+  /*  Status Colors  */
   --color-success: #22c55e;  /* Green 500 */
   --color-danger:  #ef4444;  /* Red 500 */
   --color-warning: #f59e0b;  /* Amber 500 */
   --color-info:    #3b82f6;  /* Blue 500 */
 
-  /* ─── Background Colors ─── */
+  /*  Background Colors  */
   --color-bg-light: #f8fafc;  /* Slate 50 */
   --color-bg-white: #ffffff;
   --color-bg-dark:  #0f172a;  /* Slate 900 */
   --color-bg-card:  #ffffff;
 
-  /* ─── Text Colors ─── */
+  /*  Text Colors  */
   --color-text-dark:  #0f172a;  /* Slate 900 */
   --color-text-light: #64748b;  /* Slate 500 */
   --color-text-white: #ffffff;
   --color-text-muted: #94a3b8;  /* Slate 400 */
 
-  /* ─── Border ─── */
+  /*  Border  */
   --color-border:    #e2e8f0;  /* Slate 200 */
   --border-radius:   0.75rem;  /* 12px */
   --border-radius-lg: 1.5rem;  /* 24px */
 
-  /* ─── Shadows ─── */
+  /*  Shadows  */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 
-  /* ─── Typography ─── */
+  /*  Typography  */
   --font-main: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'Fira Code', 'Courier New', monospace;
 }
@@ -59,7 +59,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ─── Medical Image Display ─── */
+/*  Medical Image Display  */
 .xray-image {
   filter:          brightness(1.1) contrast(1.2);
   border-radius:   var(--border-radius);
@@ -67,7 +67,7 @@ html {
   background:      #000;
 }
 
-/* ─── Bounding Box Overlay ─── */
+/*  Bounding Box Overlay  */
 .bounding-box {
   position:      absolute;
   border:        2px solid var(--color-danger);
@@ -75,7 +75,7 @@ html {
   pointer-events: none;
 }
 
-/* ─── AI Result Badge ─── */
+/*  AI Result Badge  */
 .badge-stone {
   background: #fef2f2;
   color:      #dc2626;
@@ -96,7 +96,7 @@ html {
   font-weight: 700;
 }
 
-/* ─── Loading Spinner ─── */
+/*  Loading Spinner  */
 .spinner {
   width:  2rem;
   height: 2rem;
@@ -110,7 +110,7 @@ html {
   to { transform: rotate(360deg); }
 }
 
-/* ─── Print Styles for Reports ─── */
+/*  Print Styles for Reports  */
 @media print {
   .no-print {
     display: none !important;

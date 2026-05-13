@@ -1,9 +1,9 @@
 const Patient = require('../models/Patient');
 const User = require('../models/User');
 
-// ===============================
+
 // CREATE PATIENT - Staff creates record first
-// ===============================
+
 const createPatient = async (req, res) => {
   try {
     const {
@@ -96,9 +96,9 @@ const createPatient = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET ALL PATIENTS
-// ===============================
+
 const getAllPatients = async (req, res) => {
   try {
     const patients = await Patient.find()
@@ -119,9 +119,9 @@ const getAllPatients = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET PATIENT BY ID
-// ===============================
+
 const getPatientById = async (req, res) => {
   try {
     const patient = await Patient.findById(req.params.id).populate(
@@ -146,9 +146,9 @@ const getPatientById = async (req, res) => {
   }
 };
 
-// ===============================
+
 // GET MY PATIENT PROFILE
-// ===============================
+
 const getMyPatientProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
@@ -207,9 +207,9 @@ const getMyPatientProfile = async (req, res) => {
   }
 };
 
-// ===============================
+
 // UPDATE PATIENT
-// ===============================
+
 const updatePatient = async (req, res) => {
   try {
     const updateData = { ...req.body };
@@ -249,9 +249,9 @@ const updatePatient = async (req, res) => {
   }
 };
 
-// ===============================
+
 // DELETE PATIENT
-// ===============================
+
 const deletePatient = async (req, res) => {
   try {
     const deleted = await Patient.findByIdAndDelete(req.params.id);

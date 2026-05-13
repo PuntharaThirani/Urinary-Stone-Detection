@@ -418,32 +418,32 @@ useEffect(() => {
           <div className="space-y-6">
 
             {/* Patient Info Form */}
-<div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
-  <div className="mb-5 border-b border-slate-100 pb-3">
+          <div className="mb-5 border-b border-slate-100 pb-3">
 
-    <h2 className="text-xl font-bold text-slate-900">
-      Patient Information
-    </h2>
+            <h2 className="text-xl font-bold text-slate-900">
+              Patient Information
+            </h2>
 
-    <p className="mt-1 text-xs text-slate-400">
-      Select a registered patient for report generation
-    </p>
+            <p className="mt-1 text-xs text-slate-400">
+              Select a registered patient for report generation
+            </p>
 
-  </div>
+          </div>
 
-  <div className="space-y-4">
+           <div className="space-y-4">
 
-    {/* Select Patient */}
-    <div>
+               {/* Select Patient */}
+          <div>
 
-      <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-        Select Patient
-      </label>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+              Select Patient
+            </label>
 
-      <select
-        value={selectedPatient}
-        onChange={(e) => {
+            <select
+              value={selectedPatient}
+              onChange={(e) => {
 
           const patient =
             patients.find(

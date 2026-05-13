@@ -1,6 +1,5 @@
 import { FILE_CONFIG } from './constants';
 
-
 // Validate Email
 
 export const validateEmail = (email) => {
@@ -8,13 +7,11 @@ export const validateEmail = (email) => {
   return re.test(String(email).toLowerCase());
 };
 
-
 // Validate Password — min 6 chars
 
 export const validatePassword = (password) => {
   return password && password.length >= 6;
 };
-
 
 // Validate File — type + size
 
@@ -40,7 +37,6 @@ export const validateFile = (file) => {
   return { valid: true, message: '' };
 };
 
-
 // Validate Name — min 2 chars 
 
 export const validateName = (name) => {
@@ -49,7 +45,6 @@ export const validateName = (name) => {
   }
   return { valid: true, message: '' };
 };
-
 
 // Validate Phone Number 
 
@@ -62,7 +57,6 @@ export const validatePhone = (phone) => {
   return { valid: true, message: '' };
 };
 
-
 // Validate Age 
 
 export const validateAge = (age) => {
@@ -73,7 +67,6 @@ export const validateAge = (age) => {
   }
   return { valid: true, message: '' };
 };
-
 
 // Validate Register Form 
 

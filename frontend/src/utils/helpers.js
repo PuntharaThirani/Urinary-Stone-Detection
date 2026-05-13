@@ -1,6 +1,5 @@
 import { STATUS_COLORS, REPORT_STATUS } from './constants';
 
-
 // Format Date — "Feb 3, 2026"
 
 export const formatDate = (dateString) => {
@@ -8,7 +7,6 @@ export const formatDate = (dateString) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
-
 
 // Format Date + Time — "Feb 3, 2026 at 10:30 AM"
 
@@ -24,7 +22,6 @@ export const formatDateTime = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
-
 // Truncate Long Text
 
 export const truncateText = (text, maxLength = 20) => {
@@ -33,13 +30,11 @@ export const truncateText = (text, maxLength = 20) => {
   return text.substring(0, maxLength) + '...';
 };
 
-
 // Get Status Color by Stone Result
 
 export const getStatusColor = (hasStones) => {
   return hasStones ? STATUS_COLORS.DANGER : STATUS_COLORS.SUCCESS;
 };
-
 
 // Capitalize First Letter
 
@@ -47,7 +42,6 @@ export const capitalize = (str) => {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
-
 
 // Get Report Status Badge Class 
 
@@ -61,7 +55,6 @@ export const getReportStatusClass = (status) => {
   return classes[status] || 'bg-slate-100 text-slate-700';
 };
 
-
 // Format File Size 
 
 export const formatFileSize = (bytes) => {
@@ -71,14 +64,12 @@ export const formatFileSize = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
-
 // Shorten MongoDB ObjectId 
 
 export const shortId = (id, length = 8) => {
   if (!id) return 'N/A';
   return `#${id.substring(0, length)}`;
 };
-
 
 // Get Role Dashboard Path 
 

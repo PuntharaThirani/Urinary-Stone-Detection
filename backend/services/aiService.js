@@ -1,8 +1,5 @@
-// backend/services/aiService.js
-
 const { spawn } = require('child_process');
 const path      = require('path');
-
 
 // Run Python AI Model
 // Sends image to detect.py and returns JSON result
@@ -10,7 +7,7 @@ const path      = require('path');
 const analyzeImage = (imagePath) => {
   return new Promise((resolve, reject) => {
 
-    // Correct path to detect.py ✅
+    // Correct path to detect.py 
     const scriptPath = path.join(
       __dirname, '..', 'AI', 'detect.py'
     );

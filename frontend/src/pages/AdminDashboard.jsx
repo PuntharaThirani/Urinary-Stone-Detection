@@ -142,10 +142,10 @@ const AdminDashboard = () => {
 
           <div className="mb-8 flex items-center gap-4 border-b border-slate-800 pb-6">
             <img
-  src={logo}
-  alt="UroScan AI Logo"
-  className="h-21 w-auto object-contain"
-/>
+               src={logo}
+               alt="UroScan AI Logo"
+               className="h-21 w-auto object-contain"
+            />
 
           </div>
 

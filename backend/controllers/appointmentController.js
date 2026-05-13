@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
 const User = require('../models/User');
+const createNotification = require('../utils/createNotification');
+
+const DOCTOR_APPOINTMENTS_LINK = '/doctor-appointments';
 
 // CREATE APPOINTMENT
 const createAppointment = async (req, res) => {
@@ -80,8 +83,16 @@ const createAppointment = async (req, res) => {
       notes: notes || '',
     });
 
+    await createNotification({
+      userId: doctor._id,
+      title: 'New Appointment Scheduled',
+      message: `New appointment with ${patient.fullName} on ${date.toLocaleDateString()} at ${timeSlot}.`,
+      type: 'appointment',
+      link: DOCTOR_APPOINTMENTS_LINK,
+    });
+
     const populatedAppointment = await Appointment.findById(appointment._id)
-      .populate('patientId', 'fullName patientId email')
+      .populate('patientId', 'fullName patientId email contactNumber age gender')
       .populate('doctorId', 'name email role doctorId');
 
     res.status(201).json({
@@ -101,8 +112,28 @@ const createAppointment = async (req, res) => {
 // GET ALL APPOINTMENTS
 const getAllAppointments = async (req, res) => {
   try {
-    const appointments = await Appointment.find()
-      .populate('patientId', 'fullName patientId email')
+    const query = {};
+
+    if (req.user.role === 'doctor') {
+      query.doctorId = req.user.id;
+    }
+
+    if (req.user.role === 'patient') {
+      const patient = await Patient.findOne({ userId: req.user.id });
+
+      if (!patient) {
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          data: [],
+        });
+      }
+
+      query.patientId = patient._id;
+    }
+
+    const appointments = await Appointment.find(query)
+      .populate('patientId', 'fullName patientId email contactNumber age gender')
       .populate('doctorId', 'name email role doctorId')
       .sort({ appointmentDate: -1 });
 
@@ -124,7 +155,7 @@ const getAllAppointments = async (req, res) => {
 const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
-      .populate('patientId', 'fullName patientId email')
+      .populate('patientId', 'fullName patientId email contactNumber age gender')
       .populate('doctorId', 'name email role doctorId');
 
     if (!appointment) {
@@ -132,6 +163,27 @@ const getAppointmentById = async (req, res) => {
         success: false,
         message: 'Appointment not found',
       });
+    }
+
+    if (
+      req.user.role === 'doctor' &&
+      String(appointment.doctorId._id) !== String(req.user.id)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not allowed to view this appointment.',
+      });
+    }
+
+    if (req.user.role === 'patient') {
+      const patient = await Patient.findOne({ userId: req.user.id });
+
+      if (!patient || String(appointment.patientId._id) !== String(patient._id)) {
+        return res.status(403).json({
+          success: false,
+          message: 'You are not allowed to view this appointment.',
+        });
+      }
     }
 
     res.status(200).json({
@@ -220,7 +272,7 @@ const updateAppointment = async (req, res) => {
       updateData,
       { new: true, runValidators: true }
     )
-      .populate('patientId', 'fullName patientId email')
+      .populate('patientId', 'fullName patientId email contactNumber age gender')
       .populate('doctorId', 'name email role doctorId');
 
     if (!updatedAppointment) {
@@ -229,6 +281,14 @@ const updateAppointment = async (req, res) => {
         message: 'Appointment not found',
       });
     }
+
+    await createNotification({
+      userId: updatedAppointment.doctorId._id,
+      title: 'Appointment Updated',
+      message: `Appointment with ${updatedAppointment.patientId.fullName} was updated.`,
+      type: 'appointment',
+      link: DOCTOR_APPOINTMENTS_LINK,
+    });
 
     res.status(200).json({
       success: true,
@@ -247,7 +307,9 @@ const updateAppointment = async (req, res) => {
 // DELETE APPOINTMENT
 const deleteAppointment = async (req, res) => {
   try {
-    const deletedAppointment = await Appointment.findByIdAndDelete(req.params.id);
+    const deletedAppointment = await Appointment.findByIdAndDelete(req.params.id)
+      .populate('patientId', 'fullName patientId')
+      .populate('doctorId', 'name email role doctorId');
 
     if (!deletedAppointment) {
       return res.status(404).json({
@@ -255,6 +317,14 @@ const deleteAppointment = async (req, res) => {
         message: 'Appointment not found',
       });
     }
+
+    await createNotification({
+      userId: deletedAppointment.doctorId._id,
+      title: 'Appointment Cancelled',
+      message: `Appointment with ${deletedAppointment.patientId.fullName} was cancelled.`,
+      type: 'appointment',
+      link: DOCTOR_APPOINTMENTS_LINK,
+    });
 
     res.status(200).json({
       success: true,

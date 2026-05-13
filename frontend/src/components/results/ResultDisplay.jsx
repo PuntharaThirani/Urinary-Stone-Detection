@@ -166,28 +166,26 @@ const ResultDisplay = ({ result }) => {
 
         {/*  Annotated X-Ray Image  */}
         {/*  Annotated X-Ray Image  */}
-{isDanger && result?.annotatedImageUrl && (
+        {isDanger && result?.annotatedImageUrl && (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white/70">
+            <p className="px-4 pt-4 text-xs font-bold uppercase tracking-widest text-slate-500">
+              🖼️ AI Annotated X-Ray
+            </p>
 
-  <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white/70">
+          <img
+            src={
 
-    <p className="px-4 pt-4 text-xs font-bold uppercase tracking-widest text-slate-500">
-      🖼️ AI Annotated X-Ray
-    </p>
+              result.annotatedImageUrl.startsWith('blob:')
 
-    <img
-      src={
+                ? result.annotatedImageUrl
 
-        result.annotatedImageUrl.startsWith('blob:')
+                : result.annotatedImageUrl.startsWith('data:image')
 
-          ? result.annotatedImageUrl
+                ? result.annotatedImageUrl
 
-          : result.annotatedImageUrl.startsWith('data:image')
+                : result.annotatedImageUrl.startsWith('http')
 
-            ? result.annotatedImageUrl
-
-            : result.annotatedImageUrl.startsWith('http')
-
-              ? result.annotatedImageUrl
+                ? result.annotatedImageUrl
 
               : `http://localhost:5000${
                   result.annotatedImageUrl.startsWith('/')
@@ -196,7 +194,7 @@ const ResultDisplay = ({ result }) => {
 
                     : `/${result.annotatedImageUrl}`
                 }`
-      }
+              }
 
       alt="AI Annotated X-Ray with Bounding Boxes"
 

@@ -1,20 +1,12 @@
 const express = require('express');
-
 const router = express.Router();
-
-const auth =
-  require('../middleware/auth');
-
-const allowRoles =
-  require('../middleware/role');
-
-const userController =
-  require('../controllers/userController');
+const auth = require('../middleware/auth');
+const allowRoles = require('../middleware/role');
+const userController =require('../controllers/userController');
 
 
-// =========================
 // GET LOGGED-IN USER
-// =========================
+
 
 router.get(
   '/me',
@@ -25,10 +17,10 @@ router.get(
 );
 
 
-// =========================
+
 // GET LOGGED-IN
 // PATIENT PROFILE
-// =========================
+
 
 router.get(
   '/my-patient-profile',
@@ -39,9 +31,9 @@ router.get(
 );
 
 
-// =========================
+
 // UPDATE OWN PROFILE
-// =========================
+
 
 router.put(
   '/me',
@@ -52,10 +44,10 @@ router.put(
 );
 
 
-// =========================
+
 // GET ALL USERS
 // STAFF + ADMIN
-// =========================
+
 
 router.get(
   '/',
@@ -71,10 +63,10 @@ router.get(
 );
 
 
-// =========================
+
 // GET ALL DOCTORS
 // STAFF + PATIENT + ADMIN
-// =========================
+
 
 router.get(
   '/doctors',
@@ -91,10 +83,10 @@ router.get(
 );
 
 
-// =========================
+
 // GET ALL PATIENTS
 // DOCTOR + STAFF + ADMIN
-// =========================
+
 
 router.get(
   '/patients',

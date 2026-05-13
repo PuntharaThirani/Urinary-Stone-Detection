@@ -41,7 +41,6 @@ axiosInstance.interceptors.response.use(
 
 // AUTH
 
-
 export const registerUser = async (userData) => {
   const response = await axiosInstance.post('/auth/register', userData);
   return response.data;
@@ -78,7 +77,7 @@ localStorage.setItem(
   return response.data;
 };
 
-// ✅ adminLogin — same as loginUser ඒත් admin role validate කරනවා
+// adminLogin — same as loginUser ඒත් admin role validate කරනවා
 export const adminLogin = async (userData) => {
   const response = await axiosInstance.post('/auth/login', userData);
 
@@ -126,7 +125,6 @@ export const logoutUser = () => {
 
 // UPLOAD + PREDICTION
 
-
 export const uploadXray = async (file) => {
   const formData = new FormData();
   formData.append('image', file);
@@ -156,7 +154,6 @@ export const uploadAndPredict = async (file) => {
 
 // REPORTS
 
-
 export const createDraftReport      = async (data)        => (await axiosInstance.post('/reports/draft',              data)).data;
 export const confirmReport          = async (id, data)    => (await axiosInstance.put(`/reports/${id}/confirm`,       data)).data;
 export const rejectReport           = async (id)          => (await axiosInstance.put(`/reports/${id}/reject`)).data;
@@ -171,7 +168,6 @@ export const deleteReport           = async (id)          => (await axiosInstanc
 
 // USERS
 
-
 export const getAllUsers    = async ()       => (await axiosInstance.get('/users')).data;
 export const getMe         = async ()       => (await axiosInstance.get('/users/me')).data;
 export const getDoctors    = async ()       => (await axiosInstance.get('/users/doctors')).data;
@@ -180,7 +176,6 @@ export const updateProfile = async (data)  => (await axiosInstance.put('/users/m
 
 
 // PATIENTS
-
 
 export const createPatient  = async (data)     => (await axiosInstance.post('/patients',       data)).data;
 export const getAllPatients  = async ()         => (await axiosInstance.get('/patients')).data;
@@ -191,7 +186,6 @@ export const deletePatient  = async (id)       => (await axiosInstance.delete(`/
 
 // APPOINTMENTS
 
-
 export const createAppointment  = async (data)     => (await axiosInstance.post('/appointments',       data)).data;
 export const getAllAppointments  = async ()         => (await axiosInstance.get('/appointments')).data;
 export const getAppointmentById = async (id)       => (await axiosInstance.get(`/appointments/${id}`)).data;
@@ -200,7 +194,6 @@ export const deleteAppointment  = async (id)       => (await axiosInstance.delet
 
 
 // ADMIN
-
 
 export const getAdminStats     = async ()         => (await axiosInstance.get('/admin/stats')).data;
 export const getAdminUsers     = async ()         => (await axiosInstance.get('/admin/users')).data;
@@ -216,7 +209,7 @@ const api = axiosInstance;
 
 api.registerUser          = registerUser;
 api.loginUser             = loginUser;
-api.adminLogin            = adminLogin; // ✅ New
+api.adminLogin            = adminLogin; 
 api.getProfile            = getProfile;
 api.verifyToken           = verifyToken;
 api.logoutUser            = logoutUser;

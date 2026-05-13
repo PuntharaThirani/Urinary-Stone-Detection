@@ -1,7 +1,4 @@
-// backend/services/emailService.js
-
 const nodemailer = require('nodemailer');
-
 
 // Email Transporter Setup
 // Uses Gmail SMTP with App Password

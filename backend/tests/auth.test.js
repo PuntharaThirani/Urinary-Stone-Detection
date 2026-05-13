@@ -44,7 +44,7 @@ describe('🔐 Auth API Tests', () => {
 
     expect(res.statusCode).toEqual(201);
     expect(res.body.success).toBe(true);
-    expect(res.body.message).toBe('User registered successfully'); //  No !
+    expect(res.body.message).toBe('User registered successfully'); 
   });
 
   

@@ -149,6 +149,7 @@ const FileUpload = ({ onUploadSuccess }) => {
             </button>
           </div>
         ) : (
+          
           /* Upload prompt */
           <div className="text-center">
             <div className="text-4xl mb-3">🏥</div>

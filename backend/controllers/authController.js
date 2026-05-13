@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { ROLES } = require('../utils/constants');
 
-// ========================= REGISTER =========================
+//  REGISTER 
 
 exports.register = async (req, res) => {
   try {
@@ -132,7 +132,7 @@ exports.register = async (req, res) => {
   }
 };
 
-// ========================= LOGIN =========================
+//  LOGIN 
 
 exports.login = async (req, res) => {
   try {
@@ -215,7 +215,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// ========================= GET PROFILE =========================
+//  GET PROFILE 
 
 exports.getProfile = async (req, res) => {
   try {
@@ -243,7 +243,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// ========================= LOGOUT =========================
+//  LOGOUT 
 
 exports.logout = async (req, res) => {
   try {

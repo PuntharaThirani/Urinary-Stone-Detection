@@ -302,7 +302,7 @@ exports.rejectReport = async (req, res) => {
 };
 
 
-// GET ALL REPORTS (Doctor / Admin)
+// GET ALL REPORTS (Doctor and Admin)
 
 exports.getAllReports = async (req, res) => {
   try {

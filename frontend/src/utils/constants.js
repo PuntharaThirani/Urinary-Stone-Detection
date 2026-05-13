@@ -1,4 +1,3 @@
-
 // User Roles
 
 export const ROLES = {
@@ -8,7 +7,6 @@ export const ROLES = {
   ADMIN:   'admin',
 };
 
-
 // Report Status — must match backend model
 
 export const REPORT_STATUS = {
@@ -17,7 +15,6 @@ export const REPORT_STATUS = {
   CONFIRMED:    'confirmed',
   REJECTED:     'rejected',
 };
-
 
 // Status Colors — Tailwind compatible
 
@@ -29,7 +26,6 @@ export const STATUS_COLORS = {
   PURPLE:  '#8b5cf6',  // Phase 1
 };
 
-
 // File Upload Config
 
 export const FILE_CONFIG = {
@@ -38,7 +34,6 @@ export const FILE_CONFIG = {
   ALLOWED_TYPES:  ['image/jpeg', 'image/png', 'image/jpg'],
   ALLOWED_EXT:    ['.jpg', '.jpeg', '.png'],
 };
-
 
 // API Base URL
 
@@ -53,7 +48,6 @@ export const DASHBOARD_PATHS = {
   staff:   '/staff-dashboard',
   admin:   '/admin',
 };
-
 
 // Pagination
 

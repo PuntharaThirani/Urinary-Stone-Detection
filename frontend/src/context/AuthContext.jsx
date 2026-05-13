@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       const userId = localStorage.getItem('userId');
 
       if (token && role) {
-        // ✅ Token expiry check
+        //  Token expiry check
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
           if (payload.exp * 1000 < Date.now()) {
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token',    token);
     localStorage.setItem('userRole', role);
     localStorage.setItem('userName', u?.name || '');
-    localStorage.setItem('userId',   u?.id || u?._id || ''); // ✅ _id fallback
+    localStorage.setItem('userId',   u?.id || u?._id || ''); 
 
     setUser({
       id:    u?.id || u?._id,
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // ✅ Fix: /admin → /admin-dashboard consistent
+  // admin-dashboard consistent
   const getDashboardPath = (role) => {
     const paths = {
       doctor:  '/doctor-dashboard',

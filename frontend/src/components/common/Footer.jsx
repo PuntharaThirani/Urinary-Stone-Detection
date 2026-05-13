@@ -95,36 +95,36 @@ const Footer = () => {
             </span>
           </p>
           <div className="flex items-center gap-4 text-base">
-  <a
-    href="https://your-website-link.com"
-    target="_blank"
-    rel="noopener noreferrer"
-    title="Website"
-    className="transition hover:text-blue-400"
-  >
-    🌐
-  </a>
+         <a
+          href="https://your-website-link.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Website"
+          className="transition hover:text-blue-400"
+        >
+          🌐
+        </a>
 
-  <a
-    href="https://www.linkedin.com/in/punthara-thirani-449776265/"
-    target="_blank"
-    rel="noopener noreferrer"
-    title="LinkedIn"
-    className="transition hover:text-blue-400"
-  >
-    💼
-  </a>
+        <a
+          href="https://www.linkedin.com/in/punthara-thirani-449776265/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="LinkedIn"
+          className="transition hover:text-blue-400"
+        >
+         💼
+       </a>
 
-  <a
-    href="https://github.com/PuntharaThirani"
-    target="_blank"
-    rel="noopener noreferrer"
-    title="GitHub"
-    className="transition hover:text-blue-400"
-  >
-    💻
-  </a>
-</div>
+       <a
+          href="https://github.com/PuntharaThirani"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="GitHub"
+          className="transition hover:text-blue-400"
+        >
+         💻
+       </a>
+      </div>
 
         </div>
       </div>

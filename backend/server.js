@@ -6,7 +6,7 @@ const dotenv     = require('dotenv');
 const connectDB  = require('./config/database');
 
 // Load env first — before anything else
-dotenv.config(); //  Top වල load කරන්න
+dotenv.config(); 
 
 // Routes
 const predictionRoutes  = require('./routes/predictionRoutes');

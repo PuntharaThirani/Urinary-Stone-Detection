@@ -1,10 +1,7 @@
 const User = require('../models/User');
 const Patient = require('../models/Patient');
 
-
-// =========================
 // GET LOGGED-IN USER
-// =========================
 
 exports.getMe = async (
   req,
@@ -55,9 +52,7 @@ exports.getMe = async (
 };
 
 
-// =========================
 // GET PATIENT PROFILE
-// =========================
 
 exports.getMyPatientProfile =
   async (req, res) => {
@@ -107,10 +102,7 @@ exports.getMyPatientProfile =
     }
   };
 
-
-// =========================
 // GET ALL USERS
-// =========================
 
 exports.getAllUsers =
   async (req, res) => {
@@ -153,10 +145,7 @@ exports.getAllUsers =
     }
   };
 
-
-// =========================
 // GET DOCTORS
-// =========================
 
 exports.getDoctors =
   async (req, res) => {
@@ -204,10 +193,7 @@ exports.getDoctors =
     }
   };
 
-
-// =========================
 // GET PATIENTS
-// =========================
 
 exports.getPatients =
   async (req, res) => {
@@ -254,9 +240,9 @@ exports.getPatients =
   };
 
 
-// =========================
+
 // UPDATE PROFILE
-// =========================
+
 
 exports.updateProfile =
   async (req, res) => {

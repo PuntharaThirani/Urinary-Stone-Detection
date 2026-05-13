@@ -64,7 +64,7 @@ describe('🔐 LoginForm Component Tests', () => {
   it('renders Sign In button', () => {
     renderLoginForm();
 
-    // Button text "Sign In" ✅
+    // Button text "Sign In" 
     const button = screen.getByRole('button', { name: /sign in/i });
     expect(button).toBeInTheDocument();
   });

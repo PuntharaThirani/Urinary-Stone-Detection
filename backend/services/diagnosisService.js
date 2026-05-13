@@ -1,8 +1,3 @@
-// backend/services/diagnosisService.js
-
-
-// AI-Assisted Urinary Stone Diagnosis Support Service
-
 // PURPOSE:
 // Converts AI detection results into preliminary
 // clinical support output for doctor review.

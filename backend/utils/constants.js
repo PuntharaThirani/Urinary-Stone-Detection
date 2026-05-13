@@ -1,6 +1,3 @@
-// backend/utils/constants.js
-
-
 // User Roles
 
 const ROLES = {

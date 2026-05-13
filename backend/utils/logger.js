@@ -1,5 +1,3 @@
-// backend/utils/logger.js
-
 // Get current timestamp
 const getTimestamp = () => {
   return new Date()

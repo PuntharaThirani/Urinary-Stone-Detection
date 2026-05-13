@@ -11,12 +11,12 @@ const {
   createPatient,
   getAllPatients,
   getPatientById,
-  getMyPatientProfile, // ✅ NEW
+  getMyPatientProfile, 
   updatePatient,
   deletePatient,
 } = require('../controllers/patientController');
 
-// ✅ Get logged-in patient's own profile
+// Get logged-in patient's own profile
 router.get('/my-profile',
   auth,
   allowRoles('patient'),

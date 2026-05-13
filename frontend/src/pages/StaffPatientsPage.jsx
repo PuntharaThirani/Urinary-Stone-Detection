@@ -76,7 +76,7 @@ const StaffPatientsPage = () => {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8">
 
-        {/* ─── Header ─── */}
+        {/*  Header  */}
         <section className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-blue-600">
@@ -97,21 +97,21 @@ const StaffPatientsPage = () => {
           </button>
         </section>
 
-        {/* ─── Success ─── */}
+        {/*  Success  */}
         {success && (
           <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {success}
           </div>
         )}
 
-        {/* ─── Error ─── */}
+        {/*  Error  */}
         {error && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             ⚠️ {error}
           </div>
         )}
 
-        {/* ─── Form ─── */}
+        {/*  Form  */}
         {showForm && (
           <form
             onSubmit={handleCreate}
@@ -164,7 +164,7 @@ const StaffPatientsPage = () => {
                 />
               </div>
 
-              {/* ✅ Email — Link to user account */}
+              {/* Email — Link to user account */}
               <div className="md:col-span-2">
                 <label className="mb-1 block text-xs font-bold uppercase text-slate-500">
                   Patient Login Email * (must match their account)
@@ -298,7 +298,7 @@ const StaffPatientsPage = () => {
           </form>
         )}
 
-        {/* ─── Table ─── */}
+        {/*  Table  */}
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           {loading ? (
             <div className="flex items-center justify-center py-16">

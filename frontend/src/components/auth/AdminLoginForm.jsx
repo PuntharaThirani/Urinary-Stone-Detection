@@ -11,7 +11,7 @@ const AdminLoginForm = () => {
   const [formData,     setFormData]     = useState({ email: '', password: '' });
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState('');
-  const [showPassword, setShowPassword] = useState(false); // ✅ Password toggle state
+  const [showPassword, setShowPassword] = useState(false); //  Password toggle state
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -150,7 +150,7 @@ const AdminLoginForm = () => {
                     placeholder="••••••••"
                     className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 pr-14 font-medium outline-none transition focus:border-blue-500"
                   />
-                  {/* ✅ Show/Hide Button */}
+                  {/* Show/Hide Button */}
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}

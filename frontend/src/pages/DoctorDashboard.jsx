@@ -81,8 +81,8 @@ const DoctorDashboard = () => {
               Welcome back, {doctorName} 👋
             </h1>
               <div className="mt-3 inline-flex items-center rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-    🩺 {doctorName} • {doctorId}
-  </div>
+            🩺 {doctorName} • {doctorId}
+          </div>
             <p className="mt-2 text-sm leading-6 text-slate-500 md:text-base">
               Review scan activity, access AI-assisted analysis tools, and monitor recent patient records.
             </p>
