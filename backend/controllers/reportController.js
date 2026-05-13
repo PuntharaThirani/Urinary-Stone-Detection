@@ -24,6 +24,29 @@ exports.createDraftReport = async (req, res) => {
 
     const hasStones = stoneCount > 0;
 
+    // Find patient document
+let patientDoc = null;
+
+if (patientId) {
+
+  patientDoc =
+  await Patient.findOne({
+
+    $or: [
+
+      {
+        patientId:
+          patientId,
+      },
+
+      {
+        _id:
+          patientId,
+      },
+    ],
+  });
+}
+
     // Generate AI draft text
     const date = new Date().toLocaleDateString('en-GB');
     const aiDraft = yoloResults?.aiDraft || `
@@ -54,12 +77,18 @@ Final diagnosis must be confirmed by a qualified doctor.
     doctorId,
 
   patient:
-    patientId || null,
+  patientDoc?._id || null,
 
+  patientName:
+  patientDoc?.fullName ||
   patientName,
 
+patientAge:
+  patientDoc?.age ||
   patientAge,
 
+patientGender:
+  patientDoc?.gender ||
   patientGender,
 
   imageId,

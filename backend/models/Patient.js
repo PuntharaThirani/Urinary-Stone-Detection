@@ -2,90 +2,81 @@ const mongoose = require('mongoose');
 
 const patientSchema = new mongoose.Schema(
   {
-    // Linked user account
     userId: {
-      type:     mongoose.Schema.Types.ObjectId,
-      ref:      'User',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: false,
-      default: null
+      default: null,
     },
 
-    // Hospital patient ID
     patientId: {
-      type:     String,
+      type: String,
       required: true,
-      unique:   true,
-      trim:     true,
+      unique: true,
+      trim: true,
       uppercase: true,
     },
 
     email: {
-     type: String,
-     trim: true,
-     lowercase: true
-    },
-
-    // Full name
-    fullName: {
-      type:     String,
+      type: String,
       required: true,
-      trim:     true,
+      trim: true,
+      lowercase: true,
     },
 
-    // Age
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     age: {
       type: Number,
-      min:  0,
-      max:  150,
+      min: 0,
+      max: 150,
     },
 
-    // Gender — lowercase to match validation
     gender: {
       type: String,
-      enum: ['male', 'female', 'other'], // ✅ Fixed lowercase
+      enum: ['male', 'female', 'other'],
     },
 
-    // Blood group
     bloodGroup: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
-      enum:    ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', ''],
+      trim: true,
+      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', ''],
     },
 
-    // Contact number
     contactNumber: {
-      type:     String,
+      type: String,
       required: true,
-      trim:     true,
+      trim: true,
     },
 
-    // Address
     address: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
-    // Emergency contact
     emergencyContact: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
-    // Medical notes
     medicalNotes: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
   },
   { timestamps: true }
 );
 
-// Indexes
-
-patientSchema.index({ fullName:  1 });
+patientSchema.index({ fullName: 1 });
+patientSchema.index({ email: 1 });
+patientSchema.index({ patientId: 1, email: 1 });
 
 module.exports = mongoose.model('Patient', patientSchema);

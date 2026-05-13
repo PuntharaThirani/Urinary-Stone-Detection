@@ -1,40 +1,112 @@
-const express    = require('express');
-const router     = express.Router();
-const auth       = require('../middleware/auth');
-const allowRoles = require('../middleware/role');
+const express = require('express');
 
-const userController = require('../controllers/userController');
+const router = express.Router();
 
-// Get logged-in user profile — all authenticated users
-router.get('/me',
+const auth =
+  require('../middleware/auth');
+
+const allowRoles =
+  require('../middleware/role');
+
+const userController =
+  require('../controllers/userController');
+
+
+// =========================
+// GET LOGGED-IN USER
+// =========================
+
+router.get(
+  '/me',
+
   auth,
+
   userController.getMe
 );
 
-// Update own profile — all authenticated users 
-router.put('/me',
+
+// =========================
+// GET LOGGED-IN
+// PATIENT PROFILE
+// =========================
+
+router.get(
+  '/my-patient-profile',
+
   auth,
+
+  userController.getMyPatientProfile
+);
+
+
+// =========================
+// UPDATE OWN PROFILE
+// =========================
+
+router.put(
+  '/me',
+
+  auth,
+
   userController.updateProfile
 );
 
-// Get all users — staff, admin
-router.get('/',
+
+// =========================
+// GET ALL USERS
+// STAFF + ADMIN
+// =========================
+
+router.get(
+  '/',
+
   auth,
-  allowRoles('staff', 'admin'), //  Admin added
+
+  allowRoles(
+    'staff',
+    'admin'
+  ),
+
   userController.getAllUsers
 );
 
-// Get all doctors — staff, patient, admin
-router.get('/doctors',
+
+// =========================
+// GET ALL DOCTORS
+// STAFF + PATIENT + ADMIN
+// =========================
+
+router.get(
+  '/doctors',
+
   auth,
-  allowRoles('staff', 'patient', 'admin'), //  Patient added
+
+  allowRoles(
+    'staff',
+    'patient',
+    'admin'
+  ),
+
   userController.getDoctors
 );
 
-// Get all patients — doctor, staff, admin
-router.get('/patients',
+
+// =========================
+// GET ALL PATIENTS
+// DOCTOR + STAFF + ADMIN
+// =========================
+
+router.get(
+  '/patients',
+
   auth,
-  allowRoles('doctor', 'staff', 'admin'), //  Admin added
+
+  allowRoles(
+    'doctor',
+    'staff',
+    'admin'
+  ),
+
   userController.getPatients
 );
 

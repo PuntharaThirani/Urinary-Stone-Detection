@@ -11,44 +11,50 @@ const {
   createPatient,
   getAllPatients,
   getPatientById,
+  getMyPatientProfile, // ✅ NEW
   updatePatient,
   deletePatient,
 } = require('../controllers/patientController');
+
+// ✅ Get logged-in patient's own profile
+router.get('/my-profile',
+  auth,
+  allowRoles('patient'),
+  getMyPatientProfile
+);
 
 // Create patient — staff, doctor, admin
 router.post('/',
   auth,
   allowRoles('staff', 'doctor', 'admin'),
-  patientValidation,  
-  validate,           
   createPatient
 );
 
-// Get all patients — staff, doctor, admin
+// Get all patients
 router.get('/',
   auth,
   allowRoles('staff', 'doctor', 'admin'),
   getAllPatients
 );
 
-// Get patient by ID — staff, doctor, patient, admin
+// Get by ID
 router.get('/:id',
   auth,
   allowRoles('staff', 'doctor', 'patient', 'admin'),
   getPatientById
 );
 
-// Update patient — staff, doctor, admin
+// Update
 router.put('/:id',
   auth,
   allowRoles('staff', 'doctor', 'admin'),
   updatePatient
 );
 
-// Delete patient — admin only
+// Delete — admin only
 router.delete('/:id',
   auth,
-  allowRoles('admin'),  //  Admin only
+  allowRoles('admin'),
   deletePatient
 );
 

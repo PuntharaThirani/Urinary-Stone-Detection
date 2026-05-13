@@ -70,7 +70,7 @@ const Footer = () => {
             </li>
             <li className="flex items-start gap-3">
               <span>📧</span>
-              <span>thirani@example.com</span>
+              <span>puntharathirani@gmail.com</span>
             </li>
             <li className="flex items-start gap-3">
               <span>🎓</span>
@@ -95,10 +95,37 @@ const Footer = () => {
             </span>
           </p>
           <div className="flex items-center gap-4 text-base">
-            <span title="Website"  className="cursor-pointer transition hover:text-blue-400">🌐</span>
-            <span title="LinkedIn" className="cursor-pointer transition hover:text-blue-400">💼</span>
-            <span title="GitHub"   className="cursor-pointer transition hover:text-blue-400">💻</span>
-          </div>
+  <a
+    href="https://your-website-link.com"
+    target="_blank"
+    rel="noopener noreferrer"
+    title="Website"
+    className="transition hover:text-blue-400"
+  >
+    🌐
+  </a>
+
+  <a
+    href="https://www.linkedin.com/in/punthara-thirani-449776265/"
+    target="_blank"
+    rel="noopener noreferrer"
+    title="LinkedIn"
+    className="transition hover:text-blue-400"
+  >
+    💼
+  </a>
+
+  <a
+    href="https://github.com/PuntharaThirani"
+    target="_blank"
+    rel="noopener noreferrer"
+    title="GitHub"
+    className="transition hover:text-blue-400"
+  >
+    💻
+  </a>
+</div>
+
         </div>
       </div>
     </footer>

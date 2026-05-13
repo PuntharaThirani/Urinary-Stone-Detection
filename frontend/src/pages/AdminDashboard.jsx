@@ -1,577 +1,523 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import logo from '../assets/images/logo-removebg-preview.png';
 
-// ── Stat Card ──────────────────────────────────────────────
-const StatCard = ({ label, value, icon, color, bg, delay = 0 }) => (
+const StatCard = ({ title, value, icon, color }) => (
   <div
-    className="stat-card"
-    style={{ animationDelay: `${delay}ms`, '--accent': color, '--bg': bg }}
+    className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
   >
-    <div className="stat-icon">{icon}</div>
-    <div className="stat-value">{value ?? 0}</div>
-    <div className="stat-label">{label}</div>
-    <div className="stat-bar" />
+    <div
+      className="flex h-14 w-14 items-center justify-center rounded-2xl text-3xl"
+      style={{ backgroundColor: color }}
+    >
+      {icon}
+    </div>
+
+    <h3 className="mt-5 text-4xl font-black tracking-tight text-slate-900">
+      {value}
+    </h3>
+
+    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+      {title}
+    </p>
   </div>
 );
 
-// ── Role Badge ─────────────────────────────────────────────
 const RoleBadge = ({ role }) => {
-  const map = {
-    admin:   { bg: '#ede9fe', color: '#7c3aed', label: 'Admin'   },
-    doctor:  { bg: '#dbeafe', color: '#1d4ed8', label: 'Doctor'  },
-    staff:   { bg: '#fef9c3', color: '#a16207', label: 'Staff'   },
-    patient: { bg: '#dcfce7', color: '#15803d', label: 'Patient' },
+  const styles = {
+    admin: 'bg-violet-100 text-violet-700',
+    doctor: 'bg-blue-100 text-blue-700',
+    patient: 'bg-emerald-100 text-emerald-700',
+    staff: 'bg-amber-100 text-amber-700',
   };
-  const s = map[role] || { bg: '#f1f5f9', color: '#475569', label: role };
+
   return (
-    <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, letterSpacing: '.04em' }}>
-      {s.label.toUpperCase()}
+    <span
+      className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] ${styles[role]}`}
+    >
+      {role}
     </span>
   );
 };
 
-// ── Main Component ─────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const currentUserId = localStorage.getItem('userId');
-  const adminName     = localStorage.getItem('userName') || 'Admin';
 
-  const [stats,     setStats]     = useState(null);
-  const [users,     setUsers]     = useState([]);
+  const adminName =
+    localStorage.getItem('userName') || 'Admin';
+
+  const currentUserId =
+    localStorage.getItem('userId');
+
+  const [stats, setStats] = useState(null);
+  const [users, setUsers] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
-  const [activeTab, setActiveTab] = useState('stats');
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
-  const [toast,     setToast]     = useState({ show: false, message: '', type: '' });
-  const [search,    setSearch]    = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
   const fetchAll = async () => {
-    setLoading(true); setError(null);
-    await Promise.all([fetchStats(), fetchUsers(), fetchAuditLogs()]);
-    setLoading(false);
+    try {
+      setLoading(true);
+
+      const [statsRes, usersRes, logsRes] =
+        await Promise.all([
+          api.get('/admin/stats'),
+          api.get('/admin/users'),
+          api.get('/admin/audit-logs'),
+        ]);
+
+      setStats(statsRes.data.data);
+      setUsers(usersRes.data.data || []);
+      setAuditLogs(logsRes.data.data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const showToast = (message, type = 'success') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: '', type: '' }), 3000);
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
   };
 
-  const fetchStats     = async () => { try { const r = await api.get('/admin/stats');      setStats(r.data.data);         } catch { setError('Failed to load statistics'); } };
-  const fetchUsers     = async () => { try { const r = await api.get('/admin/users');      setUsers(r.data.data || []);   } catch (e) { console.error(e); } };
-  const fetchAuditLogs = async () => { try { const r = await api.get('/admin/audit-logs'); setAuditLogs(r.data.data || []); } catch (e) { console.error(e); } };
+  const handleDeleteUser = async (
+    userId,
+    userName
+  ) => {
+    if (userId === currentUserId) {
+      alert('Cannot delete your own account');
+      return;
+    }
 
-  const handleRoleChange = async (userId, newRole, currentRole) => {
-    if (newRole === currentRole) return;
-    if (userId === currentUserId) { showToast('Cannot change your own role', 'error'); return; }
-    if (!window.confirm(`Change role to "${newRole.toUpperCase()}"?`)) return;
-    try { await api.put(`/admin/users/${userId}/role`, { role: newRole }); await fetchUsers(); showToast('Role updated'); }
-    catch (e) { showToast(e?.response?.data?.message || 'Failed to update role', 'error'); }
+    const confirmed = window.confirm(
+      `Delete ${userName}?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/admin/users/${userId}`);
+
+      fetchAll();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDeleteUser = async (userId, userName) => {
-    if (userId === currentUserId) { showToast('Cannot delete your own account', 'error'); return; }
-    if (!window.confirm(`Delete "${userName}"? This cannot be undone.`)) return;
-    try { await api.delete(`/admin/users/${userId}`); await fetchUsers(); showToast('User deleted'); }
-    catch (e) { showToast(e?.response?.data?.message || 'Failed to delete user', 'error'); }
-  };
-
-  const handleLogout = () => { localStorage.clear(); navigate('/login'); };
-
-  const filteredUsers = users.filter(u =>
-    u.name?.toLowerCase().includes(search.toLowerCase()) ||
-    u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.role?.toLowerCase().includes(search.toLowerCase())
+  const filteredUsers = users.filter(
+    (u) =>
+      u.name
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
+      u.email
+        ?.toLowerCase()
+        .includes(search.toLowerCase()) ||
+      u.role
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
   );
 
-  const now = new Date();
-  const greeting = now.getHours() < 12 ? 'Good Morning' : now.getHours() < 17 ? 'Good Afternoon' : 'Good Evening';
-
-  if (loading) return (
-    <div className="loading-screen">
-      <div className="loading-ring" />
-      <p>Loading dashboard...</p>
-      <style>{loadingCSS}</style>
-    </div>
-  );
-
-  if (error) return (
-    <div className="loading-screen">
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 48 }}>⚠️</div>
-        <p style={{ color: '#ef4444', fontWeight: 700, marginTop: 12 }}>{error}</p>
-        <button onClick={fetchAll} style={{ marginTop: 16, padding: '10px 24px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>Retry</button>
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100">
+        <div className="h-14 w-14 animate-spin rounded-full border-4 border-slate-300 border-t-blue-600" />
       </div>
-      <style>{loadingCSS}</style>
-    </div>
-  );
+    );
+  }
 
   return (
-    <>
-      <style>{css}</style>
+    <div className="min-h-screen bg-slate-100 text-slate-800">
 
-      {/* Toast */}
-      {toast.show && (
-        <div className={`toast ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
-          {toast.type === 'error' ? '⚠️' : '✅'} {toast.message}
-        </div>
-      )}
+      <div className="flex min-h-screen">
 
-      <div className="dash-root">
+        {/* Sidebar */}
+        <aside className="sticky top-0 flex h-screen w-[280px] flex-col bg-slate-950 px-5 py-6 text-white shadow-2xl">
 
-        {/* ── Sidebar ── */}
-        <aside className="sidebar">
-          <div className="sidebar-logo">
-            <div className="logo-icon">🛡️</div>
-            <div>
-              <div className="logo-title">UroScan AI</div>
-              <div className="logo-sub">Admin Panel</div>
-            </div>
+          <div className="mb-8 flex items-center gap-4 border-b border-slate-800 pb-6">
+            <img
+  src={logo}
+  alt="UroScan AI Logo"
+  className="h-21 w-auto object-contain"
+/>
+
           </div>
 
-          <nav className="sidebar-nav">
+          <nav className="flex flex-1 flex-col gap-3">
+
             {[
-              { id: 'stats', icon: '📊', label: 'Statistics'  },
-              { id: 'users', icon: '👥', label: 'Users'        },
-              { id: 'logs',  icon: '📋', label: 'Audit Logs'   },
-            ].map(tab => (
+              {
+                id: 'overview',
+                label: 'Overview',
+                icon: '📊',
+              },
+              {
+                id: 'users',
+                label: 'Users',
+                icon: '👥',
+              },
+              {
+                id: 'logs',
+                label: 'Audit Logs',
+                icon: '📋',
+              },
+            ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`nav-item ${activeTab === tab.id ? 'nav-active' : ''}`}
+                onClick={() =>
+                  setActiveTab(tab.id)
+                }
+                className={`flex items-center gap-4 rounded-2xl px-5 py-4 text-left text-sm font-bold transition-all duration-300 ${
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'text-slate-300 hover:bg-slate-900'
+                }`}
               >
-                <span className="nav-icon">{tab.icon}</span>
-                <span>{tab.label}</span>
+                <span className="text-xl">
+                  {tab.icon}
+                </span>
+
+                {tab.label}
               </button>
             ))}
           </nav>
 
-          <div className="sidebar-footer">
-            <div className="admin-info">
-              <div className="admin-avatar">{adminName[0]?.toUpperCase()}</div>
+          <div className="mt-8 rounded-3xl border border-slate-800 bg-slate-900 p-5">
+            <div className="flex items-center gap-4">
+
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 text-xl font-black shadow-lg">
+                {adminName[0]?.toUpperCase()}
+              </div>
+
               <div>
-                <div className="admin-name">{adminName}</div>
-                <div className="admin-role">Administrator</div>
+                <p className="font-bold">
+                  {adminName}
+                </p>
+
+                <p className="text-sm text-slate-400">
+                  System Administrator
+                </p>
               </div>
             </div>
-            <button onClick={handleLogout} className="logout-btn">
-              <span>⏻</span> Logout
+
+            <button
+              onClick={handleLogout}
+              className="mt-5 w-full rounded-2xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+            >
+              Logout
             </button>
           </div>
         </aside>
 
-        {/* ── Main ── */}
-        <main className="main-content">
+        {/* Main */}
+        <main className="flex-1 overflow-hidden">
 
           {/* Header */}
-          <div className="main-header">
-            <div>
-              <div className="greeting">{greeting}, {adminName} 👋</div>
-              <div className="header-sub">
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </div>
+          <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-700 px-10 py-10 text-white shadow-2xl">
+
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-white blur-3xl" />
+              <div className="absolute bottom-0 left-10 h-32 w-32 rounded-full bg-cyan-300 blur-3xl" />
             </div>
-            <button onClick={() => navigate('/')} className="home-btn">← Home</button>
-          </div>
 
-          {/* ── Stats Tab ── */}
-          {activeTab === 'stats' && stats && (
-            <div className="tab-content">
+            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
-              <div className="section-title">👤 User Overview</div>
-              <div className="stats-grid">
-                <StatCard label="Total Users" value={stats.users?.total}    icon="👤" color="#2563eb" bg="linear-gradient(135deg,#eff6ff,#dbeafe)" delay={0}   />
-                <StatCard label="Doctors"     value={stats.users?.doctors}  icon="🩺" color="#7c3aed" bg="linear-gradient(135deg,#f5f3ff,#ede9fe)" delay={60}  />
-                <StatCard label="Patients"    value={stats.users?.patients} icon="🏥" color="#059669" bg="linear-gradient(135deg,#f0fdf4,#dcfce7)" delay={120} />
-                <StatCard label="Staff"       value={stats.users?.staff}    icon="👨‍💼" color="#d97706" bg="linear-gradient(135deg,#fffbeb,#fef3c7)" delay={180} />
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-100">
+                  Administration Portal
+                </p>
+
+                <h1 className="mt-3 text-5xl font-black tracking-tight">
+                  Welcome, {adminName} 👋
+                </h1>
+
+                <p className="mt-4 max-w-2xl text-base leading-8 text-blue-100">
+                  Manage users, monitor reports, review system activity,
+                  and oversee the entire urinary stone detection platform.
+                </p>
               </div>
 
-              <div className="section-title" style={{ marginTop: 32 }}>🔬 Scan Overview</div>
-              <div className="stats-grid">
-                <StatCard label="Total Scans"  value={stats.scans?.total}          icon="🔍" color="#0891b2" bg="linear-gradient(135deg,#ecfeff,#cffafe)" delay={0}   />
-                <StatCard label="Today's Scans" value={stats.scans?.today}         icon="📅" color="#7c3aed" bg="linear-gradient(135deg,#f5f3ff,#ede9fe)" delay={60}  />
-                <StatCard label="This Week"    value={stats.scans?.thisWeek}       icon="📈" color="#2563eb" bg="linear-gradient(135deg,#eff6ff,#dbeafe)" delay={120} />
-                <StatCard label="Stones Found" value={stats.scans?.stonesDetected} icon="🪨" color="#dc2626" bg="linear-gradient(135deg,#fff1f2,#fee2e2)" delay={180} />
-              </div>
+              <button
+                onClick={() => navigate('/')}
+                className="inline-flex h-fit items-center rounded-2xl border border-white/20 bg-white/10 px-6 py-4 text-sm font-bold backdrop-blur-md transition hover:bg-white/20"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </section>
 
-              <div className="section-title" style={{ marginTop: 32 }}>📄 Reports</div>
-              <div className="report-card">
-                <div className="report-icon">📄</div>
-                <div>
-                  <div className="report-count">{stats.reports?.total ?? 0}</div>
-                  <div className="report-label">Total Reports Generated</div>
+          <div className="p-8">
+
+            {/* OVERVIEW */}
+            {activeTab === 'overview' && stats && (
+              <>
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+
+                  <StatCard
+                    title="Total Users"
+                    value={stats.users?.total}
+                    icon="👥"
+                    color="#DBEAFE"
+                  />
+
+                  <StatCard
+                    title="Doctors"
+                    value={stats.users?.doctors}
+                    icon="🩺"
+                    color="#EDE9FE"
+                  />
+
+                  <StatCard
+                    title="Patients"
+                    value={stats.users?.patients}
+                    icon="🏥"
+                    color="#DCFCE7"
+                  />
+
+                  <StatCard
+                    title="Staff"
+                    value={stats.users?.staff}
+                    icon="👨‍💼"
+                    color="#FEF3C7"
+                  />
                 </div>
-              </div>
 
-            </div>
-          )}
+                <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-          {/* ── Users Tab ── */}
-          {activeTab === 'users' && (
-            <div className="tab-content">
-              <div className="table-header">
-                <div className="section-title" style={{ margin: 0 }}>👥 All Users ({users.length})</div>
-                <input
-                  className="search-input"
-                  placeholder="Search by name, email or role..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-              </div>
+                  <StatCard
+                    title="Total Scans"
+                    value={stats.scans?.total}
+                    icon="🔍"
+                    color="#CFFAFE"
+                  />
 
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      {['Name', 'Email', 'Role', 'Last Login', 'Joined', 'Actions'].map(h => (
-                        <th key={h}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.length === 0 ? (
-                      <tr><td colSpan={6} style={{ textAlign: 'center', padding: 48, color: '#94a3b8' }}>No users found</td></tr>
-                    ) : filteredUsers.map(user => (
-                      <tr key={user._id}>
-                        <td>
-                          <div className="user-cell">
-                            <div className="user-avatar">{user.name?.[0]?.toUpperCase()}</div>
-                            <div>
-                              <div className="user-name">{user.name}</div>
-                              {user._id === currentUserId && <div className="you-badge">You</div>}
+                  <StatCard
+                    title="Today's Scans"
+                    value={stats.scans?.today}
+                    icon="📅"
+                    color="#EDE9FE"
+                  />
+
+                  <StatCard
+                    title="This Week"
+                    value={stats.scans?.thisWeek}
+                    icon="📈"
+                    color="#DBEAFE"
+                  />
+
+                  <StatCard
+                    title="Stone Cases"
+                    value={stats.scans?.stonesDetected}
+                    icon="🪨"
+                    color="#FEE2E2"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* USERS */}
+            {activeTab === 'users' && (
+              <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+
+                <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+                  <div>
+                    <h2 className="text-3xl font-black tracking-tight text-slate-900">
+                      User Management
+                    </h2>
+
+                    <p className="mt-2 text-sm text-slate-500">
+                      Manage all registered system users.
+                    </p>
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={search}
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
+                    className="rounded-2xl border border-slate-300 px-5 py-3 text-sm outline-none transition focus:border-blue-600"
+                  />
+                </div>
+
+                <div className="overflow-x-auto rounded-3xl border border-slate-200">
+                  <table className="min-w-full text-left">
+
+                    <thead className="bg-slate-50">
+                      <tr>
+                        {[
+                          'Name',
+                          'Email',
+                          'Role',
+                          'Joined',
+                          'Actions',
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="px-6 py-5 text-xs font-black uppercase tracking-[0.18em] text-slate-500"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {filteredUsers.map((user) => (
+                        <tr
+                          key={user._id}
+                          className="border-t border-slate-100 transition hover:bg-slate-50"
+                        >
+
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-4">
+
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 text-lg font-black text-white shadow-lg">
+                                {user.name?.[0]?.toUpperCase()}
+                              </div>
+
+                              <div>
+                                <p className="font-bold text-slate-900">
+                                  {user.name}
+                                </p>
+
+                                {user._id === currentUserId && (
+                                  <p className="text-xs font-semibold text-slate-500">
+                                    Current Account
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="email-cell">{user.email}</td>
-                        <td><RoleBadge role={user.role} /></td>
-                        <td className="date-cell">{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
-                        <td className="date-cell">{new Date(user.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          <div className="action-cell">
-                            <select
-                              value={user.role}
-                              onChange={e => handleRoleChange(user._id, e.target.value, user.role)}
-                              disabled={user._id === currentUserId}
-                              className="role-select"
-                            >
-                              {['doctor','patient','staff','admin'].map(r => (
-                                <option key={r} value={r}>{r.charAt(0).toUpperCase()+r.slice(1)}</option>
-                              ))}
-                            </select>
+                          </td>
+
+                          <td className="px-6 py-5 text-sm text-slate-600">
+                            {user.email}
+                          </td>
+
+                          <td className="px-6 py-5">
+                            <RoleBadge role={user.role} />
+                          </td>
+
+                          <td className="px-6 py-5 text-sm text-slate-600">
+                            {new Date(
+                              user.createdAt
+                            ).toLocaleDateString()}
+                          </td>
+
+                          <td className="px-6 py-5">
                             <button
-                              onClick={() => handleDeleteUser(user._id, user.name)}
-                              disabled={user._id === currentUserId}
-                              className="delete-btn"
+                              onClick={() =>
+                                handleDeleteUser(
+                                  user._id,
+                                  user.name
+                                )
+                              }
+                              disabled={
+                                user._id === currentUserId
+                              }
+                              className="rounded-xl bg-red-100 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               Delete
                             </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* ── Audit Logs Tab ── */}
-          {activeTab === 'logs' && (
-            <div className="tab-content">
-              <div className="section-title">📋 Audit Logs ({auditLogs.length})</div>
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      {['User', 'Role', 'Action', 'Status', 'Date & Time'].map(h => (
-                        <th key={h}>{h}</th>
+                          </td>
+                        </tr>
                       ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {auditLogs.length === 0 ? (
-                      <tr><td colSpan={5} style={{ textAlign: 'center', padding: 48, color: '#94a3b8' }}>No audit logs found</td></tr>
-                    ) : auditLogs.map(log => (
-                      <tr key={log._id}>
-                        <td className="user-name">{log.user_id?.name || 'Unknown'}</td>
-                        <td><RoleBadge role={log.user_id?.role} /></td>
-                        <td><span className="action-badge">{log.action_type || log.action}</span></td>
-                        <td>
-                          <span className={log.status === 'SUCCESS' ? 'status-success' : 'status-error'}>
-                            {log.status || 'SUCCESS'}
-                          </span>
-                        </td>
-                        <td className="date-cell">{new Date(log.createdAt).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
+            {/* AUDIT LOGS */}
+            {activeTab === 'logs' && (
+              <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
+
+                <div className="mb-6">
+                  <h2 className="text-3xl font-black tracking-tight text-slate-900">
+                    Audit Logs
+                  </h2>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    System activity monitoring and tracking.
+                  </p>
+                </div>
+
+                <div className="overflow-x-auto rounded-3xl border border-slate-200">
+                  <table className="min-w-full text-left">
+
+                    <thead className="bg-slate-50">
+                      <tr>
+                        {[
+                          'User',
+                          'Role',
+                          'Action',
+                          'Status',
+                          'Date',
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="px-6 py-5 text-xs font-black uppercase tracking-[0.18em] text-slate-500"
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {auditLogs.map((log) => (
+                        <tr
+                          key={log._id}
+                          className="border-t border-slate-100 hover:bg-slate-50"
+                        >
+
+                          <td className="px-6 py-5 font-semibold text-slate-900">
+                            {log.user_id?.name || 'Unknown'}
+                          </td>
+
+                          <td className="px-6 py-5">
+                            <RoleBadge
+                              role={log.user_id?.role}
+                            />
+                          </td>
+
+                          <td className="px-6 py-5">
+                            <span className="rounded-full bg-blue-100 px-4 py-2 text-xs font-bold text-blue-700">
+                              {log.action_type || log.action}
+                            </span>
+                          </td>
+
+                          <td className="px-6 py-5">
+                            <span className="rounded-full bg-emerald-100 px-4 py-2 text-xs font-bold text-emerald-700">
+                              {log.status || 'SUCCESS'}
+                            </span>
+                          </td>
+
+                          <td className="px-6 py-5 text-sm text-slate-600">
+                            {new Date(
+                              log.createdAt
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
         </main>
       </div>
-    </>
+    </div>
   );
 };
-
-// ── CSS ────────────────────────────────────────────────────
-const loadingCSS = `
-  .loading-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#f8fafc; gap:16px; font-family:'Segoe UI',sans-serif; }
-  .loading-ring { width:48px; height:48px; border:4px solid #e2e8f0; border-top-color:#2563eb; border-radius:50%; animation:spin .8s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-`;
-
-const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  .dash-root {
-    display: flex;
-    min-height: 100vh;
-    background: #f1f5f9;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    width: 260px;
-    min-height: 100vh;
-    background: #0f172a;
-    display: flex;
-    flex-direction: column;
-    padding: 24px 16px;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-  }
-
-  .sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px 24px;
-    border-bottom: 1px solid #1e293b;
-    margin-bottom: 24px;
-  }
-
-  .logo-icon { font-size: 28px; }
-  .logo-title { font-size: 16px; font-weight: 800; color: #f8fafc; letter-spacing: -.02em; }
-  .logo-sub   { font-size: 11px; color: #64748b; font-weight: 500; margin-top: 1px; }
-
-  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    border: none;
-    background: transparent;
-    color: #94a3b8;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all .2s;
-    text-align: left;
-    width: 100%;
-  }
-  .nav-item:hover  { background: #1e293b; color: #f1f5f9; }
-  .nav-active      { background: #1d4ed8 !important; color: #fff !important; box-shadow: 0 4px 12px rgba(29,78,216,.35); }
-  .nav-icon        { font-size: 18px; }
-
-  .sidebar-footer {
-    border-top: 1px solid #1e293b;
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .admin-info { display: flex; align-items: center; gap: 10px; }
-  .admin-avatar {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg,#2563eb,#7c3aed);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 800; color: #fff;
-    flex-shrink: 0;
-  }
-  .admin-name { font-size: 13px; font-weight: 700; color: #f1f5f9; }
-  .admin-role { font-size: 11px; color: #64748b; margin-top: 1px; }
-
-  .logout-btn {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 10px; border-radius: 10px;
-    background: #7f1d1d; border: none;
-    color: #fca5a5; font-size: 13px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: background .2s;
-  }
-  .logout-btn:hover { background: #991b1b; }
-
-  /* ── Main ── */
-  .main-content { flex: 1; display: flex; flex-direction: column; overflow: auto; }
-
-  .main-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 28px 32px 20px;
-    background: #fff;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  .greeting    { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -.03em; }
-  .header-sub  { font-size: 13px; color: #94a3b8; margin-top: 3px; }
-  .home-btn {
-    padding: 9px 18px; border-radius: 10px;
-    border: 1.5px solid #e2e8f0; background: #fff;
-    color: #475569; font-size: 13px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all .2s;
-  }
-  .home-btn:hover { border-color: #2563eb; color: #2563eb; }
-
-  .tab-content { padding: 28px 32px; }
-
-  .section-title {
-    font-size: 15px; font-weight: 800; color: #1e293b;
-    letter-spacing: -.02em; margin-bottom: 16px;
-  }
-
-  /* ── Stat Cards ── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .stat-card {
-    background: var(--bg);
-    border-radius: 18px;
-    padding: 22px 20px 18px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp .5s both;
-    border: 1.5px solid rgba(255,255,255,.8);
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
-    transition: transform .2s, box-shadow .2s;
-  }
-  .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.10); }
-
-  .stat-icon  { font-size: 26px; margin-bottom: 12px; }
-  .stat-value { font-size: 36px; font-weight: 800; color: var(--accent); letter-spacing: -.04em; line-height: 1; }
-  .stat-label { font-size: 12px; font-weight: 700; color: #64748b; margin-top: 6px; text-transform: uppercase; letter-spacing: .06em; }
-  .stat-bar   {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-    background: var(--accent); opacity: .3; border-radius: 0 0 18px 18px;
-  }
-
-  .report-card {
-    display: flex; align-items: center; gap: 20px;
-    background: linear-gradient(135deg,#fff7ed,#ffedd5);
-    border: 1.5px solid #fed7aa;
-    border-radius: 18px; padding: 22px 28px;
-    width: fit-content;
-  }
-  .report-icon  { font-size: 32px; }
-  .report-count { font-size: 40px; font-weight: 800; color: #ea580c; letter-spacing: -.04em; }
-  .report-label { font-size: 12px; font-weight: 700; color: #9a3412; text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
-
-  /* ── Table ── */
-  .table-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
-  }
-
-  .search-input {
-    padding: 9px 16px; border-radius: 10px;
-    border: 1.5px solid #e2e8f0; background: #fff;
-    font-size: 13px; font-family: inherit; outline: none;
-    width: 260px; transition: border-color .2s;
-  }
-  .search-input:focus { border-color: #2563eb; }
-
-  .table-wrap {
-    background: #fff; border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05);
-  }
-
-  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .data-table thead { background: #f8fafc; }
-  .data-table th {
-    padding: 12px 16px; text-align: left;
-    font-size: 11px; font-weight: 800; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: .07em;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  .data-table td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: #f8fafc; }
-
-  .user-cell  { display: flex; align-items: center; gap: 10px; }
-  .user-avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: linear-gradient(135deg,#2563eb,#7c3aed);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0;
-  }
-  .user-name  { font-weight: 700; color: #1e293b; font-size: 13px; }
-  .you-badge  { font-size: 10px; color: #64748b; font-weight: 600; margin-top: 1px; }
-  .email-cell { color: #64748b; font-size: 12px; }
-  .date-cell  { color: #94a3b8; font-size: 12px; }
-
-  .action-cell { display: flex; align-items: center; gap: 8px; }
-
-  .role-select {
-    padding: 5px 8px; border-radius: 8px;
-    border: 1.5px solid #e2e8f0; background: #fff;
-    font-size: 12px; font-family: inherit; cursor: pointer;
-    outline: none; transition: border-color .2s;
-  }
-  .role-select:focus   { border-color: #2563eb; }
-  .role-select:disabled { opacity: .45; cursor: not-allowed; }
-
-  .delete-btn {
-    padding: 5px 12px; border-radius: 8px;
-    background: #fff1f2; border: 1.5px solid #fecdd3;
-    color: #e11d48; font-size: 12px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all .2s;
-  }
-  .delete-btn:hover    { background: #ffe4e6; }
-  .delete-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-  .action-badge {
-    padding: 4px 10px; border-radius: 8px;
-    background: #eff6ff; color: #1d4ed8;
-    font-size: 11px; font-weight: 700; letter-spacing: .04em;
-  }
-  .status-success { padding: 4px 10px; border-radius: 8px; background: #f0fdf4; color: #15803d; font-size: 11px; font-weight: 700; }
-  .status-error   { padding: 4px 10px; border-radius: 8px; background: #fff1f2; color: #e11d48; font-size: 11px; font-weight: 700; }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed; top: 20px; right: 20px; z-index: 9999;
-    padding: 12px 20px; border-radius: 14px;
-    font-size: 13px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif;
-    box-shadow: 0 8px 24px rgba(0,0,0,.15);
-    animation: fadeUp .3s both;
-  }
-  .toast-success { background: #052e16; color: #86efac; }
-  .toast-error   { background: #450a0a; color: #fca5a5; }
-
-  @media (max-width: 900px) {
-    .stats-grid { grid-template-columns: repeat(2,1fr); }
-    .sidebar    { width: 200px; }
-  }
-`;
 
 export default AdminDashboard;

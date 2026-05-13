@@ -4,7 +4,12 @@ import Footer from '../components/common/Footer';
 
 const coverImage  = 'https://img.freepik.com/free-photo/medical-banner-with-stethoscope_23-2149611199.jpg?w=1380';
 const systemImage = 'https://img.freepik.com/free-vector/analysis-concept-illustration_114360-1119.jpg?w=800';
-const devImage    = 'https://img.freepik.com/free-icon/user_318-159711.jpg';
+
+const profileLinks = {
+  github: 'https://github.com/PuntharaThirani',
+  linkedin: 'https://www.linkedin.com/in/punthara-thirani-449776265/',
+  email: 'mailto:puntharathirani@gmail.com',
+};
 
 const techStack = [
   {
@@ -176,11 +181,6 @@ const About = () => {
           </h2>
 
           <div className="mx-auto max-w-xl rounded-3xl border-t-4 border-blue-600 bg-white px-8 py-12 shadow-lg">
-            <img
-              src={devImage}
-              alt="Developer"
-              className="mx-auto h-36 w-36 rounded-full border-4 border-sky-100 object-cover"
-            />
 
             <h3 className="mt-6 text-2xl font-bold text-slate-900">
               Allage A Thirani
@@ -207,25 +207,32 @@ const About = () => {
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a
-                href="#"
-                className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-600 hover:text-white"
-              >
-                💻 GitHub
-              </a>
-              <a
-                href="#"
-                className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-600 hover:text-white"
-              >
-                💼 LinkedIn
-              </a>
-              <a
-                href="#"
-                className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-600 hover:text-white"
-              >
-                📧 Email
-              </a>
-            </div>
+  <a
+    href={profileLinks.github}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-600 hover:text-white"
+  >
+    💻 GitHub
+  </a>
+
+  <a
+    href={profileLinks.linkedin}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-600 hover:text-white"
+  >
+    💼 LinkedIn
+  </a>
+
+  <a
+    href={profileLinks.email}
+    className="rounded-full bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-blue-600 hover:text-white"
+  >
+    📧 Email
+  </a>
+</div>
+
           </div>
         </section>
       </div>

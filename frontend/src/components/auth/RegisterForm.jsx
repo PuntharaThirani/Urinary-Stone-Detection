@@ -1,213 +1,128 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { registerUser } from '../../services/api';
 
-const RegisterForm = ({ onSuccess }) => {
+const createInitialFormData = (role) => ({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  role,
+  patientId: '',
+});
 
-  const [formData, setFormData] = useState({
+const RegisterForm = ({ defaultRole = 'patient', onSuccess }) => {
+  const [formData, setFormData] = useState(createInitialFormData(defaultRole));
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      role: defaultRole,
+      patientId: defaultRole === 'patient' ? prev.patientId : '',
+    }));
+  }, [defaultRole]);
 
-    role: 'patient',
+  const selectedRole =
+    formData.role.charAt(0).toUpperCase() + formData.role.slice(1);
 
-    patientId: '',
-  });
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [message, setMessage] =
-    useState({
-
-      type: '',
-      text: '',
-    });
-
-  // Handle input changes
   const handleChange = (e) => {
+    const { name, value } = e.target;
 
     setFormData((prev) => ({
-
       ...prev,
-
-      [e.target.name]:
-        e.target.value,
-
+      [name]: value,
     }));
 
     if (message.text) {
-
-      setMessage({
-
-        type: '',
-        text: '',
-
-      });
+      setMessage({ type: '', text: '' });
     }
   };
 
-  // Submit form
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
     if (loading) return;
 
+    const name = formData.name.trim();
+    const email = formData.email.trim().toLowerCase();
+    const patientId = formData.patientId.trim();
+
+    if (formData.password !== formData.confirmPassword) {
+      setMessage({ type: 'error', text: 'Passwords do not match.' });
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    if (!passwordRegex.test(formData.password)) {
+      setMessage({
+        type: 'error',
+        text: 'Password must be at least 8 characters with 1 uppercase letter and 1 number.',
+      });
+      return;
+    }
+
+    if (formData.role === 'patient' && !patientId) {
+      setMessage({ type: 'error', text: 'Patient ID is required.' });
+      return;
+    }
+
+    const payload = {
+      name,
+      email,
+      password: formData.password,
+      role: formData.role,
+    };
+
+    if (formData.role === 'patient') {
+      payload.patientId = patientId;
+    }
+
     setLoading(true);
-
-    setMessage({
-
-      type: '',
-      text: '',
-
-    });
+    setMessage({ type: '', text: '' });
 
     try {
-
-      // Password validation
-      if (
-        formData.password !==
-        formData.confirmPassword
-      ) {
-
-        setMessage({
-
-          type: 'error',
-
-          text:
-            'Passwords do not match.',
-
-        });
-
-        setLoading(false);
-
-        return;
-      }
-
-      // Strong password validation
-      const passwordRegex =
-        /^(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-      if (
-        !passwordRegex.test(
-          formData.password
-        )
-      ) {
-
-        setMessage({
-
-          type: 'error',
-
-          text:
-            'Password must be at least 8 characters with 1 uppercase letter and 1 number.',
-
-        });
-
-        setLoading(false);
-
-        return;
-      }
-
-      // Payload
-      const payload = {
-
-        name:
-          formData.name.trim(),
-
-        email:
-          formData.email
-            .trim()
-            .toLowerCase(),
-
-        password:
-          formData.password,
-
-        role:
-          formData.role,
-
-        patientId:
-          formData.role === 'patient'
-            ? formData.patientId.trim()
-            : undefined,
-      };
-
       await registerUser(payload);
 
       setMessage({
-
         type: 'success',
-
-        text:
-          'Registration successful. Please sign in.',
-
+        text: 'Registration successful. Please sign in.',
       });
 
-      // Reset form
-      setFormData({
+      setFormData(createInitialFormData(defaultRole));
 
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-
-        role: 'patient',
-
-        patientId: '',
-      });
-
-      // Redirect
       if (onSuccess) {
-
         setTimeout(() => {
-
           onSuccess();
-
         }, 1500);
       }
-
     } catch (err) {
-
       setMessage({
-
         type: 'error',
-
         text:
           err?.response?.data?.message ||
-
           err?.message ||
-
           'Registration failed. Please try again.',
-
       });
-
     } finally {
-
       setLoading(false);
     }
   };
 
   return (
-
     <div className="w-full">
-
-      {/* Heading */}
       <div className="mb-6">
-
         <h3 className="text-2xl font-black tracking-tight text-slate-900">
-          Create Patient Account
+          Create {selectedRole} Account
         </h3>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
           Register to access the UroScan AI platform.
         </p>
-
       </div>
 
-      {/* Message */}
       {message.text && (
-
         <div
           className={`mb-6 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
             message.type === 'error'
@@ -215,29 +130,15 @@ const RegisterForm = ({ onSuccess }) => {
               : 'border-emerald-200 bg-emerald-50 text-emerald-700'
           }`}
         >
-
           <span className="mt-0.5">
-
-            {message.type === 'error'
-              ? '⚠️'
-              : '✅'}
-
+            {message.type === 'error' ? '⚠️' : '✅'}
           </span>
-
           <span>{message.text}</span>
-
         </div>
       )}
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5"
-      >
-
-        {/* Full Name */}
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-
           <label className="ml-1 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
             Full Name
           </label>
@@ -252,12 +153,9 @@ const RegisterForm = ({ onSuccess }) => {
             minLength={2}
             className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 font-medium outline-none transition focus:border-blue-500"
           />
-
         </div>
 
-        {/* Email */}
         <div className="space-y-2">
-
           <label className="ml-1 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
             Email Address
           </label>
@@ -271,14 +169,10 @@ const RegisterForm = ({ onSuccess }) => {
             required
             className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 font-medium outline-none transition focus:border-blue-500"
           />
-
         </div>
 
-        {/* Patient ID */}
         {formData.role === 'patient' && (
-
           <div className="space-y-2">
-
             <label className="ml-1 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
               Patient ID
             </label>
@@ -292,14 +186,10 @@ const RegisterForm = ({ onSuccess }) => {
               required
               className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 font-medium uppercase outline-none transition focus:border-blue-500"
             />
-
           </div>
-
         )}
 
-        {/* Password */}
         <div className="space-y-2">
-
           <label className="ml-1 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
             Password
           </label>
@@ -314,12 +204,9 @@ const RegisterForm = ({ onSuccess }) => {
             minLength={8}
             className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 font-medium outline-none transition focus:border-blue-500"
           />
-
         </div>
 
-        {/* Confirm Password */}
         <div className="space-y-2">
-
           <label className="ml-1 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
             Confirm Password
           </label>
@@ -334,63 +221,16 @@ const RegisterForm = ({ onSuccess }) => {
             minLength={8}
             className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 font-medium outline-none transition focus:border-blue-500"
           />
-
         </div>
 
-        {/* Role */}
-        <div className="space-y-2">
-
-          <label className="ml-1 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
-            Account Type
-          </label>
-
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full rounded-2xl border-2 border-transparent bg-slate-50 px-5 py-4 font-medium outline-none transition focus:border-blue-500"
-          >
-
-            <option value="patient">
-              Patient
-            </option>
-
-            <option value="doctor">
-              Doctor
-            </option>
-
-            <option value="staff">
-              Staff
-            </option>
-
-          </select>
-
-        </div>
-
-        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
           className="flex w-full items-center justify-center gap-3 rounded-2xl bg-emerald-600 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.99]"
         >
-
-          {loading ? (
-
-            <>
-              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              Registering...
-            </>
-
-          ) : (
-
-            'Create Account'
-
-          )}
-
+          {loading ? 'Registering...' : `Create ${selectedRole} Account`}
         </button>
-
       </form>
-
     </div>
   );
 };

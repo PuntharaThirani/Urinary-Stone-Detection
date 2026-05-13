@@ -1,21 +1,21 @@
+const mongoose = require('mongoose');
 const Appointment = require('../models/Appointment');
-
+const Patient = require('../models/Patient');
+const User = require('../models/User');
 
 // CREATE APPOINTMENT
-
 const createAppointment = async (req, res) => {
   try {
-    const { 
-      patientId, 
-      doctorId, 
-      appointmentDate, 
-      timeSlot, 
-      reason, 
-      status, 
-      notes 
+    const {
+      patientId,
+      doctorId,
+      appointmentDate,
+      timeSlot,
+      reason,
+      status,
+      notes,
     } = req.body;
 
-    // Validate required fields
     if (!patientId || !doctorId || !appointmentDate || !timeSlot) {
       return res.status(400).json({
         success: false,
@@ -23,20 +23,71 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    const appointment = await Appointment.create({
-      patientId,
-      doctorId,
-      appointmentDate,
-      timeSlot,
-      reason:  reason  || '',
-      status:  status  || 'scheduled',
-      notes:   notes   || '',
+    let patient = null;
+
+    if (mongoose.Types.ObjectId.isValid(patientId)) {
+      patient = await Patient.findById(patientId);
+    }
+
+    if (!patient) {
+      patient = await Patient.findOne({
+        patientId: String(patientId).trim().toUpperCase(),
+      });
+    }
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found. Please check Patient ID.',
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid doctorId.',
+      });
+    }
+
+    const doctor = await User.findOne({
+      _id: doctorId,
+      role: 'doctor',
     });
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found.',
+      });
+    }
+
+    const date = new Date(appointmentDate);
+
+    if (Number.isNaN(date.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid appointment date.',
+      });
+    }
+
+    const appointment = await Appointment.create({
+      patientId: patient._id,
+      doctorId: doctor._id,
+      appointmentDate: date,
+      timeSlot: timeSlot.trim(),
+      reason: reason || '',
+      status: status || 'scheduled',
+      notes: notes || '',
+    });
+
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate('patientId', 'fullName patientId email')
+      .populate('doctorId', 'name email role doctorId');
 
     res.status(201).json({
       success: true,
       message: 'Appointment created successfully',
-      data: appointment,
+      data: populatedAppointment,
     });
   } catch (error) {
     res.status(500).json({
@@ -47,14 +98,12 @@ const createAppointment = async (req, res) => {
   }
 };
 
-
 // GET ALL APPOINTMENTS
-
 const getAllAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find()
-      .populate('patientId', 'fullName patientId')
-      .populate('doctorId',  'name email role')
+      .populate('patientId', 'fullName patientId email')
+      .populate('doctorId', 'name email role doctorId')
       .sort({ appointmentDate: -1 });
 
     res.status(200).json({
@@ -71,19 +120,17 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
-
 // GET APPOINTMENT BY ID
-
 const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
-      .populate('patientId', 'fullName patientId')
-      .populate('doctorId',  'name email role');
+      .populate('patientId', 'fullName patientId email')
+      .populate('doctorId', 'name email role doctorId');
 
     if (!appointment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Appointment not found' 
+        message: 'Appointment not found',
       });
     }
 
@@ -100,23 +147,86 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
-
 // UPDATE APPOINTMENT
-
 const updateAppointment = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    if (updateData.patientId) {
+      let patient = null;
+
+      if (mongoose.Types.ObjectId.isValid(updateData.patientId)) {
+        patient = await Patient.findById(updateData.patientId);
+      }
+
+      if (!patient) {
+        patient = await Patient.findOne({
+          patientId: String(updateData.patientId).trim().toUpperCase(),
+        });
+      }
+
+      if (!patient) {
+        return res.status(404).json({
+          success: false,
+          message: 'Patient not found. Please check Patient ID.',
+        });
+      }
+
+      updateData.patientId = patient._id;
+    }
+
+    if (updateData.doctorId) {
+      if (!mongoose.Types.ObjectId.isValid(updateData.doctorId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid doctorId.',
+        });
+      }
+
+      const doctor = await User.findOne({
+        _id: updateData.doctorId,
+        role: 'doctor',
+      });
+
+      if (!doctor) {
+        return res.status(404).json({
+          success: false,
+          message: 'Doctor not found.',
+        });
+      }
+
+      updateData.doctorId = doctor._id;
+    }
+
+    if (updateData.appointmentDate) {
+      const date = new Date(updateData.appointmentDate);
+
+      if (Number.isNaN(date.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid appointment date.',
+        });
+      }
+
+      updateData.appointmentDate = date;
+    }
+
+    if (updateData.timeSlot) {
+      updateData.timeSlot = updateData.timeSlot.trim();
+    }
+
     const updatedAppointment = await Appointment.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     )
-      .populate('patientId', 'fullName patientId')
-      .populate('doctorId',  'name email role');
+      .populate('patientId', 'fullName patientId email')
+      .populate('doctorId', 'name email role doctorId');
 
     if (!updatedAppointment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Appointment not found' 
+        message: 'Appointment not found',
       });
     }
 
@@ -134,24 +244,21 @@ const updateAppointment = async (req, res) => {
   }
 };
 
-
 // DELETE APPOINTMENT
-
 const deleteAppointment = async (req, res) => {
   try {
-    const deletedAppointment = await Appointment
-      .findByIdAndDelete(req.params.id);
+    const deletedAppointment = await Appointment.findByIdAndDelete(req.params.id);
 
     if (!deletedAppointment) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'Appointment not found' 
+        message: 'Appointment not found',
       });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
-      message: 'Appointment deleted successfully' 
+      message: 'Appointment deleted successfully',
     });
   } catch (error) {
     res.status(500).json({
