@@ -5,8 +5,8 @@ const Patient = require('../models/Patient');
 
 exports.createDraftReport = async (req, res) => {
   try {
+
     const {
-      doctorId,
       patientId,
       patientName,
       patientAge,
@@ -16,7 +16,10 @@ exports.createDraftReport = async (req, res) => {
       yoloResults,
     } = req.body;
 
-    // Get stone count from results
+    // Get authenticated doctor ID securely
+    const doctorId = req.user.id;
+
+    // Get stone count
     const stoneCount =
       yoloResults?.stoneCount ||
       yoloResults?.detected_objects?.length ||
@@ -24,139 +27,153 @@ exports.createDraftReport = async (req, res) => {
 
     const hasStones = stoneCount > 0;
 
-    // Find patient document
-let patientDoc = null;
+    // Find patient
+    let patientDoc = null;
 
-if (patientId) {
+    if (patientId) {
 
-  patientDoc =
-  await Patient.findOne({
+      patientDoc = await Patient.findOne({
 
-    $or: [
+        $or: [
 
-      {
-        patientId:
-          patientId,
-      },
+          { patientId: patientId },
 
-      {
-        _id:
-          patientId,
-      },
-    ],
-  });
-}
+          { _id: patientId },
+
+        ],
+
+      });
+    }
 
     // Generate AI draft text
-    const date = new Date().toLocaleDateString('en-GB');
-    const aiDraft = yoloResults?.aiDraft || `
-AI-ASSISTED PRELIMINARY REPORT
+    const date =
+      new Date().toLocaleDateString('en-GB');
+
+    const aiDraft =
+      yoloResults?.aiDraft ||
+
+`AI-ASSISTED PRELIMINARY REPORT
 
 Date           : ${date}
 System         : UroScan AI — Diagnosis Support System
 
 PATIENT INFORMATION:
-Name           : ${patientName   || 'N/A'}
-Age            : ${patientAge    || 'N/A'}
+Name           : ${patientName || 'N/A'}
+Age            : ${patientAge || 'N/A'}
 Gender         : ${patientGender || 'N/A'}
 
 DETECTION RESULTS:
-Status         : ${hasStones ? 'POSITIVE — Stone Detected' : 'NEGATIVE — No Stone Detected'}
+Status         : ${
+  hasStones
+    ? 'POSITIVE — Stone Detected'
+    : 'NEGATIVE — No Stone Detected'
+}
 Stone Count    : ${stoneCount}
 
 IMPORTANT:
 This is an AI-generated preliminary interpretation.
 Final diagnosis must be confirmed by a qualified doctor.
+`;
 
-    `.trim();
-
-    // Save report to database
+    // Create report
     const newReport = new Report({
 
-  doctor:
-    doctorId,
+      doctor: doctorId,
 
-  patient:
-  patientDoc?._id || null,
+      patient:
+        patientDoc?._id || null,
 
-  patientName:
-  patientDoc?.fullName ||
-  patientName,
+      patientName:
+        patientDoc?.fullName ||
+        patientName,
 
-patientAge:
-  patientDoc?.age ||
-  patientAge,
+      patientAge:
+        patientDoc?.age ||
+        patientAge,
 
-patientGender:
-  patientDoc?.gender ||
-  patientGender,
+      patientGender:
+        patientDoc?.gender ||
+        patientGender,
 
-  imageId,
+      imageId,
 
-  imagePath,
+      imagePath,
 
-  aiResult:
-    yoloResults,
+      aiResult:
+        yoloResults,
 
-  hasStones,
+      hasStones,
 
-  stoneCount,
+      stoneCount,
 
-  details:
-    yoloResults?.details || [],
+      details:
+        yoloResults?.details || [],
 
-  phase1: {
+      phase1: {
 
-    result:
+        result:
 
-      yoloResults?.phase1?.result ||
+          yoloResults?.phase1?.result ||
 
-      (hasStones
-        ? 'stone'
-        : 'normal'),
+          (
+            hasStones
+              ? 'stone'
+              : 'normal'
+          ),
 
-    confidence:
+        confidence:
 
-      yoloResults?.phase1?.confidence || 0,
-  },
+          yoloResults?.phase1?.confidence || 0,
+      },
 
-  aiDraft,
+      aiDraft,
 
-  doctorNotes: '',
+      doctorNotes: '',
 
-  doctorAdvice: '',
+      doctorAdvice: '',
 
-  finalDiagnosis: '',
+      finalDiagnosis: '',
 
-  followUp: '',
+      followUp: '',
 
-  doctorConfirmed: false,
+      doctorConfirmed: false,
 
-  status: 'pending',
-});
+      status: 'pending',
+
+    });
 
     await newReport.save();
 
     res.status(201).json({
-      success: true,
-      message: 'AI draft report created successfully',
-      report:  newReport,
-    });
-  } catch (error) {
-    console.error(
-  'Create Draft Report Error:',
-  error.message
-);
 
-console.error(error);
+      success: true,
+
+      message:
+        'AI draft report created successfully',
+
+      report: newReport,
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Create Draft Report Error:',
+      error.message
+    );
+
     res.status(500).json({
+
       success: false,
-      message: 'Failed to create draft report',
-      error:   error.message,
+
+      message:
+        'Failed to create draft report',
+
+      error: error.message,
+
     });
   }
 };
-
 
 // CONFIRM FINAL REPORT (Doctor Only)
 
