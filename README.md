@@ -186,7 +186,7 @@ X-ray Upload
 ### Step 1 — Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/StoneDetection-App.git
+git clone https://github.com/PuntharaThirani/Urinary-Stone-Detection.git
 cd StoneDetection-App
 ```
 
@@ -203,7 +203,7 @@ Create `.env` file in `/backend`:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/test?appName=Cluster0
+MONGODB_URI=mongodb+srv://xray-admin:password456@cluster0.lc5jt.mongodb.net/test?appName=Cluster0
 JWT_SECRET=your_super_secret_jwt_key_2026
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
