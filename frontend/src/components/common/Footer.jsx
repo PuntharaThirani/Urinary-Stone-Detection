@@ -26,11 +26,11 @@ const Footer = () => {
           <h3 className="text-lg font-bold text-white">Quick Links</h3>
           <ul className="mt-5 space-y-3 text-sm">
             {[
-              { to: '/',            label: 'Home'             },
-              { to: '/about',       label: 'About'            },
-              { to: '/features',    label: 'Features'         },
-              { to: '/how-it-works', label: 'How It Works'   },
-              { to: '/login',       label: 'Login / Register' },
+              { to: '/', label: 'Home'},
+              { to: '/about', label: 'About'},
+              { to: '/features', label: 'Features'},
+              { to: '/how-it-works', label: 'How It Works'},
+              { to: '/login', label: 'Login / Register'},
             ].map(({ to, label }) => (
               <li key={to}>
                 <Link to={to} className="transition hover:text-blue-400">

@@ -1,8 +1,8 @@
 import React from 'react';
 
 const LoadingSpinner = ({ 
-  size    = 'md',    // sm, md, lg
-  text    = '',      // Optional loading text
+  size = 'md',    // sm, md, lg
+  text = '',      // Optional loading text
   fullPage = false,  // Full page overlay
 }) => {
 

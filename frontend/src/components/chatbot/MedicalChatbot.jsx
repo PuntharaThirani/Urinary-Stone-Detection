@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const MedicalChatbot = ({ analysis }) => {
-  const [isOpen, setIsOpen]     = useState(false);
-  const [input, setInput]       = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [analysisInjected, setAnalysisInjected] = useState(false); 
   const [messages, setMessages] = useState([
     {
-      text:   'Hello! I am your UroScan AI assistant. I can help explain scan results and system workflow.',
+      text: 'Hello! I am your UroScan AI assistant. I can help explain scan results and system workflow.',
       sender: 'bot',
     },
   ]);

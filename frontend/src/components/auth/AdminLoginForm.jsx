@@ -8,9 +8,9 @@ import myLogo from '../../assets/images/logo-removebg-preview.png';
 const AdminLoginForm = () => {
   const navigate = useNavigate();
 
-  const [formData,     setFormData]     = useState({ email: '', password: '' });
-  const [loading,      setLoading]      = useState(false);
-  const [error,        setError]        = useState('');
+  const [formData, setFormData] = useState({ email:'', password:''});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false); //  Password toggle state
 
   const handleChange = (e) => {
@@ -26,17 +26,17 @@ const AdminLoginForm = () => {
 
     try {
       const response = await adminLogin({
-        email:    formData.email.trim().toLowerCase(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
       });
 
       const token = response?.token || '';
       const user  = response?.user  || {};
 
-      localStorage.setItem('token',    token);
+      localStorage.setItem('token', token);
       localStorage.setItem('userRole', user.role || 'admin');
       localStorage.setItem('userName', user.name || '');
-      localStorage.setItem('userId',   user.id || user._id || '');
+      localStorage.setItem('userId', user.id || user._id || '');
 
       navigate('/admin-dashboard');
 

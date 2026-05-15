@@ -3,19 +3,19 @@ import api from '../../services/api';
 
 const DoctorReportReview = ({ report, onVerifiedSuccess }) => {
 
-  const [editedDraft,    setEditedDraft]    = useState(report?.aiDraft       || '');
-  const [doctorNotes,    setDoctorNotes]    = useState(report?.doctorNotes   || '');
-  const [doctorAdvice,   setDoctorAdvice]   = useState(report?.doctorAdvice  || '');
-  const [followUp,       setFollowUp]       = useState(report?.followUp      || '');
+  const [editedDraft, setEditedDraft] = useState(report?.aiDraft || '');
+  const [doctorNotes, setDoctorNotes]  = useState(report?.doctorNotes || '');
+  const [doctorAdvice, setDoctorAdvice] = useState(report?.doctorAdvice  || '');
+  const [followUp, setFollowUp] = useState(report?.followUp || '');
   const [finalDiagnosis, setFinalDiagnosis] = useState(
     report?.finalDiagnosis ||
     (report?.hasStones ? 'Urolithiasis Detected' : 'Normal / No Stones')
   );
 
-  const [isSubmitting,    setIsSubmitting]    = useState(false);
-  const [isRejecting,     setIsRejecting]     = useState(false);
-  const [successMessage,  setSuccessMessage]  = useState('');
-  const [errorMessage,    setErrorMessage]    = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRejecting, setIsRejecting]  = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   
   // CONFIRM REPORT
