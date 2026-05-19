@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate }   from 'react-router-dom';
-import Header                  from '../components/common/Header';
-import Footer                  from '../components/common/Footer';
-import api                     from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import Header from '../components/common/Header';
+import Footer from '../components/common/Footer';
+import api from '../services/api';
 
 const AnalyzeXrayPage = () => {
 
@@ -10,15 +10,15 @@ const AnalyzeXrayPage = () => {
   const fileInputRef = useRef(null);
 
   const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl,    setPreviewUrl]    = useState(null);
-  const [isAnalyzing,   setIsAnalyzing]   = useState(false);
-  const [loadingStep,   setLoadingStep]   = useState(0);
-  const [error,         setError]         = useState('');
-  const [isDragging,    setIsDragging]    = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   // Patient info for report
-  const [patientName,   setPatientName]   = useState('');
-  const [patientAge,    setPatientAge]    = useState('');
+  const [patientName, setPatientName] = useState('');
+  const [patientAge, setPatientAge] = useState('');
   const [patientGender, setPatientGender] = useState('male');
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState('');
@@ -41,7 +41,7 @@ useEffect(() => {
     if (!file) return;
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const maxSize      = 5 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024;
 
     if (!allowedTypes.includes(file.type)) {
       setError('Please upload a valid image file: JPG, JPEG, or PNG.');
@@ -61,9 +61,9 @@ useEffect(() => {
   };
 
   const handleImageChange = (e) => processFile(e.target.files?.[0]);
-  const handleDragOver    = (e) => { e.preventDefault(); setIsDragging(true);  };
-  const handleDragLeave   = (e) => { e.preventDefault(); setIsDragging(false); };
-  const handleDrop        = (e) => { e.preventDefault(); setIsDragging(false); processFile(e.dataTransfer.files?.[0]); };
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true);  };
+  const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
+  const handleDrop = (e) => { e.preventDefault(); setIsDragging(false); processFile(e.dataTransfer.files?.[0]); };
 
   // Run AI Analysis — Upload → Predict → Navigate
   const fetchPatients = async () => {

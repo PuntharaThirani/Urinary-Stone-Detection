@@ -180,16 +180,16 @@ exports.getSystemStats = async (req, res) => {
       success: true,
       data: {
         users: {
-          total:    totalUsers,
-          doctors:  totalDoctors,
-          patients: totalPatients,
-          staff:    totalStaff,
-          admins:   totalAdmins,
+          total: totalUsers,
+          doctors: totalDoctors,
+          patients:totalPatients,
+          staff: totalStaff,
+          admins: totalAdmins,
         },
         scans: {
-          total:          totalScans,
-          today:          todayScans,
-          thisWeek:       weeklyScans,
+          total: totalScans,
+          today: todayScans,
+          thisWeek: weeklyScans,
           stonesDetected,
         },
         reports: {

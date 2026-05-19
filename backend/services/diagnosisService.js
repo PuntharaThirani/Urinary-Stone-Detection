@@ -6,8 +6,6 @@
 // This is NOT a final medical diagnosis.
 // Results must always be reviewed by a qualified doctor.
 
-
-
 // Estimate Stone Size from Bounding Box
 
 const estimateStoneSize = (bbox) => {
@@ -144,20 +142,20 @@ const generateDiagnosis = (detectionResult) => {
     const recommendation = getRecommendation(false, riskLevel, 0);
 
     return {
-      detected:        false,
-      confidence:      0,
-      estimatedSize:   0,
-      stoneCount:      0,
+      detected: false,
+      confidence: 0,
+      estimatedSize: 0,
+      stoneCount: 0,
       riskLevel,
       recommendation,
-      status:          'no_obvious_stone',
-      aiDraft:         generateAIDraft({
-        detected:    false,
-        confidence:  0,
+      status: 'no_obvious_stone',
+      aiDraft: generateAIDraft({
+        detected: false,
+        confidence: 0,
         riskLevel,
         recommendation,
-        stoneCount:  0,
-        sizeInMm:    0,
+        stoneCount: 0,
+        sizeInMm: 0,
       }),
       disclaimer:
         'This output is AI-assisted and must be reviewed by a qualified medical professional.',
@@ -169,7 +167,7 @@ const generateDiagnosis = (detectionResult) => {
     ((detectionResult.confidence || 0) * 100).toFixed(2)
   );
 
-  const bbox       = detectionResult.bbox  || null;
+  const bbox = detectionResult.bbox  || null;
   const stoneCount = detectionResult.stoneCount || 1;
 
   // Calculate estimated size
@@ -199,13 +197,13 @@ const generateDiagnosis = (detectionResult) => {
   });
 
   return {
-    detected:      true,
+    detected: true,
     confidence,
     estimatedSize: sizeInMm,
     stoneCount,
     riskLevel,
     recommendation,
-    status:        'pending_doctor_review',
+    status: 'pending_doctor_review',
     aiDraft,
     disclaimer:
       'This output is AI-assisted and must be reviewed by a qualified medical professional.',

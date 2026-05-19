@@ -6,8 +6,8 @@ const reportSchema = new mongoose.Schema(
     // Doctor Reference
     
     doctor: {
-      type:     mongoose.Schema.Types.ObjectId,
-      ref:      'User',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
 
@@ -15,21 +15,21 @@ const reportSchema = new mongoose.Schema(
     // Patient Reference
     
     patient: {
-      type:    mongoose.Schema.Types.ObjectId,
-      ref:     'Patient',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Patient',
       default: null,
     },
 
     // Patient snapshot data
     patientName: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     patientAge: {
       type: Number,
-      min:  0,
+      min: 0,
     },
 
     patientGender: {
@@ -41,22 +41,22 @@ const reportSchema = new mongoose.Schema(
     // X-ray Image
     
     imageId: {
-      type:    mongoose.Schema.Types.ObjectId,
-      ref:     'XrayImage',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'XrayImage',
       default: null,
     },
 
     imagePath: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     // Annotated image with bounding boxes 
     annotatedImageUrl: {
-      type:    String,
+      type: String,
       default: null,
-      trim:    true,
+      trim: true,
     },
 
     
@@ -89,11 +89,11 @@ const reportSchema = new mongoose.Schema(
    
     aiResult: {
       detectedObjects: {
-        type:    Array,
+        type: Array,
         default: [],
       },
       rawOutput: {
-        type:    Object,
+        type: Object,
         default: {},
       },
     },
@@ -102,21 +102,21 @@ const reportSchema = new mongoose.Schema(
     // Detection Summary
     
     hasStones: {
-      type:    Boolean,
+      type: Boolean,
       default: false,
     },
 
     stoneCount: {
-      type:    Number,
+      type: Number,
       default: 0,
-      min:     0,
+      min: 0,
     },
 
     // Individual stone details 
     details: [
       {
-        location:   { type: String, default: 'Unknown' },
-        size:       { type: Number, default: 0 },
+        location: { type: String, default: 'Unknown' },
+        size: { type: Number, default: 0 },
         confidence: { type: Number, default: 0 },
       },
     ],
@@ -125,13 +125,13 @@ const reportSchema = new mongoose.Schema(
     // AI Diagnosis Support
   
     diagnosisData: {
-      estimatedSize:  { type: Number, default: 0 },
+      estimatedSize: { type: Number, default: 0 },
       riskLevel: {
-        type:    String,
-        enum:    ['No Risk', 'Low', 'Medium', 'High'],
+        type: String,
+        enum: ['No Risk', 'Low', 'Medium', 'High'],
         default: 'No Risk',
       },
-      confidence:     { type: Number, default: 0 },
+      confidence: { type: Number, default: 0 },
       recommendation: { type: String, default: '', trim: true },
     },
 
@@ -139,63 +139,63 @@ const reportSchema = new mongoose.Schema(
     // AI Draft Report
   
     aiDraft: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     
     // Doctor Review
    
     doctorNotes: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     doctorAdvice: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     finalDiagnosis: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     followUp: {
-      type:    String,
+      type: String,
       default: '',
-      trim:    true,
+      trim: true,
     },
 
     
     // Doctor Validation Controls
    
     doctorConfirmed: {
-      type:    Boolean,
+      type: Boolean,
       default: false,
     },
 
     doctorEdited: {
-      type:    Boolean,
+      type: Boolean,
       default: false,
     },
 
     reviewedAt: {
-      type:    Date,
+      type: Date,
       default: null,
     },
 
     confirmedAt: {           
-      type:    Date,
+      type: Date,
       default: null,
     },
 
     rejectedAt: {            
-      type:    Date,
+      type: Date,
       default: null,
     },
 
@@ -203,8 +203,8 @@ const reportSchema = new mongoose.Schema(
     // Workflow Status
     
     status: {
-      type:    String,
-      enum:    ['pending', 'under_review', 'confirmed', 'rejected'],
+      type: String,
+      enum: ['pending', 'under_review', 'confirmed', 'rejected'],
       default: 'pending',
     },
   },
@@ -212,10 +212,10 @@ const reportSchema = new mongoose.Schema(
 );
 
 // Indexes for performance
-reportSchema.index({ doctor:          1 });
-reportSchema.index({ patient:         1 });
-reportSchema.index({ status:          1 });
-reportSchema.index({ createdAt:      -1 });
+reportSchema.index({ doctor: 1 });
+reportSchema.index({ patient: 1 });
+reportSchema.index({ status: 1 });
+reportSchema.index({ createdAt: -1 });
 reportSchema.index({ doctorConfirmed: 1 });
 
 module.exports = mongoose.model('Report', reportSchema);

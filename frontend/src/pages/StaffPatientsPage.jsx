@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-import api    from '../services/api';
+import api from '../services/api';
 
 const StaffPatientsPage = () => {
   const [patients, setPatients] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [error,    setError]    = useState('');
+  const [error, setError] = useState('');
   const [success,  setSuccess]  = useState('');
 
   const [formData, setFormData] = useState({
-    fullName:         '',
-    patientId:        '',
-    email:            '',
-    age:              '',
-    gender:           'male',
-    bloodGroup:       '',
-    contactNumber:    '',
-    address:          '',
+    fullName: '',
+    patientId: '',
+    email: '',
+    age: '',
+    gender: 'male',
+    bloodGroup: '',
+    contactNumber: '',
+    address: '',
     emergencyContact: '',
-    medicalNotes:     '',
+    medicalNotes: '',
   });
 
   useEffect(() => { fetchPatients(); }, []);

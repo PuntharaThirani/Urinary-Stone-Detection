@@ -2,52 +2,52 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import doctorIcon from '../assets/images/doctor.png';
+import patientIcon from '../assets/images/patienticon.png';
+import staffIcon from '../assets/images/stafficon.png';
+import heroDoctorImg from '../assets/images/home1.avif';
+import aboutImg from '../assets/images/home2.avif';
 
-const doctorIcon  = 'https://cdn-icons-png.flaticon.com/512/3774/3774299.png';
-const patientIcon = 'https://cdn-icons-png.flaticon.com/512/2750/2750657.png';
-const staffIcon   = 'https://cdn-icons-png.flaticon.com/512/3209/3209079.png';
 
-const heroDoctorImg = 'https://img.freepik.com/free-photo/portrait-smiling-handsome-male-doctor-man_171337-5055.jpg?w=996';
-const aboutImg      = 'https://img.freepik.com/free-photo/doctor-offering-medical-advice_23-2147796538.jpg?w=996';
 
 const portalCards = [
   {
-    title:       'Doctor Portal',
+    title: 'Doctor Portal',
     description: 'Upload X-ray images, review AI detection results, confirm diagnoses, and generate patient reports.',
-    icon:        doctorIcon,
-    bg:          'bg-sky-100',
-    path:        '/login?role=doctor',
-    action:      'Login as Doctor',
+    icon: doctorIcon,
+    bg: 'bg-sky-100',
+    path: '/login?role=doctor',
+    action: 'Login as Doctor',
   },
   {
-    title:       'Patient Portal',
+    title: 'Patient Portal',
     description: 'Access finalized reports, view scan history, and track medical records in one place.',
-    icon:        patientIcon,
-    bg:          'bg-emerald-100',
-    path:        '/login?role=patient',
-    action:      'Login as Patient',
+    icon: patientIcon,
+    bg: 'bg-emerald-100',
+    path: '/login?role=patient',
+    action: 'Login as Patient',
   },
   {
-    title:       'Staff Portal',
+    title: 'Staff Portal',
     description: 'Manage appointments, coordinate patient records, and support the diagnostic workflow.',
-    icon:        staffIcon,
-    bg:          'bg-fuchsia-100',
-    path:        '/login?role=staff',
-    action:      'Login as Staff',
+    icon: staffIcon,
+    bg: 'bg-fuchsia-100',
+    path: '/login?role=staff',
+    action: 'Login as Staff',
   },
 ];
 
 const systemFeatures = [
   {
-    title:       'Two-Phase AI Detection',
+    title: 'Two-Phase AI Detection',
     description: 'Phase 1 uses EfficientNet-B0 for classification (94.74% accuracy). Phase 2 uses YOLOv8 for stone localization with bounding boxes (mAP@50: 0.927).',
   },
   {
-    title:       'Draft Report Generation',
+    title: 'Draft Report Generation',
     description: 'AI generates structured preliminary reports. Doctors review, edit, confirm, and send finalized reports to patients.',
   },
   {
-    title:       'Role-Based Access Control',
+    title: 'Role-Based Access Control',
     description: 'Separate portals for Doctors, Patients, Staff, and Admins with JWT authentication and audit logging.',
   },
 ];

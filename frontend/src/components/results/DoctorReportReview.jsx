@@ -29,7 +29,7 @@ const DoctorReportReview = ({ report, onVerifiedSuccess }) => {
       const response = await api.put(
         `/reports/${report._id}/confirm`,
         {
-          aiDraft:        editedDraft,
+          aiDraft: editedDraft,
           doctorNotes,
           doctorAdvice,
           followUp,
@@ -97,7 +97,7 @@ const DoctorReportReview = ({ report, onVerifiedSuccess }) => {
 
   const isConfirmed = report.doctorConfirmed || report.status === 'confirmed';
   const isRejected  = report.status === 'rejected';
-  const isLocked    = isConfirmed || isRejected;
+  const isLocked = isConfirmed || isRejected;
 
   return (
     <div className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">

@@ -15,7 +15,7 @@ const errorHandler = (err, req, res, next) => {
  
   if (err.name === 'CastError') {
     statusCode = 400;
-    message    = `Invalid ID format: ${err.value}`;
+    message = `Invalid ID format: ${err.value}`;
   }
 
 
@@ -23,7 +23,7 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'ValidationError') {
     statusCode = 400;
-    message    = Object.values(err.errors)
+    message = Object.values(err.errors)
       .map((e) => e.message)
       .join(', ');
   }
@@ -34,7 +34,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.code === 11000) {
     statusCode = 400;
     const field = Object.keys(err.keyValue)[0];
-    message    = `${field} already exists`;
+    message = `${field} already exists`;
   }
 
   
@@ -42,12 +42,12 @@ const errorHandler = (err, req, res, next) => {
  
   if (err.name === 'JsonWebTokenError') {
     statusCode = 401;
-    message    = 'Invalid token';
+    message = 'Invalid token';
   }
 
   if (err.name === 'TokenExpiredError') {
     statusCode = 401;
-    message    = 'Token expired, please login again';
+    message = 'Token expired, please login again';
   }
 
  
@@ -55,7 +55,7 @@ const errorHandler = (err, req, res, next) => {
  
   if (err.code === 'LIMIT_FILE_SIZE') {
     statusCode = 400;
-    message    = 'File size too large. Maximum 5MB allowed';
+    message = 'File size too large. Maximum 5MB allowed';
   }
 
  
@@ -63,7 +63,7 @@ const errorHandler = (err, req, res, next) => {
  
   if (err.message === 'Only JPG, JPEG, PNG images are allowed') {
     statusCode = 400;
-    message    = err.message;
+    message = err.message;
   }
 
  

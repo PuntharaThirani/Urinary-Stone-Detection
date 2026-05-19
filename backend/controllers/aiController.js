@@ -1,9 +1,9 @@
-const path    = require('path');
-const fs      = require('fs');
+const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 const XrayImage = require('../models/XrayImage');
-const Report    = require('../models/Report');
+const Report = require('../models/Report');
 
 
 // Run Python AI Model
@@ -16,7 +16,7 @@ const runPythonModel = (imagePath) => {
     // Spawn Python process
     const python = spawn('python', [scriptPath, imagePath]);
 
-    let dataString  = '';
+    let dataString = '';
     let errorString = '';
 
     // Collect output from Python
@@ -75,10 +75,10 @@ exports.analyzeXray = async (req, res) => {
     }
 
     // Extract results from AI output
-    const hasStones  = aiResult?.hasStones  ?? false;
+    const hasStones = aiResult?.hasStones ?? false;
     const stoneCount = aiResult?.stoneCount ?? 0;
-    const details    = aiResult?.details    ?? [];
-    const phase1     = aiResult?.phase1     ?? null;
+    const details = aiResult?.details ?? [];
+    const phase1 = aiResult?.phase1 ?? null;
     const annotatedImageUrl = aiResult?.annotatedImageUrl ?? null;
 
     // Save X-ray record to DB
@@ -86,7 +86,7 @@ exports.analyzeXray = async (req, res) => {
       uploadedBy: req.user.id,
       imagePath,
       aiProcessed: true,
-      qualityStatus: 'valid',
+      qualityStatus:'valid',
     });
 
     // Generate AI draft report text
@@ -99,9 +99,9 @@ System           : UroScan AI — Diagnosis Support System
 
 RADIOLOGICAL FINDINGS (AI):
 - Phase 1 Classification : ${phase1?.result?.toUpperCase() || 'N/A'}
-- Classification Score   : ${phase1?.confidence?.toFixed(2) || 'N/A'}%
-- Stone Detection        : ${hasStones ? 'POSITIVE' : 'NEGATIVE'}
-- Stone Count            : ${stoneCount}
+- Classification Score : ${phase1?.confidence?.toFixed(2) || 'N/A'}%
+- Stone Detection : ${hasStones ? 'POSITIVE' : 'NEGATIVE'}
+- Stone Count : ${stoneCount}
 
 DETECTED STONE DETAILS:
 ${details.length > 0
@@ -123,17 +123,17 @@ Final review and validation by a qualified doctor is mandatory.
 
     // Save Report to DB
     const report = await Report.create({
-      doctor:          req.user.id,
-      imageId:         xrayImage._id,
+      doctor: req.user.id,
+      imageId: xrayImage._id,
       imagePath,
       annotatedImageUrl,
       hasStones,
       stoneCount,
       details,
       phase1,
-      aiDraft:         aiDraftText,
+      aiDraft: aiDraftText,
       doctorConfirmed: false,
-      status:          'pending',
+      status:'pending',
     });
 
     // Send response

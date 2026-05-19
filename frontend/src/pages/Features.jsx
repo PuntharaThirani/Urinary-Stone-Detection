@@ -13,18 +13,18 @@ const cloudIcon = 'https://cdn-icons-png.flaticon.com/512/414/414927.png';
 const coreFeatures = [
   {
     title: 'EfficientNet-B0 Classification',
-    icon:  aiIcon,
-    desc:  'Phase 1 uses EfficientNet-B0 with transfer learning to classify X-rays as normal or stone-positive, achieving 94.74% test accuracy and F1-score of 0.95.',
+    icon: aiIcon,
+    desc: 'Phase 1 uses EfficientNet-B0 with transfer learning to classify X-rays as normal or stone-positive, achieving 94.74% test accuracy and F1-score of 0.95.',
   },
   {
     title: 'YOLOv8 Stone Detection',
-    icon:  reportIcon,
-    desc:  'Phase 2 uses YOLOv8l trained on 1698 images with 4367 annotated stones. Achieves mAP@50 of 0.927 and precision of 0.944 for precise stone localization.',
+    icon: reportIcon,
+    desc: 'Phase 2 uses YOLOv8l trained on 1698 images with 4367 annotated stones. Achieves mAP@50 of 0.927 and precision of 0.944 for precise stone localization.',
   },
   {
     title: 'Secure Record Handling',
-    icon:  securityIcon,
-    desc:  'Patient information, scan records, and reports are managed through JWT authentication, role-based access control, and MongoDB with audit logging.',
+    icon: securityIcon,
+    desc: 'Patient information, scan records, and reports are managed through JWT authentication, role-based access control, and MongoDB with audit logging.',
   },
 ];
 
@@ -62,9 +62,9 @@ const detailedFeatures = [
 ];
 
 const systemHighlights = [
-  { value: '94.74%', label: 'Phase 1 Classification Accuracy'  },
-  { value: '0.927',  label: 'Phase 2 YOLOv8 mAP@50'           },
-  { value: '4',      label: 'User Roles Supported'             },
+  { value: '94.74%', label: 'Phase 1 Classification Accuracy' },
+  { value: '0.927', label: 'Phase 2 YOLOv8 mAP@50' },
+  { value: '4', label: 'User Roles Supported'},
 ];
 
 const Features = () => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import Header        from '../components/common/Header';
-import Footer        from '../components/common/Footer';
+import Header from '../components/common/Header';
+import Footer from '../components/common/Footer';
 import HeatmapViewer from '../components/results/HeatmapViewer';
 import ResultDisplay from '../components/results/ResultDisplay'; // 
 import MedicalChatbot from '../components/chatbot/MedicalChatbot';

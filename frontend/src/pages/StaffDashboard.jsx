@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link }   from 'react-router-dom';
-import Header     from '../components/common/Header';
-import Footer     from '../components/common/Footer';
-import api        from '../services/api';
+import { Link }  from 'react-router-dom';
+import Header from '../components/common/Header';
+import Footer from '../components/common/Footer';
+import api from '../services/api';
 
 const StaffDashboard = () => {
   const staffName = localStorage.getItem('userName') || 'Staff';
 
-  const [patients,     setPatients]     = useState([]);
+  const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [reports,      setReports]      = useState([]);
-  const [loading,      setLoading]      = useState(true);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const today = new Date().toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -28,9 +28,9 @@ const StaffDashboard = () => {
         api.get('/reports'),
       ]);
 
-      setPatients(pRes.data?.data          || pRes.data?.patients    || []);
-      setAppointments(aRes.data?.data      || aRes.data?.appointments || []);
-      setReports(rRes.data?.reports        || rRes.data?.data         || []);
+      setPatients(pRes.data?.data || pRes.data?.patients || []);
+      setAppointments(aRes.data?.data || aRes.data?.appointments || []);
+      setReports(rRes.data?.reports || rRes.data?.data || []);
     } catch (err) {
       console.error('Failed to fetch staff data:', err);
     } finally {
@@ -43,20 +43,20 @@ const StaffDashboard = () => {
 
   const summaryCards = [
     {
-      label:      'Registered Patients',
-      value:      loading ? '...' : patients.length,
-      badgeText:  'Total',
+      label: 'Registered Patients',
+      value: loading ? '...' : patients.length,
+      badgeText: 'Total',
       badgeClass: 'bg-slate-100 text-slate-700',
     },
     {
-      label:      'Appointments',
-      value:      loading ? '...' : appointments.length,
+      label: 'Appointments',
+      value: loading ? '...' : appointments.length,
       badgeText:  'All time',
       badgeClass: 'bg-blue-100 text-blue-700',
     },
     {
-      label:      'Pending Reports',
-      value:      loading ? '...' : pendingReports,
+      label: 'Pending Reports',
+      value: loading ? '...' : pendingReports,
       badgeText:  pendingReports > 0 ? 'Awaiting review' : 'All reviewed',
       badgeClass: pendingReports > 0 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700',
     },

@@ -1,28 +1,31 @@
-const express    = require('express');
-const cors       = require('cors');
-const fs         = require('fs');
-const path       = require('path');
-const dotenv     = require('dotenv');
-const connectDB  = require('./config/database');
+const express = require('express');
+const cors  = require('cors');
+const fs  = require('fs');
+const path  = require('path');
+const dotenv = require('dotenv');
+const connectDB = require('./config/database');
 
 // Load env first — before anything else
 dotenv.config(); 
 
 // Routes
-const predictionRoutes  = require('./routes/predictionRoutes');
-const authRoutes        = require('./routes/authRoutes');
-const reportRoutes      = require('./routes/reportRoutes');
-const userRoutes        = require('./routes/userRoutes');
-const uploadRoutes      = require('./routes/uploadRoutes');
-const patientRoutes     = require('./routes/patientRoutes');
+const predictionRoutes = require('./routes/predictionRoutes');
+const authRoutes = require('./routes/authRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const userRoutes = require('./routes/userRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
-const adminRoutes       = require('./routes/adminRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const auditLogRoutes = require('./routes/auditLogRoutes');
+
 
 const Patient = require('./models/Patient');
 const User = require('./models/User');
 
 const errorHandler = require('./middleware/errorHandler');
 
+const notificationRoutes = require('./routes/notificationRoutes');
 // Connect database
 connectDB();
 
@@ -77,9 +80,9 @@ setTimeout(async () => {
 // Middleware
 
 app.use(cors({
-  origin:      process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
-  methods:     ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -118,15 +121,16 @@ modelsToCheck.forEach(({ path: modelPath, name }) => {
 
 // API Routes
 
-app.use('/api/auth',         authRoutes);
-app.use('/api/predict',      predictionRoutes);
-app.use('/api/reports',      reportRoutes);
-app.use('/api/users',        userRoutes);
-app.use('/api/upload',       uploadRoutes);
-app.use('/api/patients',     patientRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/predict', predictionRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
-app.use('/api/admin',        adminRoutes);
-
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
 
 // Health Check
 
@@ -137,14 +141,15 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     status:  'running',
     endpoints: {
-      auth:         '/api/auth',
-      predict:      '/api/predict',
-      reports:      '/api/reports',
-      users:        '/api/users',
-      upload:       '/api/upload',
-      patients:     '/api/patients',
+      auth: '/api/auth',
+      predict:'/api/predict',
+      reports: '/api/reports',
+      users: '/api/users',
+      upload: '/api/upload',
+      patients: '/api/patients',
       appointments: '/api/appointments',
-      admin:        '/api/admin',
+      admin: '/api/admin',
+      notifications: '/api/notifications',
     },
   });
 });

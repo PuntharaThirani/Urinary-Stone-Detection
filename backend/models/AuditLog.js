@@ -4,15 +4,15 @@ const auditLogSchema = new mongoose.Schema(
   {
     // User who performed the action
     user_id: {                              
-      type:    mongoose.Schema.Types.ObjectId,
-      ref:     'User',
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       default: null,
     },
 
     // Action performed
     action: {
-      type:      String,
-      required:  true,
+      type: String,
+      required: true,
       uppercase: true,
       enum: [
         'USER_LOGIN',
@@ -39,14 +39,14 @@ const auditLogSchema = new mongoose.Schema(
 
     // Target resource type
     resourceType: {
-      type:    String,
-      enum:    ['USER', 'XRAY', 'REPORT', 'PATIENT', 'APPOINTMENT'],
+      type: String,
+      enum: ['USER', 'XRAY', 'REPORT', 'PATIENT', 'APPOINTMENT'],
       default: null,
     },
 
     // Target resource ID
     resourceId: {
-      type:    mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       default: null,
     },
 
@@ -58,26 +58,26 @@ const auditLogSchema = new mongoose.Schema(
 
     // HTTP method
     method: {
-      type:    String,
+      type: String,
       default: '',
     },
 
     // API route
     route: {
-      type:    String,
+      type: String,
       default: '',
     },
 
     // Client IP address
     ipAddress: {
-      type:    String,
+      type: String,
       default: '',
     },
 
     // Success or failure
     status: {
-      type:    String,
-      enum:    ['SUCCESS', 'FAILED'],
+      type: String,
+      enum: ['SUCCESS', 'FAILED'],
       default: 'SUCCESS',
     },
   },
@@ -85,8 +85,8 @@ const auditLogSchema = new mongoose.Schema(
 );
 
 // Indexes for query performance
-auditLogSchema.index({ user_id:   1 });
-auditLogSchema.index({ action:    1 });
+auditLogSchema.index({ user_id: 1 });
+auditLogSchema.index({ action: 1 });
 auditLogSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('AuditLog', auditLogSchema);

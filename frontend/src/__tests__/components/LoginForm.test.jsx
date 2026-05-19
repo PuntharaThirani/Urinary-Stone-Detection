@@ -75,9 +75,9 @@ describe('🔐 LoginForm Component Tests', () => {
   it('renders role selection tabs', () => {
     renderLoginForm();
 
-    expect(screen.getByRole('button', { name: /doctor/i  })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /doctor/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /patient/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /staff/i   })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /staff/i })).toBeInTheDocument();
   });
 
  

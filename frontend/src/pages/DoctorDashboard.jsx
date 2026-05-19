@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-import api    from '../services/api';
+import api from '../services/api';
 
 const DoctorDashboard = () => {
 
@@ -43,27 +43,27 @@ const DoctorDashboard = () => {
   };
 
   // Calculate metrics from real data
-  const totalScans     = reports.length;
+  const totalScans = reports.length;
   const stonesDetected = reports.filter((r) => r.hasStones).length;
   const pendingReviews = reports.filter((r) => r.status === 'pending').length;
 
   const metrics = [
     {
-      label:      'Total Scans',
-      value:      loading ? '...' : totalScans,
-      badgeText:  'All time',
+      label: 'Total Scans',
+      value: loading ? '...' : totalScans,
+      badgeText: 'All time',
       badgeClass: 'bg-blue-100 text-blue-700',
     },
     {
-      label:      'Stones Detected',
-      value:      loading ? '...' : stonesDetected,
-      badgeText:  'Requires review',
+      label:'Stones Detected',
+      value: loading ? '...' : stonesDetected,
+      badgeText: 'Requires review',
       badgeClass: 'bg-amber-100 text-amber-700',
     },
     {
-      label:      'Pending Reviews',
-      value:      loading ? '...' : pendingReviews,
-      badgeText:  pendingReviews > 0 ? 'Action needed' : 'All clear',
+      label: 'Pending Reviews',
+      value: loading ? '...' : pendingReviews,
+      badgeText: pendingReviews > 0 ? 'Action needed' : 'All clear',
       badgeClass: pendingReviews > 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700',
     },
   ];

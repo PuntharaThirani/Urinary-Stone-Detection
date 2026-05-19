@@ -45,7 +45,7 @@ const generateRandomId = (length = 10) => {
 // Format: PT-2026-XXXXXX
 
 const generatePatientId = () => {
-  const year   = new Date().getFullYear();
+  const year = new Date().getFullYear();
   const random = generateRandomId(6);
   return `PT-${year}-${random}`;
 };
@@ -83,7 +83,7 @@ const sanitizeString = (str) => {
 const getPagination = (page = 1, limit = 20) => {
   const pageNum  = Math.max(1, parseInt(page));
   const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
-  const skip     = (pageNum - 1) * limitNum;
+  const skip = (pageNum - 1) * limitNum;
 
   return { page: pageNum, limit: limitNum, skip };
 };

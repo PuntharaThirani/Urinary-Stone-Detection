@@ -77,9 +77,9 @@ export const validateRegisterForm = (formData) => {
   const emailCheck = { valid: validateEmail(formData.email), message: 'Invalid email address.' };
   const passCheck  = { valid: validatePassword(formData.password), message: 'Password must be at least 6 characters.' };
 
-  if (!nameCheck.valid)  errors.name     = nameCheck.message;
-  if (!emailCheck.valid) errors.email    = emailCheck.message;
-  if (!passCheck.valid)  errors.password = passCheck.message;
+  if (!nameCheck.valid) errors.name = nameCheck.message;
+  if (!emailCheck.valid) errors.email  = emailCheck.message;
+  if (!passCheck.valid) errors.password = passCheck.message;
 
   return {
     valid:  Object.keys(errors).length === 0,

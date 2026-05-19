@@ -14,14 +14,14 @@ export const useUpload = () => {
 };
 
 export const UploadProvider = ({ children }) => {
-  const [file,        setFile]        = useState(null);
-  const [previewUrl,  setPreviewUrl]  = useState(null);
+  const [file, setFile]  = useState(null);
+  const [previewUrl, setPreviewUrl]  = useState(null);
   const [uploadedPath, setUploadedPath] = useState(null);
-  const [result,      setResult]      = useState(null);
+  const [result, setResult] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error,       setError]       = useState(null);
-  const [progress,    setProgress]    = useState(0);
+  const [error, setError] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   // Select file — create preview
   const selectFile = (selectedFile) => {

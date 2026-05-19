@@ -9,15 +9,15 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user,    setUser]    = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Check existing login on app start
   useEffect(() => {
     const checkLogin = () => {
       const token  = localStorage.getItem('token');
-      const role   = localStorage.getItem('userRole');
-      const name   = localStorage.getItem('userName');
+      const role = localStorage.getItem('userRole');
+      const name = localStorage.getItem('userName');
       const userId = localStorage.getItem('userId');
 
       if (token && role) {
@@ -47,13 +47,13 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     const { token, role, user: u } = userData;
 
-    localStorage.setItem('token',    token);
+    localStorage.setItem('token', token);
     localStorage.setItem('userRole', role);
     localStorage.setItem('userName', u?.name || '');
-    localStorage.setItem('userId',   u?.id || u?._id || ''); 
+    localStorage.setItem('userId', u?.id || u?._id || ''); 
 
     setUser({
-      id:    u?.id || u?._id,
+      id: u?.id || u?._id,
       name:  u?.name,
       email: u?.email,
       role,
@@ -70,10 +70,10 @@ export const AuthProvider = ({ children }) => {
   // admin-dashboard consistent
   const getDashboardPath = (role) => {
     const paths = {
-      doctor:  '/doctor-dashboard',
+      doctor: '/doctor-dashboard',
       patient: '/patient-dashboard',
-      staff:   '/staff-dashboard',
-      admin:   '/admin-dashboard',
+      staff: '/staff-dashboard',
+      admin: '/admin-dashboard',
     };
     return paths[role] || '/login';
   };

@@ -13,10 +13,10 @@ export const formatDate = (dateString) => {
 export const formatDateTime = (dateString) => {
   if (!dateString) return 'N/A';
   const options = {
-    year:   'numeric',
-    month:  'short',
-    day:    'numeric',
-    hour:   '2-digit',
+    year:'numeric',
+    month:'short',
+    day:  'numeric',
+    hour: '2-digit',
     minute: '2-digit',
   };
   return new Date(dateString).toLocaleDateString('en-US', options);
@@ -47,10 +47,10 @@ export const capitalize = (str) => {
 
 export const getReportStatusClass = (status) => {
   const classes = {
-    [REPORT_STATUS.CONFIRMED]:    'bg-emerald-100 text-emerald-700',
-    [REPORT_STATUS.REJECTED]:     'bg-red-100 text-red-700',
+    [REPORT_STATUS.CONFIRMED]:'bg-emerald-100 text-emerald-700',
+    [REPORT_STATUS.REJECTED]: 'bg-red-100 text-red-700',
     [REPORT_STATUS.UNDER_REVIEW]: 'bg-purple-100 text-purple-700',
-    [REPORT_STATUS.PENDING]:      'bg-amber-100 text-amber-700',
+    [REPORT_STATUS.PENDING]:'bg-amber-100 text-amber-700',
   };
   return classes[status] || 'bg-slate-100 text-slate-700';
 };
@@ -59,7 +59,7 @@ export const getReportStatusClass = (status) => {
 
 export const formatFileSize = (bytes) => {
   if (!bytes) return '0 B';
-  if (bytes < 1024)           return `${bytes} B`;
+  if (bytes < 1024)  return `${bytes} B`;
   if (bytes < 1024 * 1024)   return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
@@ -75,10 +75,10 @@ export const shortId = (id, length = 8) => {
 
 export const getDashboardPath = (role) => {
   const paths = {
-    doctor:  '/doctor-dashboard',
+    doctor: '/doctor-dashboard',
     patient: '/patient-dashboard',
-    staff:   '/staff-dashboard',
-    admin:   '/admin',
+    staff: '/staff-dashboard',
+    admin: '/admin',
   };
   return paths[role] || '/login';
 };

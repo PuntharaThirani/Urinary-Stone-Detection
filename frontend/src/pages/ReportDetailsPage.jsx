@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import Header        from '../components/common/Header';
-import Footer        from '../components/common/Footer';
+import Header  from '../components/common/Header';
+import Footer from '../components/common/Footer';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import api           from '../services/api';
+import api  from '../services/api';
 
 const ReportDetailsPage = () => {
-  const { id }      = useParams();
-  const navigate    = useNavigate();
-  const userRole    = localStorage.getItem('userRole');
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const userRole = localStorage.getItem('userRole');
 
-  const [report,  setReport]  = useState(null);
+  const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
 
   // Back path based on role
   const backPath  = userRole === 'doctor' ? '/reports' : '/my-reports';
@@ -28,8 +28,8 @@ const ReportDetailsPage = () => {
       setError('');
 
       //  Direct api.get
-      const res    = await api.get(`/reports/${id}`);
-      const data   = res.data?.report || res.data;
+      const res = await api.get(`/reports/${id}`);
+      const data = res.data?.report || res.data;
       setReport(data);
 
     } catch (err) {
@@ -84,17 +84,17 @@ ${report.aiDraft || 'N/A'}
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
+    const a = document.createElement('a');
+    a.href = url;
     a.download = `UroScan-Report-${report._id?.substring(0, 8)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const getStatusStyle = (status) => ({
-    confirmed:    'bg-emerald-100 text-emerald-700',
-    pending:      'bg-amber-100 text-amber-700',
-    rejected:     'bg-red-100 text-red-700',
+    confirmed: 'bg-emerald-100 text-emerald-700',
+    pending: 'bg-amber-100 text-amber-700',
+    rejected: 'bg-red-100 text-red-700',
     under_review: 'bg-purple-100 text-purple-700',
   }[status] || 'bg-slate-100 text-slate-700');
 
@@ -181,9 +181,9 @@ ${report.aiDraft || 'N/A'}
         {/*  Summary Cards  */}
         <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: 'Report Date',     value: new Date(report.createdAt).toLocaleDateString() },
-            { label: 'Stone Count',     value: report.stoneCount || 0 },
-            { label: 'Reviewed By',     value: report.doctor?.name || 'Doctor' },
+            { label: 'Report Date', value: new Date(report.createdAt).toLocaleDateString() },
+            { label: 'Stone Count', value: report.stoneCount || 0 },
+            { label: 'Reviewed By', value: report.doctor?.name || 'Doctor' },
             { label: 'Final Diagnosis', value: report.finalDiagnosis || 'Pending' },
           ].map((card) => (
             <div key={card.label} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

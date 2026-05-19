@@ -1,21 +1,21 @@
 // User Roles
 
 const ROLES = {
-  ADMIN:   'admin',
-  DOCTOR:  'doctor',
+  ADMIN: 'admin',
+  DOCTOR: 'doctor',
   PATIENT: 'patient',
-  STAFF:   'staff',
+  STAFF: 'staff',
 };
 
 
 // Report Status
-// Must match Report model enum exactly
+
 
 const REPORT_STATUS = {
-  PENDING:      'pending',       // AI analyzed, awaiting doctor
+  PENDING: 'pending',       // AI analyzed, awaiting doctor
   UNDER_REVIEW: 'under_review',  // Doctor reviewing
-  CONFIRMED:    'confirmed',     // Doctor confirmed
-  REJECTED:     'rejected',      // Doctor rejected
+  CONFIRMED: 'confirmed',     // Doctor confirmed
+  REJECTED: 'rejected',      // Doctor rejected
 };
 
 

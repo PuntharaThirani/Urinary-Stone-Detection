@@ -54,13 +54,13 @@ exports.createDraftReport = async (req, res) => {
 
 `AI-ASSISTED PRELIMINARY REPORT
 
-Date           : ${date}
-System         : UroScan AI — Diagnosis Support System
+Date : ${date}
+System : UroScan AI — Diagnosis Support System
 
 PATIENT INFORMATION:
-Name           : ${patientName || 'N/A'}
-Age            : ${patientAge || 'N/A'}
-Gender         : ${patientGender || 'N/A'}
+Name : ${patientName || 'N/A'}
+Age : ${patientAge || 'N/A'}
+Gender : ${patientGender || 'N/A'}
 
 DETECTION RESULTS:
 Status         : ${
@@ -205,18 +205,18 @@ exports.confirmReport = async (req, res) => {
     } = req.body;
 
     // Update report fields
-    report.aiDraft        = aiDraft        || report.aiDraft;
-    report.doctorNotes    = doctorNotes    || report.doctorNotes;
-    report.doctorAdvice   = doctorAdvice   || report.doctorAdvice;
+    report.aiDraft = aiDraft || report.aiDraft;
+    report.doctorNotes = doctorNotes || report.doctorNotes;
+    report.doctorAdvice = doctorAdvice || report.doctorAdvice;
     report.finalDiagnosis = finalDiagnosis || (
       report.hasStones
         ? 'Suspicious urinary stone detected'
         : 'No obvious urinary stone detected'
     );
-    report.followUp         = followUp || report.followUp;
+    report.followUp = followUp || report.followUp;
     report.doctorConfirmed  = true;
-    report.status           = 'confirmed';
-    report.confirmedAt      = new Date();
+    report.status = 'confirmed';
+    report.confirmedAt = new Date();
 
     await report.save();
 
@@ -230,7 +230,7 @@ exports.confirmReport = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to confirm report',
-      error:   error.message,
+      error: error.message,
     });
   }
 };
@@ -297,9 +297,9 @@ exports.rejectReport = async (req, res) => {
       });
     }
 
-    report.status           = 'rejected';
+    report.status = 'rejected';
     report.doctorConfirmed  = false;
-    report.rejectedAt       = new Date();
+    report.rejectedAt = new Date();
 
     await report.save();
 
@@ -313,7 +313,7 @@ exports.rejectReport = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to reject report',
-      error:   error.message,
+      error: error.message,
     });
   }
 };
@@ -325,12 +325,12 @@ exports.getAllReports = async (req, res) => {
   try {
     const reports = await Report.find()
       .sort({ createdAt: -1 })
-      .populate('doctor',  'name email role')
+      .populate('doctor', 'name email role')
       .populate('patient', 'fullName patientId');
 
     res.status(200).json({
       success: true,
-      count:   reports.length,
+      count: reports.length,
       reports,
     });
   } catch (error) {
@@ -338,7 +338,7 @@ exports.getAllReports = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch reports',
-      error:   error.message,
+      error: error.message,
     });
   }
 };
@@ -368,7 +368,7 @@ exports.getReportById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch report',
-      error:   error.message,
+      error: error.message,
     });
   }
 };
@@ -386,7 +386,7 @@ exports.getReportsByPatientId = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      count:   reports.length,
+      count: reports.length,
       reports,
     });
   } catch (error) {
@@ -394,7 +394,7 @@ exports.getReportsByPatientId = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch patient reports',
-      error:   error.message,
+      error: error.message,
     });
   }
 };
@@ -497,7 +497,7 @@ exports.getMyReports = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch reports',
-      error:   error.message,
+      error: error.message,
     });
   }
 };

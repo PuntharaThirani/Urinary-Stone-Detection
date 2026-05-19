@@ -4,32 +4,32 @@ import Footer from '../components/common/Footer';
 
 const steps = [
   {
-    number:      '01',
-    title:       'Upload X-Ray Image',
+    number: '01',
+    title: 'Upload X-Ray Image',
     description: 'The doctor logs in and uploads a KUB X-ray image (JPG, PNG). The system validates file type and size before processing.',
-    image:       'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
-    alt:         'Upload scan',
+    image: 'https://cdn-icons-png.flaticon.com/512/3004/3004458.png',
+    alt: 'Upload scan',
   },
   {
-    number:      '02',
-    title:       'Phase 1 — EfficientNet-B0 Classification',
+    number: '02',
+    title: 'Phase 1 — EfficientNet-B0 Classification',
     description: 'The image is classified as Normal or Stone-Positive by EfficientNet-B0 with transfer learning. Achieves 94.74% test accuracy and F1-score of 0.95. Phase 2 only runs if Phase 1 detects a stone.',
-    image:       'https://cdn-icons-png.flaticon.com/512/8654/8654261.png',
-    alt:         'Classification',
+    image: 'https://cdn-icons-png.flaticon.com/512/8654/8654261.png',
+    alt: 'Classification',
   },
   {
-    number:      '03',
-    title:       'Phase 2 — YOLOv8 Stone Detection',
+    number: '03',
+    title: 'Phase 2 — YOLOv8 Stone Detection',
     description: 'YOLOv8l trained on 1698 images (4367 annotated stones) locates and draws bounding boxes around detected stones. Precision: 0.944, Recall: 0.893, mAP@50: 0.927.',
-    image:       'https://cdn-icons-png.flaticon.com/512/2983/2983677.png',
-    alt:         'Detection',
+    image: 'https://cdn-icons-png.flaticon.com/512/2983/2983677.png',
+    alt: 'Detection',
   },
   {
-    number:      '04',
-    title:       'Doctor Review & Report Generation',
+    number: '04',
+    title: 'Doctor Review & Report Generation',
     description: 'The system generates a preliminary AI draft report. The doctor reviews, edits, adds clinical notes, confirms, and sends the finalized report to the patient.',
-    image:       'https://cdn-icons-png.flaticon.com/512/3029/3029337.png',
-    alt:         'Report',
+    image: 'https://cdn-icons-png.flaticon.com/512/3029/3029337.png',
+    alt: 'Report',
   },
 ];
 
@@ -52,11 +52,11 @@ const faqs = [
 ];
 
 const architecture = [
-  { title: 'React Frontend',    subtitle: 'React + Vite + Tailwind'           },
-  { title: 'Node.js API',       subtitle: 'Express + JWT + MongoDB'           },
-  { title: 'EfficientNet-B0',   subtitle: 'Phase 1 Classification', highlight: true },
-  { title: 'YOLOv8',           subtitle: 'Phase 2 Detection',      highlight: true },
-  { title: 'MongoDB Atlas',     subtitle: 'Reports + Users + Logs'            },
+  { title: 'React Frontend', subtitle: 'React + Vite + Tailwind' },
+  { title: 'Node.js API', subtitle: 'Express + JWT + MongoDB' },
+  { title: 'EfficientNet-B0', subtitle: 'Phase 1 Classification', highlight: true },
+  { title: 'YOLOv8', subtitle: 'Phase 2 Detection', highlight: true },
+  { title: 'MongoDB Atlas', subtitle: 'Reports + Users + Logs'            },
 ];
 
 const HowItWorks = () => {

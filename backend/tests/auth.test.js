@@ -1,7 +1,7 @@
-const request  = require('supertest');
-const app      = require('../server');
+const request = require('supertest');
+const app = require('../server');
 const mongoose = require('mongoose');
-const User     = require('../models/User');
+const User = require('../models/User');
 
 let authToken = ''; // Store token for protected route tests
 
@@ -36,10 +36,10 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        name:     'Test User',
-        email:    'testuser@example.com',
+        name: 'Test User',
+        email: 'testuser@example.com',
         password: 'password123',
-        role:     'patient',
+        role: 'patient',
       });
 
     expect(res.statusCode).toEqual(201);
@@ -54,10 +54,10 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        name:     'Test Doctor',
-        email:    'testdoctor@example.com',
+        name: 'Test Doctor',
+        email: 'testdoctor@example.com',
         password: 'password123',
-        role:     'doctor',
+        role:'doctor',
       });
 
     expect(res.statusCode).toEqual(201);
@@ -71,10 +71,10 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        name:     'Test User 2',
-        email:    'testuser@example.com', // Same email
+        name: 'Test User 2',
+        email: 'testuser@example.com', // Same email
         password: 'password123',
-        role:     'patient',
+        role: 'patient',
       });
 
     expect(res.statusCode).toEqual(400);
@@ -104,7 +104,7 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({
-        email:    'testuser@example.com',
+        email: 'testuser@example.com',
         password: 'password123',
       });
 
@@ -125,7 +125,7 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({
-        email:    'testuser@example.com',
+        email: 'testuser@example.com',
         password: 'wrongpassword',
       });
 
@@ -141,7 +141,7 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({
-        email:    'notexist@example.com',
+        email: 'notexist@example.com',
         password: 'password123',
       });
 
@@ -193,10 +193,10 @@ describe('🔐 Auth API Tests', () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
-        name:     'Fake Admin',
-        email:    'fakeadmin@example.com',
+        name: 'Fake Admin',
+        email: 'fakeadmin@example.com',
         password: 'password123',
-        role:     'admin', // Should be blocked
+        role: 'admin', // Should be blocked
       });
 
     expect(res.statusCode).toEqual(201);

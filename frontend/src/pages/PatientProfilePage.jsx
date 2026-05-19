@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-import api    from '../services/api';
+import api from '../services/api';
 
 const PatientProfilePage = () => {
   const { id } = useParams();
@@ -10,7 +10,7 @@ const PatientProfilePage = () => {
   const [patient, setPatient] = useState(null);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchPatient();

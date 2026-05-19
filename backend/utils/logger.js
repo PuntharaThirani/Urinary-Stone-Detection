@@ -24,14 +24,14 @@ const logger = {
   // Warnings
   warn: (message) => {
     console.warn(
-      `⚠️  [WARN]    [${getTimestamp()}]: ${message}`
+      `⚠️  [WARN]  [${getTimestamp()}]: ${message}`
     );
   },
 
   // Errors
   error: (message, error = '') => {
     console.error(
-      `❌ [ERROR]   [${getTimestamp()}]: ${message}`,
+      `❌ [ERROR] [${getTimestamp()}]: ${message}`,
       error instanceof Error ? error.message : error
     );
   },
@@ -39,14 +39,14 @@ const logger = {
   // Database operations
   db: (message) => {
     console.log(
-      `🗄️  [DB]      [${getTimestamp()}]: ${message}`
+      `🗄️  [DB]  [${getTimestamp()}]: ${message}`
     );
   },
 
   // API requests
   api: (method, route, status) => {
     console.log(
-      `🌐 [API]     [${getTimestamp()}]: ${method} ${route} → ${status}`
+      `🌐 [API] [${getTimestamp()}]: ${method} ${route} → ${status}`
     );
   },
 };

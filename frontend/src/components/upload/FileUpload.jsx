@@ -3,17 +3,17 @@ import api from '../../services/api';
 
 const FileUpload = ({ onUploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [preview,      setPreview]      = useState(null);
-  const [isUploading,  setIsUploading]  = useState(false);
-  const [message,      setMessage]      = useState({ type: '', text: '' });
-  const [isDragging,   setIsDragging]   = useState(false);
+  const [preview, setPreview] = useState(null);
+  const [isUploading, setIsUploading]  = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef(null);
 
   // Validate file
   const validateFile = (file) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    const maxSize      = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
       return 'Only JPG and PNG images are allowed';
@@ -44,9 +44,9 @@ const FileUpload = ({ onUploadSuccess }) => {
   };
 
   // Drag & Drop handlers
-  const handleDragOver  = (e) => { e.preventDefault(); setIsDragging(true);  };
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true);  };
   const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
-  const handleDrop      = (e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
     handleFile(e.dataTransfer.files[0]);

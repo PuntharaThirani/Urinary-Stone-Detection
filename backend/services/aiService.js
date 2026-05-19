@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const path      = require('path');
+const path = require('path');
 
 // Run Python AI Model
 // Sends image to detect.py and returns JSON result

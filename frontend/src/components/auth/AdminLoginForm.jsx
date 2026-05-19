@@ -1,9 +1,8 @@
-// src/components/auth/AdminLoginForm.jsx
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminLogin } from '../../services/api';
 import myLogo from '../../assets/images/logo-removebg-preview.png';
+import admin from '../../assets/images/admin login photo.avif';
 
 const AdminLoginForm = () => {
   const navigate = useNavigate();
@@ -55,7 +54,7 @@ const AdminLoginForm = () => {
         {/* LEFT PANEL */}
         <div className="relative hidden w-1/2 overflow-hidden md:block">
           <img
-            src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=1000"
+            src={admin} 
             alt="Admin panel"
             className="absolute inset-0 h-full w-full object-cover"
           />

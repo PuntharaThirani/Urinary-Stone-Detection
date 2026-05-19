@@ -39,7 +39,7 @@ router.get('/verify', auth, (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Token is valid',
-    user:    req.user,
+    user: req.user,
   });
 });
 

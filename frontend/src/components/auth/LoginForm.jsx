@@ -3,18 +3,18 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../../services/api';
 import RegisterForm from './RegisterForm';
 import myLogo from '../../assets/images/logo-removebg-preview.png';
+import patient from '../../assets/images/patient image.avif';
+import doctor from '../../assets/images/doctor image.avif';
+import staff from '../../assets/images/staff image.avif';
+import admin from '../../assets/images/admin login photo.avif';
 
 const roles = ['doctor', 'patient', 'staff'];
 
 const imageMap = {
-  patient:
-    'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&q=80&w=800',
-  doctor:
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=1000&auto=format&fit=crop',
-  staff:
-    'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=1000',
-  admin:
-    'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=1000',
+  doctor,
+  patient,
+  staff,
+  admin,
 };
 
 const headingMap = {

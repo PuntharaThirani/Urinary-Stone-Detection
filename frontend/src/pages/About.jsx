@@ -1,9 +1,8 @@
 import React from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-
-const coverImage  = 'https://img.freepik.com/free-photo/medical-banner-with-stethoscope_23-2149611199.jpg?w=1380';
-const systemImage = 'https://img.freepik.com/free-vector/analysis-concept-illustration_114360-1119.jpg?w=800';
+import coverImage  from '../assets/images/about1.avif';
+import systemImage from '../assets/images/about2.avif';
 
 const profileLinks = {
   github: 'https://github.com/PuntharaThirani',
@@ -57,9 +56,9 @@ const techStack = [
 // AI Performance metrics
 const metrics = [
   { label: 'Phase 1 Test Accuracy',  value: '94.74%', color: 'blue'   },
-  { label: 'Phase 1 F1 Score',       value: '0.95',   color: 'purple' },
-  { label: 'Phase 2 mAP@50',         value: '0.927',  color: 'green'  },
-  { label: 'YOLOv8 Precision',       value: '0.944',  color: 'indigo' },
+  { label: 'Phase 1 F1 Score', value: '0.95',   color: 'purple' },
+  { label: 'Phase 2 mAP@50', value: '0.927',  color: 'green'  },
+  { label: 'YOLOv8 Precision', value: '0.944',  color: 'indigo' },
 ];
 
 const About = () => {

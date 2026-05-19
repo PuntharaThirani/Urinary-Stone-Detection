@@ -5,8 +5,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock API calls — prevent real network requests
 vi.mock('../../services/api', () => ({
-  getReports:    vi.fn().mockResolvedValue({ data: [] }),
-  getPatients:   vi.fn().mockResolvedValue({ data: [] }),
+  getReports: vi.fn().mockResolvedValue({ data: [] }),
+  getPatients: vi.fn().mockResolvedValue({ data: [] }),
   getDashboardStats: vi.fn().mockResolvedValue({ data: {} }),
 }));
 

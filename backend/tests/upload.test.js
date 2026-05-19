@@ -1,9 +1,9 @@
-const request  = require('supertest');
-const app      = require('../server');
+const request = require('supertest');
+const app = require('../server');
 const mongoose = require('mongoose');
-const User     = require('../models/User');
-const path     = require('path');
-const fs       = require('fs');
+const User = require('../models/User');
+const path = require('path');
+const fs = require('fs');
 
 let doctorToken = '';
 
@@ -20,10 +20,10 @@ beforeAll(async () => {
   await request(app)
     .post('/api/auth/register')
     .send({
-      name:     'Upload Test Doctor',
-      email:    'testdoctor.upload@example.com',
+      name: 'Upload Test Doctor',
+      email: 'testdoctor.upload@example.com',
       password: 'password123',
-      role:     'doctor',
+      role: 'doctor',
     });
 
   // Login and get token

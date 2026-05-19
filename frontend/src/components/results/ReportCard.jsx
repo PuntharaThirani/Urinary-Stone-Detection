@@ -4,18 +4,18 @@ import { formatDate } from '../../utils/helpers';
 const ReportCard = ({ report, onClick }) => {
   if (!report) return null;
 
-  const hasStones   = Boolean(report.hasStones);
+  const hasStones = Boolean(report.hasStones);
   const patientName = report.patientName || 'Unknown Patient';
-  const reportId    = report._id ? `#${report._id.substring(0, 8)}` : 'N/A';
+  const reportId = report._id ? `#${report._id.substring(0, 8)}` : 'N/A';
   const createdDate = report.createdAt ? formatDate(report.createdAt) : 'N/A';
-  const status      = report.status || 'pending';
-  const stoneCount  = report.stoneCount || 0;
+  const status = report.status || 'pending';
+  const stoneCount = report.stoneCount || 0;
 
   const statusStyles = {
-    confirmed:    'bg-emerald-100 text-emerald-700',
-    rejected:     'bg-red-100 text-red-700',
+    confirmed: 'bg-emerald-100 text-emerald-700',
+    rejected: 'bg-red-100 text-red-700',
     under_review: 'bg-purple-100 text-purple-700',
-    pending:      'bg-amber-100 text-amber-700',
+    pending: 'bg-amber-100 text-amber-700',
   };
 
   return (

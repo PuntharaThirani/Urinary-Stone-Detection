@@ -2,15 +2,15 @@ import React from 'react';
 
 const UploadProgress = ({
   progress = 0,
-  message  = 'Processing...',
-  status   = 'uploading', // uploading, analyzing, complete, error
+  message = 'Processing...',
+  status = 'uploading', // uploading, analyzing, complete, error
 }) => {
 
   const statusColors = {
     uploading: 'bg-blue-600',
     analyzing: 'bg-purple-600',
-    complete:  'bg-emerald-600',
-    error:     'bg-red-500',
+    complete: 'bg-emerald-600',
+    error: 'bg-red-500',
   };
 
   const barColor = statusColors[status] || statusColors.uploading;

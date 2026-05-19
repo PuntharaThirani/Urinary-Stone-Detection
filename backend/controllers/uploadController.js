@@ -1,7 +1,6 @@
 const path     = require('path');
 const XrayImage = require('../models/XrayImage');
 
-
 // UPLOAD X-RAY IMAGE
 
 exports.uploadXray = async (req, res) => {
@@ -28,11 +27,11 @@ exports.uploadXray = async (req, res) => {
     // Save to database
     const savedImage = await XrayImage.create({
       originalName: req.file.originalname,
-      fileName:     req.file.filename,
-      filePath:     normalizedPath,
-      mimeType:     req.file.mimetype,
-      size:         req.file.size,
-      uploadedBy:   req.user ? req.user.id : null,
+      fileName: req.file.filename,
+      filePath: normalizedPath,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+      uploadedBy: req.user ? req.user.id : null,
       qualityStatus: 'valid',
     });
 
@@ -40,12 +39,12 @@ exports.uploadXray = async (req, res) => {
       success: true,
       message: 'X-ray image uploaded successfully',
       image: {
-        id:           savedImage._id,
+        id: savedImage._id,
         originalName: savedImage.originalName,
-        fileName:     savedImage.fileName,
-        filePath:     savedImage.filePath,
-        mimeType:     savedImage.mimeType,
-        size:         savedImage.size,
+        fileName: savedImage.fileName,
+        filePath: savedImage.filePath,
+        mimeType: savedImage.mimeType,
+        size: savedImage.size,
       },
     });
   } catch (error) {
@@ -53,7 +52,7 @@ exports.uploadXray = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to upload X-ray image',
-      error:   error.message,
+      error: error.message,
     });
   }
 };
